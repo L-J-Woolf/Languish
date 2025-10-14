@@ -1,12 +1,12 @@
 {
   "name": "Learn German with Lucas",
-  "short_name": "LearnGermanWithLucas",
+  "short_name": "GermanWithLucas",
   "start_url": "Learn-German-with-Lucas/index.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#0f766e",
+  "background_color": "#14161B",
+  "theme_color": "#14161B",
   "icons": [
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
