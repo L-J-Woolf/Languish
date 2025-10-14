@@ -1,12 +1,12 @@
 const CACHE = "app-v3";
 const ASSETS = [
   "/",
-  "./index.html",
-  "./styles.css",
-  "./script.js",
-  "./manifest.webmanifest",
-  "./assets/icon-192.png",
-  "./assets/icon-512.png"
+  "/index.html",
+  "/styles.css",
+  "/script.js",
+  "/manifest.webmanifest",
+  "/assets/icon-192.png",
+  "/assets/icon-512.png"
 ];
 
 self.addEventListener("install", event => {
