@@ -1,8 +1,8 @@
 {
   "name": "Learn German with Lucas",
   "short_name": "GermanWithLucas",
-  "start_url": "/index.html",
-  "scope": "/",
+  "start_url": "Learn-German-with-Lucas/index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#14161B",
