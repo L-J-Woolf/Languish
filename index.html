@@ -6,22 +6,24 @@
 <meta name="Learn German with Lucas" content="Learn German with Lucas">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- <link rel="manifest" href="https://l-j-woolf.github.io/Learn-German-with-Lucas/manifest.webmanifest"> -->
+<meta name="theme-color" content="#14161B">
+
+<!-- pwa manifest -->
 <link rel="manifest" href="./manifest.webmanifest">
-<meta name="theme-color" content="#0f766e">
+
 <!-- content delivery network (cdn) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-<!-- custom styles -->
-<link rel="stylesheet" href="styles.css">
+<!-- styles -->
+<link rel="stylesheet" href="./styles.css">
 <style>@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap');</style>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css"/>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"/>
 
 <!-- custom scripts -->
-<script defer src="components.js"></script>
-<script defer src="script.js"></script>
+<script defer src="./components.js"></script>
+<script defer src="./script.js"></script>
 
 <!-- user interface -->
 <body>
@@ -84,7 +86,7 @@
 <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/service-worker.js");
+    navigator.serviceWorker.register("./service-worker.js");
   });
 }
 </script>
