@@ -1,0 +1,318 @@
+/* css varibles */
+
+:root {
+  --white: #ffffff;
+  --halfwhite: #ffffff50;
+  --black: #14161B;
+
+  --layer_base: #14161B;
+
+  --layer_one: #26282D;
+  --layer_one_hover: #313237;
+
+  --layer_two: #3A3B40;
+  --layer_two_hover: #434549;
+
+  --layer_three: #4C4E52;
+  --layer_three_hover: #55575A;
+
+  --yellow_light: #F1CC06;
+  --yellow_medium: #DBBA08;
+  --yellow_dark: #C5A70A;
+
+  --green_light: #7FAC3A;
+  --green_medium: #759D37;
+  --green_dark: #6A8E33;
+}
+
+/* Titillium Web Guide
+
+font-weight: 200; = Extra Light
+font-weight: 300; = Light
+font-weight: 400; = Regular
+font-weight: 600; = Semi Bold
+font-weight: 700; = Bold
+font-weight: 900; = Black 
+
+*/
+
+/* global styles */
+
+body {
+  font-family: 'Titillium Web', sans-serif;
+  margin: 0 0 48px 0;
+  padding: 0;
+  background-color: var(--layer_base);
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+/* default scene settings */
+
+#scene_decks {display: none}
+#scene_add_item {display: none;}
+
+/* card styles */
+
+.word_card {
+  display: flex;
+  flex-flow: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 6px 0;
+  padding: 18px;
+  width: 100%;
+  height: 56px;
+  background-color: var(--white);
+  border-radius: 6px;
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 0px 18px 0px;
+}
+
+/* deck styles */
+
+.deck_list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 auto;;
+  padding: 24px;
+  max-width: 600px;
+}
+
+.deck_card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; 
+  align-items: center; 
+  height: 58px;
+  padding: 0 12px 0 18px;
+  background: var(--layer_one);
+  border: 1px solid var(--layer_two);
+  border-radius: 12px;
+}
+
+.deck_card:hover {
+  background: var(--layer_one_hover);
+}
+
+.deck_card:active {
+  background: var(--layer_two);
+}
+
+.deck_card_right_column {
+  display: flex;
+  gap: 12px;
+}
+
+.deck_card_type {
+  color: var(--white);
+  font-size: 15px;
+  line-height: 30px;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.deck_card_count {
+  color: var(--halfwhite);
+  font-size: 12px;
+  line-height: 30px;
+}
+
+.deck_card_icon {
+  display: flex;
+  flex-direction: row;
+  justify-content: center; 
+  align-items: center; 
+  width: 30px;
+  height: 30px;
+  background: var(--layer_two);
+  border-radius: 9px;
+  color: var(--white);
+  font-size: 15px;
+}
+
+/* header styles */
+
+.dashboard_header {
+  display: flex;
+  padding: 24px;
+  flex-flow: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 18px;
+  background-color: var(--layer_one);
+  border-bottom: 1px solid var(--layer_two);
+}
+
+.dashboard_title {
+  color: var(--white);
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.dashboard_metrics {
+  display: flex;
+  width: 100%;
+  gap: 12px;
+}
+
+.dashboard_metric {
+  display: flex;
+  padding: 12px;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1 1 0%;
+  gap: 6px;
+  background-color: var(--layer_two);
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--layer_three);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.dashboard_metric_number {
+  color: var(--white);
+  height: 18px;
+  font-size: 18px;
+  line-height: 18px;
+  font-weight: 700;
+}
+
+.dashboard_metric_label {
+  color: var(--halfwhite);
+  font-size: 12px;
+  line-height: 12px;
+  font-weight: 400;
+}
+
+/* other styles */
+
+.scene_title {
+  color: var(--white);
+  justify-content: center;
+  align-items: center;
+  padding-top: 18px;
+  padding-bottom: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 18px;
+  display: flex;
+}
+
+.scene_sync_date {
+  color: var(--halfwhite);
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 18px;
+  font-size: 12px;
+  line-height: 15px;
+  display: flex;
+  font-weight: 600;
+}
+
+.fab {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--green_light);
+  border-radius: 100%;
+  width: 54px;
+  height: 54px;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  color: var(--white);
+  font-size: 15px;
+}
+
+.fab:hover {
+  background-color: var(--green_medium);
+}
+
+.fab:active {
+  background-color: var(--green_dark);
+}
+
+/* form styles */
+
+.custom_form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 auto;
+  padding: 24px;
+  max-width: 600px;
+}
+
+.custom_form label {
+  display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.custom_form input {
+  width: 100%;
+  height: 54px;
+  box-sizing: border-box;
+  padding: 12px;
+}
+
+.custom_form button {
+  width: 100%;
+  height: 54px;
+  box-sizing: border-box;
+}
+
+.is_admin_only {
+  display: none;
+}
+
+.simple_header {
+  grid-column-gap: 12px;
+  grid-row-gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  display: flex;
+}
+
+.simple_header_button {
+  display: flex;
+  flex: none;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--white);
+  font-size: 15px;
+  line-height: 15px;
+  background-color: var(--layer_one);;
+  border-radius: 9px;
+}
+
+.simple_header_button:hover {
+  background-color: var(--layer_one_hover);
+}
+
+.simple_header_button:active {
+  background-color: var(--layer_two);
+}
+
+.simple_header_title {
+  color: var(--white);
+  text-align: center;
+  flex: 0 auto;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 30px;
+}

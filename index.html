@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<!-- meta -->
+<title>Learn German with Lucas</title>
+<meta name="Learn German with Lucas" content="Learn German with Lucas">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- content delivery network (cdn) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<!-- custom styles -->
+<link rel="stylesheet" href="styles.css">
+<style>@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap');</style>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css"/>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"/>
+
+<!-- custom scripts -->
+<script defer src="components.js"></script>
+<script defer src="script_v3.js"></script>
+
+<!-- user interface -->
+<body>
+
+<!-- developer menu -->
+<button class="is_admin_only" onclick="log_variable(vocab_database)">log vocab database</button>
+<button class="is_admin_only" onclick="query_all_entries(vocab_database, 'type', 'noun')">log nouns</button>
+<button class="is_admin_only" onclick="query_unique_entries(vocab_database,'type')">log unique types</button>
+<button class="is_admin_only" onclick="log_variable(query_result)">log query_result</button>
+<button class="is_admin_only" onclick="speakGerman('Könntest du das wiederholen?')">speakGerman</button>
+<button class="is_admin_only" onclick="update_synced_timestamp()">update timestamp</button>
+
+<!-- scene: decks  -->
+<div class="scene" id="scene_decks">
+    <!-- header  -->
+    <div class="dashboard_header">
+        <div class="dashboard_title" id="btn_toggle_developer_mode">Dashboard</div>  
+        <div class="dashboard_metrics">
+            <div class="dashboard_metric">
+                <div class="dashboard_metric_number">101</div>
+                <div class="dashboard_metric_label">studied today</div>
+            </div>
+            <div class="dashboard_metric">
+                <div class="dashboard_metric_number">84</div>
+                <div class="dashboard_metric_label">average 7 days</div>
+            </div>
+            <div class="dashboard_metric">
+                <div class="dashboard_metric_number">54</div>
+                <div class="dashboard_metric_label">average 30 days</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- decks list  -->
+    <div class="scene_title">Types</div>
+    <div class="deck_list" id="deck_list"></div>
+    
+    <!-- sync date  -->
+    <div class="scene_sync_date" id="scene_sync_date">last sync unknown</div>
+
+    <!-- floating action button  -->
+    <div class="fab" id="btn_add_item"><div class="fab_icon"><i class="ph-bold ph-plus"></i></div></div>
+
+</div>
+
+<!-- scene: add  -->
+ <div class="scene" id="scene_add_item">
+    <div class="simple_header">
+        <div class="simple_header_button" id="btn_back"><i class="ph-bold ph-arrow-left"></i></div>
+        <div class="simple_header_title">Add Item</div>
+        <div class="hidden simple_header_button"><i class="ph-bold ph-arrow-left"></i></div>
+    </div>
+    <form class="custom_form">
+        <label><input type="text" placeholder="Deck" id="deck_field"></label>
+        <label><input type="text" placeholder="English" id="english_field"></label>
+        <label><input type="text" placeholder="German" id="german_field"></label>
+        <button type="button" onclick="submit_user_input()">Add Card</button>
+    </form>
+ </div>
+
+</body>
+</html>
