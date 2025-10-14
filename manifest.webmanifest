@@ -1,6 +1,6 @@
 {
   "name": "Learn German with Lucas",
-  "short_name": "alpha",
+  "short_name": "German with Lucas",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
