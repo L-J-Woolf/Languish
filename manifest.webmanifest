@@ -1,7 +1,7 @@
 {
   "name": "Learn German with Lucas",
   "short_name": "GermanWithLucas",
-  "start_url": "Learn-German-with-Lucas/index.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
