@@ -1,0 +1,22 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_360_845)">
+<rect width="512" height="102.4" fill="#AD0081"/>
+<rect y="102.4" width="512" height="102.4" fill="#FC8C4A"/>
+<rect y="204.8" width="512" height="102.4" fill="#FBDD36"/>
+<rect y="307.2" width="512" height="102.4" fill="#7FAC3A"/>
+<rect y="409.6" width="512" height="102.4" fill="#497BB6"/>
+</g>
+<rect width="256" height="512" fill="#2A2B2F"/>
+<g opacity="0.33">
+<rect x="466" y="466" width="420" height="420" rx="210" transform="rotate(-180 466 466)" fill="url(#paint0_linear_360_845)" style="mix-blend-mode:lighten"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_360_845" x1="676" y1="466" x2="676" y2="886" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" stop-opacity="0"/>
+<stop offset="1" stop-color="white"/>
+</linearGradient>
+<clipPath id="clip0_360_845">
+<rect width="512" height="512" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -32,17 +32,6 @@
   --green_dark: #6A8E33;
 }
 
-/* Titillium Web Guide
-
-font-weight: 200; = Extra Light
-font-weight: 300; = Light
-font-weight: 400; = Regular
-font-weight: 600; = Semi Bold
-font-weight: 700; = Bold
-font-weight: 900; = Black 
-
-*/
-
 /* global styles */
 
 body {
@@ -64,10 +53,6 @@ body {
   background: linear-gradient(180deg, #262521 0%, #9881F2 100%);
   opacity: 0.25;
 }
-
-/* .hidden {
-  visibility: hidden;
-} */
 
 /* default scene settings */
 
