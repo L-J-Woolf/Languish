@@ -3,11 +3,10 @@
 // ---------------------------------------------------------
 
 // specify globals
-var vocab_database = [];
+var local_database = [];
 var developer_mode = false;
 var first_load = true;
 var query_result = [];
-var types_list = [];
 
 // specify firebase credentials and identifiers
 var firebase_config = {
@@ -39,12 +38,12 @@ document.addEventListener('DOMContentLoaded', async function initialise_app() {
   
   // startup functions which must fire and complete first
   await manually_sync_database();
-  
-  // startup functions which may fire concurrently
   await update_user_interface();
   await select_initial_scene();
+  // startup functions which may fire concurrently
+
   install_single_popstate_handler();
-  activate_realtime_listener();
+  //activate_realtime_listener();
   
   // log messages in the console
   console.log("initialisation complete");
@@ -67,10 +66,10 @@ async function manually_sync_database() {
     var data = snapshot.val();
     
     // turn the data into an array
-    vocab_database = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : [];
+    local_database = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : [];
    
     // log messages in the console
-    console.log('database synced (manual) ' + timestamp() + ', total words: ' + vocab_database.length);
+    console.log('database synced (manual) ' + timestamp() + ', total words: ' + local_database.length);
   }); 
 }
 
@@ -81,8 +80,8 @@ async function update_user_interface() {
   console.log("updating user interface");
   
   // functions to build or update user-interface elements
-  query_unique_entries(vocab_database, 'type');
-  build_types_list();
+  query_unique_entries(local_database, 'type');
+  build_deck_list();
   update_synced_timestamp();
 }
 
@@ -143,12 +142,12 @@ async function activate_realtime_listener() {
     var data = snapshot.val();
     
     // turn the data into an array
-    vocab_database = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : []; 
+    local_database = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : []; 
     
     // functions to run when the database is updated
      if (first_load === false) {
       update_user_interface();
-      console.log('database synced (realtime) ' + timestamp() + ', total words: ' + vocab_database.length);
+      console.log('database synced (realtime) ' + timestamp() + ', total words: ' + local_database.length);
     }
     
     // prevents functions from firing on first load
@@ -184,13 +183,46 @@ btn_toggle_developer_mode.addEventListener("dblclick", function() {
 });
 
 // ---------------------------------------------------------
-// FUNCTIONS
+// ATOMIC FUNCTIONS
 // ---------------------------------------------------------
 
 // function to log a specified variable
 function log_variable(variable_to_log) {
   console.log(variable_to_log);
 }
+
+// function to to speak aloud a string in german
+function speakGerman(text_to_speak) {
+  speechSynthesis.cancel();
+  var utterance = new SpeechSynthesisUtterance(text_to_speak);
+  utterance.lang = "de-DE";
+  utterance.rate = 1.0;    // default is 1, range is 0.1 to 10
+  speechSynthesis.speak(utterance);
+}
+
+// Function to fetch the current timestamp
+function timestamp() {
+  
+  // log messages in the console
+  console.log("fetching timestamp");
+  
+  // create variable to store date-time object
+  var now = new Date();
+
+  // specify custom formatting for date-time object
+  var format = {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  };
+   
+  //reutrn the formatted date-time object
+  return new Intl.DateTimeFormat('en-AU', format).format(now).toLowerCase(); 
+}
+
+// ---------------------------------------------------------
+// DEDICATED FUNCTIONS
+// ---------------------------------------------------------
 
 // function to search an array for all unique values attributed to a specified key
 function query_unique_entries(array_to_query, key_to_query) {
@@ -276,7 +308,7 @@ function delete_database_item(english, german, type) {
 function build_list() {
   
   // specify array to loop through and perform actions
-  vocab_database.forEach (
+  local_database.forEach (
       
     // specify the actions to perform on each list item
       function (list_item) {
@@ -297,7 +329,7 @@ function build_list() {
 }
 
 // function to loop through an array
-function build_types_list() {
+function build_deck_list() {
   
   var deck_list = document.getElementById('deck_list');
   deck_list.innerHTML = null;
@@ -317,44 +349,10 @@ function build_types_list() {
         var snippet = deck_list.lastElementChild;
 
         // fill its fields
-        snippet.querySelector(".deck_snippet_type").innerHTML = list_item.type + "s";
+        snippet.querySelector(".deck_snippet_type").innerHTML = list_item.type;
         snippet.querySelector(".deck_snippet_count").innerHTML = list_item.count;
       }
     );
-}
-
-function speakGerman(text_to_speak) {
-  speechSynthesis.cancel();
-  var utterance = new SpeechSynthesisUtterance(text_to_speak);
-  utterance.lang = "de-DE";
-  utterance.rate = 1.0;    // default is 1, range is 0.1 to 10
-  speechSynthesis.speak(utterance);
-}
-
-// function to add an html snippet to a scene
-function load_snippet (specify_scene, snippet_to_insert) {
-  // insert html template
-  specify_scene.insertAdjacentHTML("beforeend", snippet_to_insert);
-}
-
-// Function to fetch the current timestamp
-function timestamp() {
-  
-  // log messages in the console
-  console.log("fetching timestamp");
-  
-  // create variable to store date-time object
-  var now = new Date();
-
-  // specify custom formatting for date-time object
-  var format = {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  };
-   
-  //reutrn the formatted date-time object
-  return new Intl.DateTimeFormat('en-AU', format).format(now).toLowerCase(); 
 }
 
 // fucntion to update the synced timestamp
@@ -441,3 +439,46 @@ function loadScene(scene_to_load) {
   // Log for debugging
   console.log('loading scene: ' + scene_to_load);
 }
+
+// // function to create listeners for all elements by class
+// function testing_call_after_ui_refresh() {
+
+//   var deck_snippet_wrapper = document.querySelectorAll('.deck_snippet_wrapper');
+
+//   deck_snippet_wrapper.forEach(item => {item.addEventListener("click", () => {
+    
+//     // look only inside this element for deck_snippet_type
+//     var element_type = item.querySelector('.deck_snippet_type'); 
+    
+//     // get the clean text, e.g. "Articles"
+//     var type = element_type.textContent.trim();
+   
+//     // log a message in the console
+//     console.log('"' + type + 's" deck has been selected');
+//     query_all_entries(local_database, 'type', type);
+//     });
+//   });
+// }
+
+// attach a delegated listener to a stable container element.
+var deck_list = document.getElementById('deck_list');
+
+deck_list.addEventListener('click', event => {
+  
+  // Find the clicked item within the wrapper
+  var item = event.target.closest('.deck_snippet_wrapper');
+  
+  // Guard in case the click was outside an item
+  if (!item || !deck_list.contains(item)) return;
+
+  // Read the type text from within the clicked item
+  var type = item.querySelector('.deck_snippet_type');
+  if (!type) return;
+
+  // get the clean text, e.g. "Articles"
+  var type = type.textContent.trim();
+  
+  // addition code to execute
+  console.log('deck selected:', type);
+
+});

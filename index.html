@@ -6,7 +6,7 @@
 <meta name="languish" content="languish">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#14161B">
+<meta name="theme-color" content="#38393E">
 <link rel="icon" type="image/x-icon" href="/Learn-German-with-Lucas/assets/favicon.svg">
 
 <!-- pwa manifest -->
@@ -42,9 +42,9 @@ if ("serviceWorker" in navigator) {
 <div id="tint"></div>
 
 <!-- developer menu -->
-<button class="is_admin_only" onclick="log_variable(vocab_database)">log vocab database</button>
-<button class="is_admin_only" onclick="query_all_entries(vocab_database, 'type', 'noun')">log nouns</button>
-<button class="is_admin_only" onclick="query_unique_entries(vocab_database,'type')">log unique types</button>
+<button class="is_admin_only" onclick="log_variable(local_database)">log vocab database</button>
+<button class="is_admin_only" onclick="query_all_entries(local_database, 'type', 'noun')">log nouns</button>
+<button class="is_admin_only" onclick="query_unique_entries(local_database,'type')">log unique types</button>
 <button class="is_admin_only" onclick="log_variable(query_result)">log query_result</button>
 <button class="is_admin_only" onclick="speakGerman('Könntest du das wiederholen?')">speakGerman</button>
 <button class="is_admin_only" onclick="update_synced_timestamp()">update timestamp</button>

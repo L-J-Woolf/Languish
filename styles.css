@@ -337,7 +337,7 @@ outline: none;
 .bottom_bar_wrapper {
   background-color: var(--layer);
   border-top: 2px solid var(--stroke);
-  padding: 12px 24px;
+  padding: 18px 24px;
 }
 
 .button_primary {
@@ -361,7 +361,7 @@ outline: none;
 }
 
 .button_primary_label {
-  color: var(--black);
+  color: var(--white);
   text-align: center;
   font-size: 18px;
 }
@@ -370,13 +370,13 @@ outline: none;
   width: 18px;
   height: 18px;
   font-size: 18px;
-  color: var(--black)
+  color: var(--white)
 }
 
 .floating_buttons {
   justify-content: flex-end;
   align-items: flex-start;
-  padding-bottom: 24px;
+  padding-bottom: 18px;
   padding-left: 24px;
   padding-right: 24px;
   display: flex;
