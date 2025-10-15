@@ -318,7 +318,7 @@ function build_types_list() {
 
         // fill its fields
         snippet.querySelector(".deck_snippet_type").innerHTML = list_item.type + "s";
-        snippet.querySelector(".deck_snippet_count").innerHTML = list_item.count + " cards";
+        snippet.querySelector(".deck_snippet_count").innerHTML = list_item.count;
       }
     );
 }
