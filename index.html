@@ -21,12 +21,24 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css"/>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"/>
 
-<!-- custom scripts -->
+<!-- scripts -->
 <script defer src="./components.js"></script>
 <script defer src="./script.js"></script>
 
+<!-- pwa service worker -->
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./pwa-service-worker.js");
+  });
+}
+</script>
+
 <!-- user interface -->
 <body>
+
+<!-- global tint -->
+<div id="tint"></div>
 
 <!-- developer menu -->
 <button class="is_admin_only" onclick="log_variable(vocab_database)">log vocab database</button>
@@ -83,12 +95,5 @@
         <button type="button" onclick="submit_user_input()">Add Card</button>
     </form>
  </div>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js");
-  });
-}
-</script>
 </body>
 </html>

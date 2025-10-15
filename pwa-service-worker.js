@@ -1,4 +1,4 @@
-const CACHE = "bravo"; //Always bump the cache name (app-v5, app-v6 etc.) when you change cached assets, or old caches can linger.
+const CACHE = "bravo"; // update cache name when changing assets, or old caches can linger.
 const ASSETS = [
   ".",
   "index.html",

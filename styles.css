@@ -45,6 +45,14 @@ body {
   background-color: var(--layer_base);
 }
 
+#tint {
+  position: fixed;
+  background: linear-gradient(180deg, #26252133 0%, #9881F233 100%);
+  left: 0; top: 0; bottom: 0; right: 0;
+  pointer-events: none;
+  z-index: 50;
+}
+
 .hidden {
   visibility: hidden;
 }
@@ -56,19 +64,45 @@ body {
 
 /* card styles */
 
-.word_card {
-  display: flex;
-  flex-flow: row;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 18px;
-  margin: 0 0 6px 0;
+.card_snippet_wrapper {
+  border-radius: 9px;
+  border-left: 3px solid #81B64C;
+  overflow: hidden;
+}
+
+.card_snippet_question {
   padding: 18px;
-  width: 100%;
-  height: 56px;
-  background-color: var(--white);
-  border-radius: 6px;
-  box-shadow: rgba(0, 0, 0, 0.06) 0px 0px 18px 0px;
+  background-color: #363941;
+  border-top: 2px solid #41444B;
+  border-right: 2px solid #41444B;
+  border-left: 2px solid #41444B;
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.card_snippet_answer {
+  padding: 18px;
+  background-color: #363941;
+  border-top: 2px solid #41444B;
+  border-right: 2px solid #41444B;
+  border-bottom: 2px solid #41444B;
+  border-left: 2px solid #41444B;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff66;
+}
+
+.card_snippet_question:empty::before,
+.card_snippet_answer:empty::before {
+  content: attr(data-placeholder);
+  color: #9aa0a6;
+  pointer-events: none;
+}
+
+.card_snippet_question:focus-visible,
+.card_snippet_answer:focus-visible {
+outline: none;
 }
 
 /* deck styles */
@@ -83,7 +117,7 @@ body {
   max-width: 600px;
 }
 
-.deck_card {
+.deck_snippet_wrapper {
   position: relative;
   display: flex;
   flex-direction: row;
@@ -96,20 +130,20 @@ body {
   border-radius: 12px;
 }
 
-.deck_card:hover {
+.deck_snippet_wrapper:hover {
   background: var(--layer_one_hover);
 }
 
-.deck_card:active {
+.deck_snippet_wrapper:active {
   background: var(--layer_two);
 }
 
-.deck_card_right_column {
+.deck_snippet_right_column {
   display: flex;
   gap: 12px;
 }
 
-.deck_card_type {
+.deck_snippet_type {
   color: var(--white);
   font-size: 15px;
   line-height: 30px;
@@ -117,13 +151,13 @@ body {
   text-transform: capitalize;
 }
 
-.deck_card_count {
+.deck_snippet_count {
   color: var(--halfwhite);
   font-size: 12px;
   line-height: 30px;
 }
 
-.deck_card_icon {
+.deck_snippet_icon {
   display: flex;
   flex-direction: row;
   justify-content: center; 
@@ -228,6 +262,7 @@ body {
   width: 54px;
   height: 54px;
   position: fixed;
+  z-index: 55;
   bottom: 24px;
   right: 24px;
   color: var(--white);

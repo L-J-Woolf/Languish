@@ -5,12 +5,9 @@
 // specify globals
 var vocab_database = [];
 var developer_mode = false;
+var first_load = true;
 var query_result = [];
 var types_list = [];
-//var time_stamp = null;
-//var current_scene_id = null;
-//var deck_list = null;
-//var scenes = null;
 
 // specify firebase credentials and identifiers
 var firebase_config = {
@@ -35,20 +32,19 @@ var realtime_database = firebase.database();
 // ---------------------------------------------------------
 
 // initialise the app once the DOM ready
-document.addEventListener('DOMContentLoaded', function initialise_app() {
+document.addEventListener('DOMContentLoaded', async function initialise_app() {
   
   // log messages in the console
-  console.log("initialising app (v3.0)");
+  console.log("initialising app (v3.2)");
   
   // startup functions which must fire and complete first
-  //await manually_sync_database()
+  await manually_sync_database();
   
   // startup functions which may fire concurrently
-  activate_realtime_listener();
-  //update_user_interface();
-  select_initial_scene();
+  await update_user_interface();
+  await select_initial_scene();
   install_single_popstate_handler();
-  //activate_realtime_listener();
+  activate_realtime_listener();
   
   // log messages in the console
   console.log("initialisation complete");
@@ -79,7 +75,7 @@ async function manually_sync_database() {
 }
 
 // STEP 2. build and update user-interface elements (utilises local database)
-function update_user_interface() {
+async function update_user_interface() {
   
   // log messages in the console
   console.log("updating user interface");
@@ -90,8 +86,8 @@ function update_user_interface() {
   update_synced_timestamp();
 }
 
-// STEP 3. lad the correct scene
-function select_initial_scene() {
+// STEP 3. load the correct scene
+async function select_initial_scene() {
   
   // log messages in the console
   console.log("selecting initial scene");
@@ -122,7 +118,7 @@ function select_initial_scene() {
 }
 
 // STEP 4. Install a single popstate handler once for back and forward navigation
-function install_single_popstate_handler() {
+async function install_single_popstate_handler() {
   
   // log messages in the console
   console.log("installing state handler");
@@ -135,7 +131,7 @@ function install_single_popstate_handler() {
 }
 
 // STEP 5. activate realtime listener for ongoing updates
-function activate_realtime_listener() {
+async function activate_realtime_listener() {
   
   // log messages in the console
   console.log('activating realtime listener');
@@ -147,16 +143,21 @@ function activate_realtime_listener() {
     var data = snapshot.val();
     
     // turn the data into an array
-    vocab_database = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : [];
-    
-    // log messages in the console
-    console.log('database synced (realtime) ' + timestamp() + ', total words: ' + vocab_database.length);
+    vocab_database = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : []; 
     
     // functions to run when the database is updated
-    update_user_interface();
+     if (first_load === false) {
+      update_user_interface();
+      console.log('database synced (realtime) ' + timestamp() + ', total words: ' + vocab_database.length);
+    }
+    
+    // prevents functions from firing on first load
+    else {
+      first_load = false;
+    }
+
   });
 }
-
 
 // ---------------------------------------------------------
 // LISTENERS 
@@ -181,8 +182,6 @@ btn_back.addEventListener("click", function() {
 btn_toggle_developer_mode.addEventListener("dblclick", function() {
   toggle_developer_mode();
 });
-
-
 
 // ---------------------------------------------------------
 // FUNCTIONS
@@ -283,16 +282,16 @@ function build_list() {
       function (list_item) {
 
         // insert html template
-        scene.insertAdjacentHTML("beforeend", word_card);
+        scene.insertAdjacentHTML("beforeend", card_snippet);
         
         // grab the element just inserted
-        var card = scene.lastElementChild;
+        var snippet = scene.lastElementChild;
 
         // fill its fields
-        card.querySelector(".type").innerHTML = list_item.type;
-        card.querySelector(".english").innerHTML = list_item.english;
-        card.querySelector(".german").innerHTML = list_item.german;
-        card.querySelector(".score").innerHTML = list_item.score;
+        snippet.querySelector(".type").innerHTML = list_item.type;
+        snippet.querySelector(".english").innerHTML = list_item.english;
+        snippet.querySelector(".german").innerHTML = list_item.german;
+        snippet.querySelector(".score").innerHTML = list_item.score;
       }
     );
 }
@@ -312,14 +311,14 @@ function build_types_list() {
         var deck_list = document.getElementById('deck_list');
 
         // insert html template
-        deck_list.insertAdjacentHTML("beforeend", deck_card);
+        deck_list.insertAdjacentHTML("beforeend", deck_snippet);
         
         // grab the element just inserted
-        var card = deck_list.lastElementChild;
+        var snippet = deck_list.lastElementChild;
 
         // fill its fields
-        card.querySelector(".deck_card_type").innerHTML = list_item.type + "s";
-        card.querySelector(".deck_card_count").innerHTML = list_item.count + " cards";
+        snippet.querySelector(".deck_snippet_type").innerHTML = list_item.type + "s";
+        snippet.querySelector(".deck_snippet_count").innerHTML = list_item.count + " cards";
       }
     );
 }
