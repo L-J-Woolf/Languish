@@ -17,7 +17,7 @@
 
 <!-- styles -->
 <link rel="stylesheet" href="./styles.css">
-<style>@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap');</style>
+<style>@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');</style>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css"/>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css"/>
 
@@ -51,34 +51,74 @@ if ("serviceWorker" in navigator) {
 <!-- scene: decks  -->
 <div class="scene" id="scene_decks">
     <!-- header  -->
-    <div class="dashboard_header">
-        <div class="dashboard_title" id="btn_toggle_developer_mode">Dashboard</div>  
-        <div class="dashboard_metrics">
-            <div class="dashboard_metric">
-                <div class="dashboard_metric_number">101</div>
-                <div class="dashboard_metric_label">studied today</div>
+    <div class="header_wrapper">
+        <div class="header_title" id="btn_toggle_developer_mode">languish</div>
+    </div> 
+    
+    <!-- summary  -->
+    <div class="summary_wrapper">
+        <div class="summary_title">Dashbaord</div>
+        <div class="metrics_column">
+            <div class="metrics_row">
+                <div class="metric">
+                    <div class="metric_icon"><i class="ph-fill ph-fire"></i></div>
+                    <div class="metric_right_column">
+                        <div class="metric_data">4</div>
+                        <div class="metric_label">Day streak</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric_icon"><i class="ph-fill ph-lightning"></i></div>
+                    <div class="metric_right_column">
+                        <div class="metric_data">87</div>
+                        <div class="metric_label">Studied today</div>
+                    </div>
+                </div>
             </div>
-            <div class="dashboard_metric">
-                <div class="dashboard_metric_number">84</div>
-                <div class="dashboard_metric_label">average 7 days</div>
-            </div>
-            <div class="dashboard_metric">
-                <div class="dashboard_metric_number">54</div>
-                <div class="dashboard_metric_label">average 30 days</div>
+            <div class="metrics_row">
+                <div class="metric">
+                    <div class="metric_icon"><i class="ph-fill ph-calendar-heart"></i></div>
+                    <div class="metric_right_column">
+                        <div class="metric_data">56</div>
+                        <div class="metric_label">7 day avg</div>
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric_icon"><i class="ph-fill ph-calendar-star"></i></div>
+                    <div class="metric_right_column">
+                        <div class="metric_data">32</div>
+                        <div class="metric_label">30 day avg</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- decks list  -->
-    <div class="scene_title">Types</div>
-    <div class="deck_list" id="deck_list"></div>
+    <!-- decks  -->
+    <div class="decks_wrapper">
+        <div class="deck_list_title">Decks</div>
+        <div class="deck_list" id="deck_list"></div>
+    </div>
+      
+    <!-- sync status  -->
+    <div class="synced_status_wrapper">
+        <div class="synced_status_label" id="scene_sync_date">synced 3:30 pm</div>
+    </div>
     
-    <!-- sync date  -->
-    <div class="scene_sync_date" id="scene_sync_date">last sync unknown</div>
-
-    <!-- floating action button  -->
-    <div class="fab" id="btn_add_item"><div class="fab_icon"><i class="ph-bold ph-plus"></i></div></div>
-
+    <!-- fixed actions -->
+    <div class="fixed_buttons">
+        <div class="floating_buttons">
+            <div class="floating_action_button" id="btn_add_item">
+                <div class="floating_action_button_icon"><i class="ph-fill ph-plus"></i></div>
+            </div>
+        </div>
+        <div class="bottom_bar_wrapper">
+            <div class="button_primary">
+                <div class="button_primary_icon"><i class="ph-fill ph-lightning"></i></div>
+                <div class="button_primary_label">Articles</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- scene: add  -->
