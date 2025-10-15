@@ -1,6 +1,6 @@
 {
-  "name": "Learn German with Lucas",
-  "short_name": "German with Lucas",
+  "name": "languish",
+  "short_name": "languish",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
