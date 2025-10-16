@@ -4,10 +4,9 @@ var deck_snippet = `
 <div class="deck_snippet_wrapper">
   <div class="deck_snippet_name">Articles</div>
   <div class="deck_snippet_count_wrapper">
-    <div class="deck_snippet_icon"><i class="ph-fill ph-cards"></i></div>
-    <div class="deck_snippet_count">114</div>
+    <div class="deck_snippet_count_icon"><i class="ph-fill ph-notebook"></i></div>
+    <div class="deck_snippet_count_value">114</div>
   </div>
-  <div class="deck_snippet_button"><i class="ph-bold ph-caret-right"></i></div>
 </div>
 
 `;

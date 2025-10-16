@@ -292,16 +292,16 @@ function timestamp() {
 
 function generate_default_deck_name() {
   const strings = [
-    "Bananas are berries, but strawberries are not",
+    "strawberries are not berries",
     "Sharks existed before trees",
-    "Sloths can hold breath longer than dolphins",
+    "Sloths hold their breath longer than dolphins",
     "Honey never spoils",
     "Octopuses have three hearts",
     "Wombat poo is cube-shaped",
     "Space smells like burnt steak",
     "Penguins propose with pebbles",
     "A day on Venus is longer than a year",
-    "The Eiffel Tower grows in summer heat"
+    "The Eiffel Tower grows in summer"
   ];
   
   const randomIndex = Math.floor(Math.random() * strings.length);
@@ -464,7 +464,7 @@ function render_decks_list() {
         // fill its fields
         snippet.setAttribute('data-id', list_item.id); // set id
         snippet.querySelector(".deck_snippet_name").innerHTML = list_item.name;
-        snippet.querySelector(".deck_snippet_count").innerHTML = "69";
+        snippet.querySelector(".deck_snippet_count_value").innerHTML = "69";
       }
     );
 }
