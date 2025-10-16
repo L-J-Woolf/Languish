@@ -42,15 +42,19 @@ if ("serviceWorker" in navigator) {
 <div id="tint"></div>
 
 <!-- developer menu -->
-<button class="is_admin_only" onclick="log_variable(local_database)">log vocab database</button>
-<button class="is_admin_only" onclick="query_all_entries(local_database, 'type', 'noun')">log nouns</button>
-<button class="is_admin_only" onclick="query_unique_entries(local_database,'type')">log unique types</button>
+<button class="is_admin_only" onclick="log_variable(local_database_decks)">log decks</button>
+<button class="is_admin_only" onclick="log_variable(local_database_cards)">log cards</button>
+<button class="is_admin_only" onclick="query_all_entries(local_database_cards, 'deck', 'noun')">log nouns</button>
+<button class="is_admin_only" onclick="query_unique_entries(local_database_cards,'deck')">log unique decks</button>
 <button class="is_admin_only" onclick="log_variable(query_result)">log query_result</button>
 <button class="is_admin_only" onclick="speakGerman('Könntest du das wiederholen?')">speakGerman</button>
 <button class="is_admin_only" onclick="update_synced_timestamp()">update timestamp</button>
+<button class="is_admin_only" onclick="add_deck_to_database(generate_default_deck_name())">add deck</button>
+<button class="is_admin_only" onclick="edit_deck_in_database('This is The New Name', '-ObeUEdEP7mUYLBzyCUK')">edit deck</button>
+<button class="is_admin_only" onclick="add_card_to_database()">add card</button>
 
 <!-- scene: decks  -->
-<div class="scene" id="scene_decks">
+<div class="scene" id="scene_dashboard">
     <!-- header  -->
     <div class="header_wrapper">
         <div class="header_title" id="btn_toggle_developer_mode">languish</div>
@@ -95,26 +99,29 @@ if ("serviceWorker" in navigator) {
         </div>
     </div>
     
-    <!-- decks  -->
+    <!-- dynamic list: decks -->
     <div class="decks_wrapper">
         <div class="deck_list_title">Decks</div>
-        <div class="deck_list" id="deck_list"></div>
+        <div class="dynamic_list_decks" id="dynamic_list_decks"></div>
     </div>
-      
+    
+    <!-- cards  -->
+    <div id="cards_dynamic_list"></div>
+
     <!-- sync status  -->
     <div class="synced_status_wrapper">
         <div class="synced_status_label" id="scene_sync_date">synced 3:30 pm</div>
     </div>
     
     <!-- fixed actions -->
-    <div class="fixed_buttons">
-        <div class="floating_buttons">
-            <div class="floating_action_button" id="btn_add_item">
+    <div class="fixed_layer">
+        <div class="floating_bar_wrapper">
+            <div class="floating_action_button" id="btn_add_deck">
                 <div class="floating_action_button_icon"><i class="ph-fill ph-plus"></i></div>
             </div>
         </div>
         <div class="bottom_bar_wrapper">
-            <div class="button_primary">
+            <div class="button_primary" id="btn_practice_all">
                 <div class="button_primary_icon"><i class="ph-fill ph-lightning"></i></div>
                 <div class="button_primary_label">Practice</div>
             </div>
@@ -122,19 +129,82 @@ if ("serviceWorker" in navigator) {
     </div>
 </div>
 
-<!-- scene: add  -->
- <div class="scene" id="scene_add_item">
-    <div class="simple_header">
-        <div class="simple_header_button" id="btn_back"><i class="ph-bold ph-arrow-left"></i></div>
-        <div class="simple_header_title">Add Item</div>
-        <div class="hidden simple_header_button"><i class="ph-bold ph-arrow-left"></i></div>
+<!-- scene: cards  -->
+<div class="scene" id="scene_deck_list">
+    
+    <!-- header -->
+    <div class="simple_header_wrapper">
+        <div class="simple_header_button btn_back">
+            <div class="simple_header_button_icon">
+                <div><i class="ph-bold ph-arrow-left"></i></div>
+            </div>
+        </div>
+        <div class="simple_header_title">Cards</div>
+        <div class="simple_header_spacer"></div>
     </div>
+
+    <!-- dynamic list: cards -->
+    <div class="dynamic_list_cards" id="dynamic_list_cards"></div>
+    
+    <!-- fixed layer -->
+    <div class="fixed_layer">
+        <div class="floating_bar_wrapper">
+            <div class="floating_action_button" id="btn_add_card">
+                <div class="floating_action_button_icon"><i class="ph-fill ph-plus"></i></div>
+            </div>
+        </div>
+        <div class="bottom_bar_wrapper">
+            <div class="button_primary">
+                <div class="button_primary_icon"><i class="ph-fill ph-lightning"></i></div>
+                <div class="button_primary_label">Practice $Deck</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- scene: add deck  -->
+<div class="scene" id="scene_add_deck">
+    
+    <!-- header -->
+    <div class="simple_header_wrapper">
+        <div class="simple_header_button btn_back">
+            <div class="simple_header_button_icon">
+                <div><i class="ph-bold ph-arrow-left"></i></div>
+            </div>
+        </div>
+        <div class="simple_header_title">Cards</div>
+        <div class="simple_header_spacer"></div>
+    </div>
+
+    <!-- form -->
+    <form class="custom_form">
+        <label><input type="text" placeholder="eg. German A1: Nouns" id="input_deck_name"></label>
+        <button type="button" onclick="submit_card()">Add Card</button>
+    </form>
+</div>
+
+<!-- scene: add card  -->
+<div class="scene" id="scene_add_item">
+    
+    <!-- header -->
+    <div class="simple_header_wrapper">
+        <div class="simple_header_button btn_back">
+            <div class="simple_header_button_icon">
+                <div><i class="ph-bold ph-arrow-left"></i></div>
+            </div>
+        </div>
+        <div class="simple_header_title">Cards</div>
+        <div class="simple_header_spacer"></div>
+    </div>
+
+    <!-- form -->
     <form class="custom_form">
         <label><input type="text" placeholder="Deck" id="deck_field"></label>
         <label><input type="text" placeholder="English" id="english_field"></label>
         <label><input type="text" placeholder="German" id="german_field"></label>
         <button type="button" onclick="submit_user_input()">Add Card</button>
     </form>
- </div>
+</div>
+
 </body>
 </html>

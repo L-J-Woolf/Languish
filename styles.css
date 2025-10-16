@@ -54,12 +54,74 @@ body {
   opacity: 0.25;
 }
 
-/* default scene settings */
+/* hide scenes by default  */
 
-#scene_decks {display: none}
-#scene_add_item {display: none;}
+.scene {display: none}
+
+/* simple header styles */
+
+.simple_header_wrapper {
+  grid-column-gap: 12px;
+  grid-row-gap: 12px;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 24px 24px 0;
+  display: flex;
+}
+
+.simple_header_button {
+  background-color: var(--layer);
+  border: 2px solid var(--stroke);
+  border-radius: 9px;
+  flex: none;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  display: flex;
+}
+
+.simple_header_button:hover {
+  background-color: var(--hover);
+}
+
+.simple_header_button:active {
+  background-color: var(--pressed);
+}
+
+.simple_header_button_icon {
+  color: #fff;
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.simple_header_title {
+  font-size: 24px;
+  text-align: center;
+  flex: 1;
+}
+
+.simple_hedaer_spacer {
+  flex: none;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  display: block;
+}
 
 /* card styles */
+
+.dynamic_list_cards {
+  grid-column-gap: 6px;
+  grid-row-gap: 6px;
+  flex-flow: column;
+  padding: 24px;
+  display: flex;
+  max-width: 600px;
+  margin: 0 auto;
+}
 
 .card_snippet_wrapper {
   border-radius: 9px;
@@ -104,7 +166,7 @@ outline: none;
 
 /* deck styles */
 
-.deck_list {
+.dynamic_list_decks {
   border-top: 2px solid var(--stroke);
   border-left: 2px solid var(--stroke);
   border-right: 2px solid var(--stroke);
@@ -138,7 +200,7 @@ outline: none;
   background-color: var(--pressed);
 }
 
-.deck_snippet_type {
+.deck_snippet_name {
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 0 auto;
@@ -298,7 +360,24 @@ outline: none;
   font-size: 12px;
 }
 
-/* fixed actions */
+/* fixed layer styles */
+
+.fixed_layer {
+  position: fixed;
+  z-index: 60;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.floating_bar_wrapper {
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding-bottom: 18px;
+  padding-left: 24px;
+  padding-right: 24px;
+  display: flex;
+}
 
 .floating_action_button {
   background-color: var(--green_light);
@@ -324,14 +403,6 @@ outline: none;
   height: 24px;
   font-size: 24px;
   color: white;
-}
-
-.fixed_buttons {
-  position: fixed;
-  z-index: 60;
-  bottom: 0;
-  left: 0;
-  right: 0;
 }
 
 .bottom_bar_wrapper {
@@ -373,15 +444,6 @@ outline: none;
   color: var(--white)
 }
 
-.floating_buttons {
-  justify-content: flex-end;
-  align-items: flex-start;
-  padding-bottom: 18px;
-  padding-left: 24px;
-  padding-right: 24px;
-  display: flex;
-}
-
 /* form styles */
 
 .custom_form {
@@ -415,44 +477,4 @@ outline: none;
 
 .is_admin_only {
   display: none;
-}
-
-.simple_header {
-  grid-column-gap: 12px;
-  grid-row-gap: 12px;
-  justify-content: space-between;
-  align-items: center;
-  padding: 24px;
-  display: flex;
-}
-
-.simple_header_button {
-  display: flex;
-  flex: none;
-  justify-content: center;
-  align-items: center;
-  width: 36px;
-  height: 36px;
-  color: var(--white);
-  font-size: 15px;
-  line-height: 15px;
-  background-color: var(--layer_one);;
-  border-radius: 9px;
-}
-
-.simple_header_button:hover {
-  background-color: var(--layer_one_hover);
-}
-
-.simple_header_button:active {
-  background-color: var(--layer_two);
-}
-
-.simple_header_title {
-  color: var(--white);
-  text-align: center;
-  flex: 0 auto;
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 30px;
 }

@@ -3,10 +3,12 @@
 // ---------------------------------------------------------
 
 // specify globals
-var local_database = [];
+var local_database_decks = [];
+var local_database_cards = [];
+//var query_result = [];
 var developer_mode = false;
 var first_load = true;
-var query_result = [];
+var deck_id = "-ObeUEdEP7mUYLBzyCUK";
 
 // specify firebase credentials and identifiers
 var firebase_config = {
@@ -38,12 +40,14 @@ document.addEventListener('DOMContentLoaded', async function initialise_app() {
   
   // startup functions which must fire and complete first
   await manually_sync_database();
+  await manually_sync_decks();
   await update_user_interface();
   await select_initial_scene();
+  
   // startup functions which may fire concurrently
-
-  install_single_popstate_handler();
-  //activate_realtime_listener();
+  install_popstate_handler();
+  activate_realtime_decks_listener();
+  activate_realtime_cards_listener();
   
   // log messages in the console
   console.log("initialisation complete");
@@ -60,16 +64,36 @@ async function manually_sync_database() {
   console.log("manually syncing database");
 
   // go to the 'words' section of the database and listen for *any* changes (add, edit, delete)
-  return realtime_database.ref('words').once('value').then(function(snapshot) {
+  return realtime_database.ref('cards').once('value').then(function(snapshot) {
     
     // get all entries stored under 'words'
     var data = snapshot.val();
     
     // turn the data into an array
-    local_database = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : [];
+    local_database_cards = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : [];
    
     // log messages in the console
-    console.log('database synced (manual) ' + timestamp() + ', total words: ' + local_database.length);
+    console.log('database synced (manual) ' + timestamp() + ', total words: ' + local_database_cards.length);
+  }); 
+}
+
+// STEP 1. manually sync the local database with the realtime database
+async function manually_sync_decks() {
+  
+  // log messages in the console
+  console.log("manually syncing database");
+
+  // go to the 'words' section of the database and listen for *any* changes (add, edit, delete)
+  return realtime_database.ref('decks').once('value').then(function(snapshot) {
+    
+    // get all entries stored under 'words'
+    var data = snapshot.val();
+    
+    // turn the data into an array
+    local_database_decks = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : [];
+   
+    // log messages in the console
+    console.log('decks synced (manual) ' + timestamp() + ', total decks: ' + local_database_decks.length);
   }); 
 }
 
@@ -80,8 +104,9 @@ async function update_user_interface() {
   console.log("updating user interface");
   
   // functions to build or update user-interface elements
-  query_unique_entries(local_database, 'type');
-  build_deck_list();
+  //query_unique_entries(local_database_cards, 'deck');
+  render_decks_list();
+  render_cards_list();
   update_synced_timestamp();
 }
 
@@ -109,7 +134,7 @@ async function select_initial_scene() {
 
   // 3) fall back to your default scene
   if (!initial_scene) {
-    initial_scene = 'scene_decks'; // specify default scene
+    initial_scene = 'scene_dashboard'; // specify default scene
   }
 
   // render without pushing a new history entry on first paint
@@ -117,7 +142,7 @@ async function select_initial_scene() {
 }
 
 // STEP 4. Install a single popstate handler once for back and forward navigation
-async function install_single_popstate_handler() {
+async function install_popstate_handler() {
   
   // log messages in the console
   console.log("installing state handler");
@@ -130,24 +155,52 @@ async function install_single_popstate_handler() {
 }
 
 // STEP 5. activate realtime listener for ongoing updates
-async function activate_realtime_listener() {
+async function activate_realtime_decks_listener() {
   
   // log messages in the console
   console.log('activating realtime listener');
 
   // go to the 'words' section of the database and listen for *any* changes (add, edit, delete)
-  realtime_database.ref('words').on('value', function(snapshot) {
+  realtime_database.ref('decks').on('value', function(snapshot) {
     
     // get all entries stored under 'words'
     var data = snapshot.val();
     
     // turn the data into an array
-    local_database = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : []; 
+    local_database_decks = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : []; 
     
     // functions to run when the database is updated
      if (first_load === false) {
       update_user_interface();
-      console.log('database synced (realtime) ' + timestamp() + ', total words: ' + local_database.length);
+      console.log('database synced (realtime) ' + timestamp() + ', total decks: ' + local_database_decks.length);
+    }
+    
+    // prevents functions from firing on first load
+    else {
+      first_load = false;
+    }
+
+  });
+}
+
+async function activate_realtime_cards_listener() {
+  
+  // log messages in the console
+  console.log('activating realtime listener');
+
+  // go to the 'words' section of the database and listen for *any* changes (add, edit, delete)
+  realtime_database.ref('cards').on('value', function(snapshot) {
+    
+    // get all entries stored under 'words'
+    var data = snapshot.val();
+    
+    // turn the data into an array
+    local_database_cards = data ? Object.entries(data).map(([id, item]) => ({ id, ...item })) : []; 
+    
+    // functions to run when the database is updated
+     if (first_load === false) {
+      update_user_interface();
+      console.log('database synced (realtime) ' + timestamp() + ', total cards: ' + local_database_cards.length);
     }
     
     // prevents functions from firing on first load
@@ -163,18 +216,38 @@ async function activate_realtime_listener() {
 // ---------------------------------------------------------
 
 // get varibles
-var btn_add_item = document.getElementById('btn_add_item');
-var btn_back = document.getElementById('btn_back');
+var btn_back = document.querySelectorAll('.btn_back');
+var btn_add_deck = document.getElementById('btn_add_deck');
+var btn_add_card = document.getElementById('btn_add_card');
+var btn_practice_all = document.getElementById('btn_practice_all');
+
 var btn_toggle_developer_mode = document.getElementById('btn_toggle_developer_mode');
 
-// listener to show and hide scenes
-btn_add_item.addEventListener("click", function() {
-  loadScene('scene_add_item');
+// listener to create listeners for all elements by class
+btn_back.forEach(item => {item.addEventListener("click", () => {
+  window.history.back();
+  });
 });
 
 // listener to show and hide scenes
-btn_back.addEventListener("click", function() {
-  loadScene('scene_decks');
+// btn_add_deck.addEventListener("click", function() {
+//   loadScene('scene_add_deck');
+// });
+btn_add_deck.addEventListener("click", function() {
+  add_deck_to_database(generate_default_deck_name());
+});
+
+// listener to show and hide scenes
+// btn_add_card.addEventListener("click", function() {
+//   loadScene('scene_add_item');
+// });
+btn_add_card.addEventListener("click", function() {
+  add_card_to_database();
+});
+
+// listener to show and hide scenes
+btn_practice_all.addEventListener("click", function() {
+  loadScene('scene_deck_list');
 });
 
 // listener to enable or disable developer mode
@@ -203,9 +276,6 @@ function speakGerman(text_to_speak) {
 // Function to fetch the current timestamp
 function timestamp() {
   
-  // log messages in the console
-  console.log("fetching timestamp");
-  
   // create variable to store date-time object
   var now = new Date();
 
@@ -218,6 +288,24 @@ function timestamp() {
    
   //reutrn the formatted date-time object
   return new Intl.DateTimeFormat('en-AU', format).format(now).toLowerCase(); 
+}
+
+function generate_default_deck_name() {
+  const strings = [
+    "Bananas are berries, but strawberries are not",
+    "Sharks existed before trees",
+    "Sloths can hold breath longer than dolphins",
+    "Honey never spoils",
+    "Octopuses have three hearts",
+    "Wombat poo is cube-shaped",
+    "Space smells like burnt steak",
+    "Penguins propose with pebbles",
+    "A day on Venus is longer than a year",
+    "The Eiffel Tower grows in summer heat"
+  ];
+  
+  const randomIndex = Math.floor(Math.random() * strings.length);
+  return strings[randomIndex];
 }
 
 // ---------------------------------------------------------
@@ -262,22 +350,67 @@ function query_all_entries(array_to_query, key_to_query, value_to_query) {
 }
 
 // function to add an item into the database
-function add_database_item(english, german, score, type) {
+function add_deck_to_database(deck_name) {
   
-  // get a reference to 'words' list in the database
-  var word_ref = realtime_database.ref('words');
+  // get a reference to the database
+  var deck_ref = realtime_database.ref('decks');
 
-  // push a new item into 'words' (firebase will give it a unique ID)
-  word_ref.push({
-    english: english, // english word
-    german: german,   // german word
-    score: score,     // score
-    type: type        // type
+  // push a new item (firebase will give it a unique ID)
+  deck_ref.push({
+    name: deck_name
   });
 
   // show messages in the console
-  console.log('new word added:', english, german);
+  console.log('new deck added:', deck_name);
+}
 
+// function to edit an item into the database
+function edit_deck_in_database(deck_name, unique_id) {
+  
+  // point to the specific item using its id
+  var deck_ref = realtime_database.ref('decks/' + unique_id);
+
+  // update only the provided fields
+  deck_ref.update({
+    name: deck_name
+  });
+
+  console.log('deck updated:', deck_name, unique_id);
+}
+
+// function to add an item into the database
+function add_card_to_database() {
+  
+  // get a reference to the database
+  var card_ref = realtime_database.ref('cards');
+
+  // push a new item (firebase will give it a unique ID)
+  card_ref.push({
+    deck: deck_id,
+    question: "",
+    answer: "",
+    score: 0,
+    last_reviewed: Date.now()
+  });
+
+  // show messages in the console
+  console.log('new card added:');
+}
+
+// function to edit an item into the database
+function edit_card_in_database(question, answer, unique_id) {
+  
+  // point to the specific item using its id
+  var card_ref = realtime_database.ref('cards/' + unique_id);
+
+  // update only the provided fields
+  card_ref.update({
+    question: question,
+    answer: answer
+  });
+
+  // show messages in the console
+  console.log('card updated:', question, answer, unique_id);
 }
 
 // function to delete a word by its values
@@ -304,43 +437,23 @@ function delete_database_item(english, german, type) {
   })
 }
 
-// function to loop through an array
-function build_list() {
+// function to render decks list
+function render_decks_list() {
   
-  // specify array to loop through and perform actions
-  local_database.forEach (
-      
-    // specify the actions to perform on each list item
-      function (list_item) {
+  // show messages in the console
+  console.log('rendering decks list');
 
-        // insert html template
-        scene.insertAdjacentHTML("beforeend", card_snippet);
-        
-        // grab the element just inserted
-        var snippet = scene.lastElementChild;
+  // select the element to render inside
+  var deck_list = document.getElementById('dynamic_list_decks');
 
-        // fill its fields
-        snippet.querySelector(".type").innerHTML = list_item.type;
-        snippet.querySelector(".english").innerHTML = list_item.english;
-        snippet.querySelector(".german").innerHTML = list_item.german;
-        snippet.querySelector(".score").innerHTML = list_item.score;
-      }
-    );
-}
-
-// function to loop through an array
-function build_deck_list() {
-  
-  var deck_list = document.getElementById('deck_list');
+  // ensure the element has an innerhtml property
   deck_list.innerHTML = null;
 
   // specify array to loop through and perform actions
-  query_result.forEach (
+  local_database_decks.forEach (
       
     // specify the actions to perform on each list item
       function (list_item) {
-
-        var deck_list = document.getElementById('deck_list');
 
         // insert html template
         deck_list.insertAdjacentHTML("beforeend", deck_snippet);
@@ -349,8 +462,41 @@ function build_deck_list() {
         var snippet = deck_list.lastElementChild;
 
         // fill its fields
-        snippet.querySelector(".deck_snippet_type").innerHTML = list_item.type;
-        snippet.querySelector(".deck_snippet_count").innerHTML = list_item.count;
+        snippet.setAttribute('data-id', list_item.id); // set id
+        snippet.querySelector(".deck_snippet_name").innerHTML = list_item.name;
+        snippet.querySelector(".deck_snippet_count").innerHTML = "69";
+      }
+    );
+}
+
+// function to render cards list
+function render_cards_list() {
+  
+  // show messages in the console
+  console.log('rendering cards list');
+
+  // select the element to render inside
+  var cards_list = document.getElementById('dynamic_list_cards');
+  
+  // ensure the element has an innerhtml property
+  cards_list.innerHTML = null;
+
+  // specify array to loop through and perform actions
+  local_database_cards.forEach (
+      
+    // specify the actions to perform on each list item
+      function (list_item) {
+
+        // insert html template
+        cards_list.insertAdjacentHTML("beforeend", card_snippet);
+        
+        // grab the element just inserted
+        var snippet = cards_list.lastElementChild;
+
+        // fill its fields
+        snippet.setAttribute('data-id', list_item.id); // set id
+        snippet.querySelector(".card_snippet_question").innerHTML = list_item.question;
+        snippet.querySelector(".card_snippet_answer").innerHTML = list_item.answer;
       }
     );
 }
@@ -366,6 +512,29 @@ function update_synced_timestamp() {
 
   // log messages in the console
   console.log("sync timestamp updated");
+}
+
+// function to retrieve values from inputs
+function submit_card() {
+  
+  // locate input fields
+  var deck_name = document.getElementById("input_deck_name");
+  
+  // store their values
+  var deck_name = input_deck_name.value;
+  
+  // validate inputs
+  if (deck_name === "") {
+  console.log("please fill out all form fields");
+  
+  // code to execute if successful
+  } else {
+  console.log("submitting data");
+  add_deck_to_database(deck_name);  
+  } 
+  
+  // reset the fields afterwards
+  deck_name.value = "";
 }
 
 // function to retrieve values from inputs
@@ -440,45 +609,59 @@ function loadScene(scene_to_load) {
   console.log('loading scene: ' + scene_to_load);
 }
 
-// // function to create listeners for all elements by class
-// function testing_call_after_ui_refresh() {
-
-//   var deck_snippet_wrapper = document.querySelectorAll('.deck_snippet_wrapper');
-
-//   deck_snippet_wrapper.forEach(item => {item.addEventListener("click", () => {
-    
-//     // look only inside this element for deck_snippet_type
-//     var element_type = item.querySelector('.deck_snippet_type'); 
-    
-//     // get the clean text, e.g. "Articles"
-//     var type = element_type.textContent.trim();
-   
-//     // log a message in the console
-//     console.log('"' + type + 's" deck has been selected');
-//     query_all_entries(local_database, 'type', type);
-//     });
-//   });
-// }
-
-// attach a delegated listener to a stable container element.
-var deck_list = document.getElementById('deck_list');
-
-deck_list.addEventListener('click', event => {
+document.getElementById('dynamic_list_decks').addEventListener('click', event => {
   
-  // Find the clicked item within the wrapper
-  var item = event.target.closest('.deck_snippet_wrapper');
-  
-  // Guard in case the click was outside an item
-  if (!item || !deck_list.contains(item)) return;
-
-  // Read the type text from within the clicked item
-  var type = item.querySelector('.deck_snippet_type');
-  if (!type) return;
-
-  // get the clean text, e.g. "Articles"
-  var type = type.textContent.trim();
+  // find the clicked item within the wrapper
+  var clicked_item = event.target.closest('.deck_snippet_wrapper');
   
   // addition code to execute
-  console.log('deck selected:', type);
+  console.log('deck selected:id: ', clicked_item.dataset.id);
+
+});
+
+// attach a delegated listener to a stable container element.
+document.getElementById('dynamic_list_decks').addEventListener('dblclick', event => {
+  
+  // find the clicked item within the wrapper
+  var clicked_item = event.target.closest('.deck_snippet_wrapper');
+
+  // find the element within the clicked item you want to modify
+  var element_to_modify = clicked_item.querySelector('.deck_snippet_name');
+
+  //clicked_item.style.background = "red";
+  element_to_modify.contentEditable = "true";
+  element_to_modify.style.outline = 'none';
+  element_to_modify.focus();
+
+  element_to_modify.addEventListener('keydown', function (event) {
+  if (event.key === 'Enter') {
+    //event.preventDefault(); // stops a new line
+    element_to_modify.blur();
+    edit_deck_in_database(element_to_modify.innerText, clicked_item.dataset.id)
+  }
+  });
+
+});
+
+// attach a delegated listener to a stable container element.
+document.getElementById('dynamic_list_cards').addEventListener('click', event => {
+  
+  // find the clicked item within the wrapper
+  var clicked_item = event.target.closest('.card_snippet_wrapper');
+
+  // find the element within the clicked item you want to modify
+  var question_to_modify = clicked_item.querySelector('.card_snippet_question');
+  var answer_to_modify = clicked_item.querySelector('.card_snippet_answer');
+  var card_unique_id = clicked_item.dataset.id;
+
+  question_to_modify.addEventListener('blur', function () {
+  edit_card_in_database(question_to_modify.innerText, answer_to_modify.innerText, card_unique_id )
+  console.log('card edited ' + question_to_modify.innerText, answer_to_modify.innerText, card_unique_id);
+  });
+
+  answer_to_modify.addEventListener('blur', function () {
+  edit_card_in_database(question_to_modify.innerText, answer_to_modify.innerText, card_unique_id )
+  console.log('card edited ' + question_to_modify.innerText, answer_to_modify.innerText, card_unique_id);
+  });
 
 });
