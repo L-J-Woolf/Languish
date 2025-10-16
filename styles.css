@@ -440,37 +440,6 @@ outline: none;
   color: var(--white)
 }
 
-/* form styles */
-
-.custom_form {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 0 auto;
-  padding: 24px;
-  max-width: 600px;
-}
-
-.custom_form label {
-  display: inline-block;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.custom_form input {
-  width: 100%;
-  height: 54px;
-  box-sizing: border-box;
-  padding: 12px;
-}
-
-.custom_form button {
-  width: 100%;
-  height: 54px;
-  box-sizing: border-box;
-}
-
 .is_admin_only {
   display: none;
 }

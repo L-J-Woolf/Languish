@@ -42,16 +42,10 @@ if ("serviceWorker" in navigator) {
 <div id="tint"></div>
 
 <!-- developer menu -->
-<button class="is_admin_only" onclick="log_variable(local_database_decks)">log decks</button>
-<button class="is_admin_only" onclick="log_variable(local_database_cards)">log cards</button>
-<button class="is_admin_only" onclick="query_all_entries(local_database_cards, 'deck', 'noun')">log nouns</button>
-<button class="is_admin_only" onclick="query_unique_entries(local_database_cards,'deck')">log unique decks</button>
-<button class="is_admin_only" onclick="log_variable(query_result)">log query_result</button>
-<button class="is_admin_only" onclick="speakGerman('Könntest du das wiederholen?')">speakGerman</button>
-<button class="is_admin_only" onclick="update_synced_timestamp()">update timestamp</button>
-<button class="is_admin_only" onclick="add_deck_to_database(generate_default_deck_name())">add deck</button>
-<button class="is_admin_only" onclick="edit_deck_in_database('This is The New Name', '-ObeUEdEP7mUYLBzyCUK')">edit deck</button>
-<button class="is_admin_only" onclick="add_card_to_database()">add card</button>
+<button class="is_admin_only" onclick="console.log(local_database_decks)">log decks</button>
+<button class="is_admin_only" onclick="console.log(local_database_cards)">log cards</button>
+<button class="is_admin_only" onclick="delete_deck('-ObggDuJtdkGxhRAqosm')">delete deck</button>
+<button class="is_admin_only" onclick="delete_card('-ObggHw3JN8g4Z6gYAxZ')">delete card</button>
 
 <!-- scene: decks  -->
 <div class="scene" id="scene_dashboard">
@@ -160,50 +154,6 @@ if ("serviceWorker" in navigator) {
             </div>
         </div>
     </div>
-</div>
-
-<!-- scene: add deck  -->
-<div class="scene" id="scene_add_deck">
-    
-    <!-- header -->
-    <div class="simple_header_wrapper">
-        <div class="simple_header_button btn_back">
-            <div class="simple_header_button_icon">
-                <div><i class="ph-bold ph-arrow-left"></i></div>
-            </div>
-        </div>
-        <div class="simple_header_title">Cards</div>
-        <div class="simple_header_spacer"></div>
-    </div>
-
-    <!-- form -->
-    <form class="custom_form">
-        <label><input type="text" placeholder="eg. German A1: Nouns" id="input_deck_name"></label>
-        <button type="button" onclick="submit_card()">Add Card</button>
-    </form>
-</div>
-
-<!-- scene: add card  -->
-<div class="scene" id="scene_add_item">
-    
-    <!-- header -->
-    <div class="simple_header_wrapper">
-        <div class="simple_header_button btn_back">
-            <div class="simple_header_button_icon">
-                <div><i class="ph-bold ph-arrow-left"></i></div>
-            </div>
-        </div>
-        <div class="simple_header_title">Cards</div>
-        <div class="simple_header_spacer"></div>
-    </div>
-
-    <!-- form -->
-    <form class="custom_form">
-        <label><input type="text" placeholder="Deck" id="deck_field"></label>
-        <label><input type="text" placeholder="English" id="english_field"></label>
-        <label><input type="text" placeholder="German" id="german_field"></label>
-        <button type="button" onclick="submit_user_input()">Add Card</button>
-    </form>
 </div>
 
 </body>
