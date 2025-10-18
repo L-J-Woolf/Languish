@@ -45,13 +45,16 @@ if ("serviceWorker" in navigator) {
 <div id="tint"></div>
 
 <!-- developer menu -->
-<button class="is_admin_only" onclick="console.log(local_database_decks)">log decks</button>
-<button class="is_admin_only" onclick="console.log(local_database_cards)">log cards</button>
-<button class="is_admin_only" onclick="delete_deck('-ObggDuJtdkGxhRAqosm')">delete deck</button>
-<button class="is_admin_only" onclick="delete_card('-ObggHw3JN8g4Z6gYAxZ')">delete card</button>
+<button class="is_admin_only" onclick="console.log(decks_index)">log decks_index</button>
+<button class="is_admin_only" onclick="console.log(cards_index)">log cards_index</button>
+<button class="is_admin_only" onclick="render_decks_list()">build_deck_list</button>
+<button class="is_admin_only" onclick="console.log(get_unique_id_from_hash())">get_unique_id_from_hash</button>
+<button class="is_admin_only" onclick="load_scene('scene_dashboard')">load_scene</button>
+<button class="is_admin_only" onclick="debug()">debug</button>
+<button class="is_admin_only" onclick="activate_listener()">activate_listener</button>
 
 <!-- scene: decks  -->
-<div class="scene" id="scene_dashboard">
+<div class="scene" id="#/dashboard">
     <!-- header  -->
     <div class="header_wrapper">
         <div class="header_title" id="btn_toggle_developer_mode">languish</div>
@@ -107,7 +110,7 @@ if ("serviceWorker" in navigator) {
 
     <!-- sync status  -->
     <div class="synced_status_wrapper">
-        <div class="synced_status_label" id="scene_sync_date">synced 3:30 pm</div>
+        <div class="synced_status_label" id="scene_sync_date">last sync unknown</div>
     </div>
     
     <!-- fixed actions -->
@@ -127,7 +130,7 @@ if ("serviceWorker" in navigator) {
 </div>
 
 <!-- scene: cards  -->
-<div class="scene" id="scene_deck_list">
+<div class="scene" id="#/decks">
     
     <!-- header -->
     <div class="simple_header_wrapper">
@@ -136,7 +139,7 @@ if ("serviceWorker" in navigator) {
                 <div><i class="ph-bold ph-arrow-left"></i></div>
             </div>
         </div>
-        <div class="simple_header_title">Cards</div>
+        <div class="simple_header_title" id="deck_title">$title</div>
         <div class="simple_header_spacer"></div>
     </div>
 

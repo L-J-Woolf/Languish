@@ -1,13 +1,13 @@
 // reusable HTML snippet
 var deck_snippet = `
 
-<div class="deck_snippet_wrapper">
-  <div class="deck_snippet_name">Articles</div>
+<a class="deck_snippet_wrapper" href="#/decks/deck_name/unique_id">
+  <div class="deck_snippet_name">$deck_name</div>
   <div class="deck_snippet_count_wrapper">
     <div class="deck_snippet_count_icon"><i class="ph-fill ph-notebook"></i></div>
-    <div class="deck_snippet_count_value">114</div>
+    <div class="deck_snippet_count_value">$$$</div>
   </div>
-</div>
+</a>
 
 `;
 
