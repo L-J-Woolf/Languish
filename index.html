@@ -50,10 +50,13 @@ if ("serviceWorker" in navigator) {
 
 <!-- scene: decks  -->
 <div class="scene" id="#/dashboard">
+
     <!-- header  -->
-    <div class="header_wrapper">
-        <div class="header_title">languish</div>
+    <div class="header_primary">
+        <div class="header_primary_title">languish</div>
     </div> 
+
+    <div class="content">
     
     <!-- summary  -->
     <div class="summary_wrapper">
@@ -92,9 +95,9 @@ if ("serviceWorker" in navigator) {
                 </div>
             </div>
         </div>
-        <div class="button_primary" id="btn_practice_all">
+        <a href="#/study" class="button_primary" id="btn_practice_all">
             <div class="button_primary_label">Practice</div>
-        </div>
+        </a>
     </div>
     
     <!-- dynamic list: decks -->
@@ -116,16 +119,31 @@ if ("serviceWorker" in navigator) {
             </div>
         </div>
     </div>
+
+    </div>
+
 </div>
+
 
 <!-- scene: cards  -->
 <div class="scene" id="#/decks">
     
     <!-- header -->
-    <div class="simple_header_wrapper">
+    <div class="secondary_header_wrapper">
         <a class="button_secondary_solid" href="#/dashboard"><i class="ph-bold ph-arrow-left"></i></a>
-        <div class="simple_header_title" id="deck_title">$title</div>
+        <div class="secondary_header_title" id="deck_title">$title</div>
         <a class="button_secondary_outline" id="btn_delete_deck" href="#/dashboard"><i class="ph-bold ph-trash"></i></a>
+    </div>
+
+    <div class="content">
+
+    <div class="primary_section">
+        <a href="#/study" class="button_primary">
+            <div class="button_primary_label">Practice</div>
+        </a>
+        <div class="deck_status_wrapper">
+            <div class="deck_status_label" id="deck_status">$deck_status</div>
+        </div>
     </div>
 
     <!-- dynamic list: cards -->
@@ -135,16 +153,29 @@ if ("serviceWorker" in navigator) {
     <div class="fixed_layer">
         <div class="floating_bar_wrapper">
             <div class="floating_action_button" id="btn_add_card">
-                <div class="floating_action_button_icon"><i class="ph-fill ph-plus"></i></div>
-            </div>
-        </div>
-        <div class="bottom_bar_wrapper">
-            <div class="button_primary">
-                <div class="button_primary_icon"><i class="ph-fill ph-lightning"></i></div>
-                <div class="button_primary_label">Practice $Deck</div>
+                <div class="floating_action_button_icon"><i class="ph-bold ph-plus"></i></div>
             </div>
         </div>
     </div>
+
+    </div>
+
+</div>
+
+<!-- scene: cards  -->
+<div class="scene" id="#/study">
+    
+    <!-- header -->
+    <div class="secondary_header_wrapper">
+        <a class="button_secondary_solid" href="#/dashboard"><i class="ph-bold ph-arrow-left"></i></a>
+        <div class="secondary_header_title">$tracker</div>
+        <a class="button_secondary_outline"><i class="ph-bold ph-dots-three"></i></a>
+    </div>
+
+    <div class="content">
+
+    </div>
+
 </div>
 
 </body>

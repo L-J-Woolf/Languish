@@ -164,24 +164,32 @@ async function refresh() {
 // listener for adding decks
 document.getElementById('btn_add_deck').addEventListener("click", function() {
   add_deck_to_database();
-  console.log('button pressed: add deck');
 });
 
 document.getElementById('btn_delete_deck').addEventListener("click", function() {
   delete_deck(get_unique_id_from_hash())
-  console.log('button pressed: delete deck');
 });
 
 // listen for events on an element and execute code
 document.getElementById('btn_add_card').addEventListener("click", function() {
   add_card_to_database();
-  console.log('button pressed: add card');
 });
 
-// listen for events on an element and execute code
-document.getElementById('btn_practice_all').addEventListener("click", function() {
-  console.log('button pressed: practice all');
-});
+// // listen for click events on card delete buttons
+// document.getElementById('dynamic_list_decks').addEventListener('click', function(event) {
+  
+//   // find the parent container of the clicked item
+//   var clicked_item = event.target.closest('.card_snippet_wrapper');
+
+//   // check if the click was on (or inside) an element
+//   if (event.target.closest('.deck_snippet_toggle_wrapper')) {
+    
+//     // log messages in the console
+//     console.log("button toggled"); 
+
+//   }
+
+// });
 
 // listener to pushes changes to deck names to realtime database
 document.getElementById('deck_title').addEventListener('dblclick', event => {
@@ -324,6 +332,7 @@ function render_deck_scene(deck_id_to_render) {
 
   // render page details
   document.getElementById('deck_title').innerText = find_deck_by_id(deck_id_to_render).deck_name;
+  document.getElementById('deck_status').innerText = cards_index.filter(item => item.deck.includes(deck_id_to_render)).length + ' cards';
 
   // select the element to render inside
   var dynamic_list_cards = document.getElementById('dynamic_list_cards');
@@ -350,6 +359,14 @@ function render_deck_scene(deck_id_to_render) {
         snippet.querySelector(".card_snippet_answer").innerText = list_item.answer; // // set question
       }
     );
+}
+
+// function to render cards list
+function render_study_list() {
+
+  // show messages in the console
+  console.log('rendering study scene');
+
 }
 
 // ---------------------------------------------------------

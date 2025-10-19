@@ -1,17 +1,4 @@
 // reusable HTML snippet
-var deck_snippet_old = `
-
-<a class="deck_snippet_wrapper" href="#/decks/deck_name/unique_id">
-  <div class="deck_snippet_name">$deck_name</div>
-  <div class="deck_snippet_count_wrapper">
-    <div class="deck_snippet_count_icon"><i class="ph-fill ph-notebook"></i></div>
-    <div class="deck_snippet_count">$$$</div>
-  </div>
-</a>
-
-`;
-
-// reusable HTML snippet
 var deck_snippet = `
 
 <div class="deck_snippet_wrapper">
@@ -20,7 +7,7 @@ var deck_snippet = `
     <span class="deck_snippet_custom_checkbox_off"><i class="ph-fill ph-circle"></i></span>
     <span class="deck_snippet_custom_checkbox_on"><i class="ph-fill ph-check-circle"></i></span>
   </label>
-  <a class="deck_snippet_button_wrapper href="#/decks/deck_name/unique_id">
+  <a class="deck_snippet_button_wrapper" href="#/decks/deck_name/unique_id">
     <div class="deck_snippet_textcontent">
       <div class="deck_snippet_name">$deck_name</div>
       <div class="deck_snippet_count">$card_count</div>
