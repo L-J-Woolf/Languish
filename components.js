@@ -1,13 +1,35 @@
 // reusable HTML snippet
-var deck_snippet = `
+var deck_snippet_old = `
 
 <a class="deck_snippet_wrapper" href="#/decks/deck_name/unique_id">
   <div class="deck_snippet_name">$deck_name</div>
   <div class="deck_snippet_count_wrapper">
     <div class="deck_snippet_count_icon"><i class="ph-fill ph-notebook"></i></div>
-    <div class="deck_snippet_count_value">$$$</div>
+    <div class="deck_snippet_count">$$$</div>
   </div>
 </a>
+
+`;
+
+// reusable HTML snippet
+var deck_snippet = `
+
+<div class="deck_snippet_wrapper">
+  <label class="deck_snippet_toggle_wrapper">
+    <input type="checkbox" checked="checked">
+    <span class="deck_snippet_custom_checkbox_off"><i class="ph-fill ph-circle"></i></span>
+    <span class="deck_snippet_custom_checkbox_on"><i class="ph-fill ph-check-circle"></i></span>
+  </label>
+  <a class="deck_snippet_button_wrapper href="#/decks/deck_name/unique_id">
+    <div class="deck_snippet_textcontent">
+      <div class="deck_snippet_name">$deck_name</div>
+      <div class="deck_snippet_count">$card_count</div>
+    </div>
+    <div class="deck_snippet_icon_wrapper">
+      <div class="deck_snippet_icon"><i class="ph-bold ph-caret-right"></i></div>
+    </div>
+  </a>
+</div>
 
 `;
 
@@ -15,8 +37,12 @@ var deck_snippet = `
 var card_snippet = `
 
 <div class="card_snippet_wrapper">
+  <div class="card_snippet_header">
+    <div class="card_snippet_label">Card</div>
+    <div class="button_secondary_ghost"><i class="ph-bold ph-trash-simple"></i></div>
+  </div>
   <div class="card_snippet_question" data-placeholder="Question..." contenteditable="true"></div>
   <div class="card_snippet_answer" data-placeholder="Answer..." contenteditable="true"></div>
-<div>
+</div>
 
 `;

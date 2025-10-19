@@ -47,11 +47,6 @@ if ("serviceWorker" in navigator) {
 <!-- developer menu -->
 <button class="is_admin_only" onclick="console.log(decks_index)">log decks_index</button>
 <button class="is_admin_only" onclick="console.log(cards_index)">log cards_index</button>
-<button class="is_admin_only" onclick="render_decks_list()">build_deck_list</button>
-<button class="is_admin_only" onclick="console.log(get_unique_id_from_hash())">get_unique_id_from_hash</button>
-<button class="is_admin_only" onclick="load_scene('scene_dashboard')">load_scene</button>
-<button class="is_admin_only" onclick="debug()">debug</button>
-<button class="is_admin_only" onclick="activate_listener()">activate_listener</button>
 
 <!-- scene: decks  -->
 <div class="scene" id="#/dashboard">
@@ -97,6 +92,9 @@ if ("serviceWorker" in navigator) {
                 </div>
             </div>
         </div>
+        <div class="button_primary" id="btn_practice_all">
+            <div class="button_primary_label">Practice</div>
+        </div>
     </div>
     
     <!-- dynamic list: decks -->
@@ -104,9 +102,6 @@ if ("serviceWorker" in navigator) {
         <div class="deck_list_title">Decks</div>
         <div class="dynamic_list_decks" id="dynamic_list_decks"></div>
     </div>
-    
-    <!-- cards  -->
-    <div id="cards_dynamic_list"></div>
 
     <!-- sync status  -->
     <div class="synced_status_wrapper">
@@ -117,13 +112,7 @@ if ("serviceWorker" in navigator) {
     <div class="fixed_layer">
         <div class="floating_bar_wrapper">
             <div class="floating_action_button" id="btn_add_deck">
-                <div class="floating_action_button_icon"><i class="ph-fill ph-plus"></i></div>
-            </div>
-        </div>
-        <div class="bottom_bar_wrapper">
-            <div class="button_primary" id="btn_practice_all">
-                <div class="button_primary_icon"><i class="ph-fill ph-lightning"></i></div>
-                <div class="button_primary_label">Practice</div>
+                <div class="floating_action_button_icon"><i class="ph-bold ph-plus"></i></div>
             </div>
         </div>
     </div>
@@ -134,13 +123,9 @@ if ("serviceWorker" in navigator) {
     
     <!-- header -->
     <div class="simple_header_wrapper">
-        <div class="simple_header_button btn_back">
-            <div class="simple_header_button_icon">
-                <div><i class="ph-bold ph-arrow-left"></i></div>
-            </div>
-        </div>
+        <a class="button_secondary_solid" href="#/dashboard"><i class="ph-bold ph-arrow-left"></i></a>
         <div class="simple_header_title" id="deck_title">$title</div>
-        <div class="simple_header_spacer"></div>
+        <a class="button_secondary_outline" id="btn_delete_deck" href="#/dashboard"><i class="ph-bold ph-trash"></i></a>
     </div>
 
     <!-- dynamic list: cards -->

@@ -2,10 +2,12 @@
 // GLOBALS 
 // ---------------------------------------------------------
 
-var first_load = true;
 var decks_index = [];
 var cards_index = [];
-var developer_mode = false;
+var study_index = [];
+var synced_timestamp = 'last sync unknown';
+var is_first_load = true;
+var is_developer_mode = false;
 
 // specify firebase credentials and identifiers
 var firebase_config = {
@@ -87,8 +89,11 @@ async function index_database() {
     // map array labels to realtime database keys
   }));
 
+  // update global synced timestamp
+  synced_timestamp = get_timestamp();
+
   // log messages in the console
-  console.log('database indexed');
+  console.log('database synced & indexed: ' + synced_timestamp);
 }
 
 // route
@@ -139,7 +144,7 @@ function install_realtime_listener() {
   const data = snapshot.val();
   
   // first run, do not refresh
-  if (first_load === true) {first_load = false;}
+  if (is_first_load === true) {is_first_load = false;}
   
   // subsequent runs
   else {refresh();}
@@ -157,16 +162,15 @@ async function refresh() {
 // LISTENERS 
 // ---------------------------------------------------------
 
-// listener to create listeners for all elements by class
-document.querySelectorAll('.btn_back').forEach(item => {item.addEventListener("click", () => {
-  window.history.back();
-  });
-});
-
 // listener for adding decks
 document.getElementById('btn_add_deck').addEventListener("click", function() {
-  // add_deck_to_database();
+  add_deck_to_database();
   console.log('button pressed: add deck');
+});
+
+document.getElementById('btn_delete_deck').addEventListener("click", function() {
+  delete_deck(get_unique_id_from_hash())
+  console.log('button pressed: delete deck');
 });
 
 // listen for events on an element and execute code
@@ -183,58 +187,99 @@ document.getElementById('btn_practice_all').addEventListener("click", function()
 // listener to enable or disable developer mode
 document.getElementById('btn_toggle_developer_mode').addEventListener("dblclick", function() {
   // code to execute if the conditions are met
-  if (developer_mode === false) { 
+  if (is_developer_mode === false) { 
   var developer_options = document.getElementsByClassName("is_admin_only");
   for (let i = 0; i < developer_options.length; i++) {developer_options[i].style.display = "inline-block";}
   console.log("developer mode enabled");    
-  developer_mode = true;
+  is_developer_mode = true;
 
   // code to execute if the conditions are not met
-  } else if (developer_mode === true) { 
+  } else if (is_developer_mode === true) { 
   var developer_options = document.getElementsByClassName("is_admin_only");
   for (let i = 0; i < developer_options.length; i++) {developer_options[i].style.display = "none";}
   console.log("developer mode disabled");  
-  developer_mode = false;
+  is_developer_mode = false;
   } 
 });
 
 // listener to pushes changes to deck names to realtime database
-// document.getElementById('dynamic_list_decks').addEventListener('dblclick', event => {
+document.getElementById('deck_title').addEventListener('dblclick', event => {
+  
+  // log messages in the console
+  console.log("editing deck name"); 
+
+  // store the current event target for ease of access
+  var element_to_modify = event.currentTarget;
+  
+  // restyle the event target
+  element_to_modify.contentEditable = "true";
+  element_to_modify.style.background = "#54555D";
+  element_to_modify.style.padding = "0 12px"
+  element_to_modify.focus();
+
+  // add event listeners for de-focus and enter
+  element_to_modify.addEventListener('keydown', on_keydown);
+  element_to_modify.addEventListener('blur', on_blur);
+
+  // funtion to run when user hits enter
+  function on_keydown(event) {
+    if (event.key !== 'Enter') return; // ignore everything else
+    event.preventDefault();
+    element_to_modify.blur();
+    element_to_modify.removeEventListener('keydown', on_keydown);
+  }
+
+  // funtion to run when user de-focusses the input
+  function on_blur(event) {
+    element_to_modify.style.removeProperty("background");
+    element_to_modify.style.removeProperty("padding");
+    // element_to_modify.style.background = "#38393E";
+    element_to_modify.contentEditable = "false";
+    edit_deck_in_database(element_to_modify.textContent, get_unique_id_from_hash());
+    element_to_modify.removeEventListener('blur', on_blur);
+  }
+
+});
+
+
+document.getElementById('dynamic_list_cards').addEventListener('click', function(event) {
+  
+  // check if the click was on (or inside) an element with class "a"
+  if (event.target.closest('.button_secondary_ghost')) {
+    console.log('clicked element A');
+    return;
+  }
+
+  // check if the click was on (or inside) an element with class "b"
+  if (event.target.closest('.card_snippet_question')) {
+    console.log('clicked element B');
+    return;
+  }
+
+  // check if the click was on (or inside) an element with class "c"
+  if (event.target.closest('.card_snippet_answer')) {
+    console.log('clicked element C');
+    return;
+  }
+
+});
+
+// // listener to pushes changes to cards to realtime database
+// document.getElementById('dynamic_list_cards').addEventListener('focusout', event => {
   
 //   // find the clicked item within the wrapper
-//   var clicked_item = event.target.closest('.deck_snippet_wrapper');
+//   var clicked_item = event.target.closest('.card_snippet_wrapper');
+  
+//   // store the relavent elements so we can access their values
+//   var question_to_modify = clicked_item.querySelector('.card_snippet_question');
+//   var answer_to_modify = clicked_item.querySelector('.card_snippet_answer');
+//   var card_unique_id = clicked_item.dataset.id;
 
-//   // find the element within the clicked item you want to modify
-//   var element_to_modify = clicked_item.querySelector('.deck_snippet_name');
-
-//   //clicked_item.style.background = "red";
-//   element_to_modify.contentEditable = "true";
-//   element_to_modify.style.outline = 'none';
-//   element_to_modify.focus();
-
-//   element_to_modify.addEventListener('keydown', function (event) {
-//   if (event.key === 'Enter') {
-//     //event.preventDefault(); // stops a new line
-//     element_to_modify.blur();
-//     edit_deck_in_database(element_to_modify.innerText, clicked_item.dataset.id)
-//   }
-//   });
+//   // pass details to the update function
+//   edit_card_in_database(question_to_modify.innerText, answer_to_modify.innerText, card_unique_id )
 // });
 
-// listener to pushes changes to cards to realtime database
-document.getElementById('dynamic_list_cards').addEventListener('focusout', event => {
-  
-  // find the clicked item within the wrapper
-  var clicked_item = event.target.closest('.card_snippet_wrapper');
-  
-  // store the relavent elements so we can access their values
-  var question_to_modify = clicked_item.querySelector('.card_snippet_question');
-  var answer_to_modify = clicked_item.querySelector('.card_snippet_answer');
-  var card_unique_id = clicked_item.dataset.id;
-
-  // pass details to the update function
-  edit_card_in_database(question_to_modify.innerText, answer_to_modify.innerText, card_unique_id )
-});
+// });
 
 // ---------------------------------------------------------
 // RENDER FUNCTIONS 
@@ -263,6 +308,8 @@ function render_dashboard() {
   // show messages in the console
   console.log('rendering dashboard');
 
+  document.getElementById('scene_sync_date').innerText = 'synced ' + synced_timestamp;
+
   // select the element to render inside
   var dynamic_list_decks = document.getElementById('dynamic_list_decks');
 
@@ -273,22 +320,21 @@ function render_dashboard() {
   decks_index.forEach (
       
     // specify the actions to perform on each list item
-      function (list_item) {
+    function (list_item) {
 
-        // insert html template
-        dynamic_list_decks.insertAdjacentHTML("beforeend", deck_snippet);
+      // insert html template
+      dynamic_list_decks.insertAdjacentHTML("beforeend", deck_snippet);
         
-        // grab the element just inserted
-        var snippet = dynamic_list_decks.lastElementChild;
+      // grab the element just inserted
+      var snippet = dynamic_list_decks.lastElementChild;
 
-        // fill its fields
-        snippet.href = '#/decks/' + list_item.deck_name + '/' + list_item.unique_id; // set hash
-        snippet.setAttribute('data-id', list_item.unique_id); // set id
-        snippet.querySelector(".deck_snippet_name").textContent = list_item.deck_name; // set deck name
-        //snippet.querySelector(".deck_snippet_count_value").textContent  = find_cards_by_deck_id(list_item.unique_id).length; // set count
-        snippet.querySelector(".deck_snippet_count_value").textContent = cards_index.filter(item => item.deck.includes(list_item.unique_id)).length; // set count
-      }
-    );
+      // fill its fields
+      snippet.querySelector(".deck_snippet_button_wrapper").href = '#/decks/' + list_item.deck_name + '/' + list_item.unique_id; // set hash
+      snippet.setAttribute('data-id', list_item.unique_id); // set id
+      snippet.querySelector(".deck_snippet_name").textContent = list_item.deck_name; // set deck name
+      snippet.querySelector(".deck_snippet_count").textContent = cards_index.filter(item => item.deck.includes(list_item.unique_id)).length + ' cards'; // set count
+    }
+  );
 }
 
 // function to render cards list
@@ -320,6 +366,7 @@ function render_deck_scene(deck_id_to_render) {
 
         // fill its fields
         snippet.setAttribute('data-id', list_item.unique_id); // set id
+        snippet.querySelector(".button_secondary_ghost").setAttribute('data-id', list_item.unique_id); // set id
         snippet.querySelector(".card_snippet_question").innerText = list_item.question; // set question
         snippet.querySelector(".card_snippet_answer").innerText = list_item.answer; // // set question
       }
@@ -366,10 +413,17 @@ function edit_deck_in_database(deck_name, unique_id) {
 function delete_deck(item_to_delete) {
 
   //build a reference to the specific card you want to delete
-  var item_ref = realtime_database.ref('decks/' + item_to_delete);
+  var deck_ref = realtime_database.ref('decks/' + item_to_delete);
 
   // remove it from the database
-  item_ref.remove();
+  deck_ref.remove();
+  
+  var cards_to_delete = cards_index.filter(item => item.deck.includes(item_to_delete));
+
+  cards_to_delete.forEach(function(item) {
+    delete_card(item.unique_id)
+  });
+
 }
 
 // function to add an item into the database
@@ -415,6 +469,7 @@ function delete_card(item_to_delete) {
 
   // remove it from the database
   card_ref.remove();
+
 }
 
 // ---------------------------------------------------------
@@ -422,7 +477,7 @@ function delete_card(item_to_delete) {
 // ---------------------------------------------------------
 
 // Function to fetch the current timestamp
-function timestamp() {
+function get_timestamp() {
   
   // create variable to store date-time object
   var now = new Date();
