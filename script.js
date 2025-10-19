@@ -7,7 +7,6 @@ var cards_index = [];
 var study_index = [];
 var synced_timestamp = 'last sync unknown';
 var is_first_load = true;
-var is_developer_mode = false;
 
 // specify firebase credentials and identifiers
 var firebase_config = {
@@ -184,24 +183,6 @@ document.getElementById('btn_practice_all').addEventListener("click", function()
   console.log('button pressed: practice all');
 });
 
-// listener to enable or disable developer mode
-document.getElementById('btn_toggle_developer_mode').addEventListener("dblclick", function() {
-  // code to execute if the conditions are met
-  if (is_developer_mode === false) { 
-  var developer_options = document.getElementsByClassName("is_admin_only");
-  for (let i = 0; i < developer_options.length; i++) {developer_options[i].style.display = "inline-block";}
-  console.log("developer mode enabled");    
-  is_developer_mode = true;
-
-  // code to execute if the conditions are not met
-  } else if (is_developer_mode === true) { 
-  var developer_options = document.getElementsByClassName("is_admin_only");
-  for (let i = 0; i < developer_options.length; i++) {developer_options[i].style.display = "none";}
-  console.log("developer mode disabled");  
-  is_developer_mode = false;
-  } 
-});
-
 // listener to pushes changes to deck names to realtime database
 document.getElementById('deck_title').addEventListener('dblclick', event => {
   
@@ -241,45 +222,43 @@ document.getElementById('deck_title').addEventListener('dblclick', event => {
 
 });
 
-
+// listen for click events on card delete buttons
 document.getElementById('dynamic_list_cards').addEventListener('click', function(event) {
   
-  // check if the click was on (or inside) an element with class "a"
+  // find the parent container of the clicked item
+  var clicked_item = event.target.closest('.card_snippet_wrapper');
+
+  // check if the click was on (or inside) an element
   if (event.target.closest('.button_secondary_ghost')) {
-    console.log('clicked element A');
-    return;
-  }
-
-  // check if the click was on (or inside) an element with class "b"
-  if (event.target.closest('.card_snippet_question')) {
-    console.log('clicked element B');
-    return;
-  }
-
-  // check if the click was on (or inside) an element with class "c"
-  if (event.target.closest('.card_snippet_answer')) {
-    console.log('clicked element C');
-    return;
+    delete_card(clicked_item.dataset.id)
   }
 
 });
 
-// // listener to pushes changes to cards to realtime database
-// document.getElementById('dynamic_list_cards').addEventListener('focusout', event => {
+// listen for defocus events on card questions and answers
+document.getElementById('dynamic_list_cards').addEventListener('focusout', function(event) {
   
-//   // find the clicked item within the wrapper
-//   var clicked_item = event.target.closest('.card_snippet_wrapper');
-  
-//   // store the relavent elements so we can access their values
-//   var question_to_modify = clicked_item.querySelector('.card_snippet_question');
-//   var answer_to_modify = clicked_item.querySelector('.card_snippet_answer');
-//   var card_unique_id = clicked_item.dataset.id;
+  // find the parent container of the clicked item
+  var clicked_item = event.target.closest('.card_snippet_wrapper');
 
-//   // pass details to the update function
-//   edit_card_in_database(question_to_modify.innerText, answer_to_modify.innerText, card_unique_id )
-// });
+  // check if the click was on (or inside) an element
+  if (event.target.classList.contains('card_snippet_question')) {
+    console.log('element B lost focus');
+    var question_to_modify = clicked_item.querySelector('.card_snippet_question');
+    var answer_to_modify = clicked_item.querySelector('.card_snippet_answer');
+    var card_unique_id = clicked_item.dataset.id;
+    edit_card_in_database(question_to_modify.innerText, answer_to_modify.innerText, card_unique_id);
+  }
 
-// });
+  // check if the click was on (or inside) an element
+  if (event.target.classList.contains('card_snippet_answer')) {
+    console.log('element C lost focus');
+    var question_to_modify = clicked_item.querySelector('.card_snippet_question');
+    var answer_to_modify = clicked_item.querySelector('.card_snippet_answer');
+    var card_unique_id = clicked_item.dataset.id;
+    edit_card_in_database(question_to_modify.innerText, answer_to_modify.innerText, card_unique_id);
+  }
+});
 
 // ---------------------------------------------------------
 // RENDER FUNCTIONS 
