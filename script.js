@@ -175,21 +175,27 @@ document.getElementById('btn_add_card').addEventListener("click", function() {
   add_card_to_database();
 });
 
-// // listen for click events on card delete buttons
-// document.getElementById('dynamic_list_decks').addEventListener('click', function(event) {
+// listen for changes to the toggle buttons on the dashboard
+document.getElementById('dynamic_list_decks').addEventListener('change', function(change) {
   
-//   // find the parent container of the clicked item
-//   var clicked_item = event.target.closest('.card_snippet_wrapper');
+  // only react if a checkbox inside the toggle wrapper changed
+  if (!change.target.matches('.deck_snippet_toggle_wrapper input[type="checkbox"]')) return;
+  
+  // find the deck card
+  var deck_ref = change.target.closest('.deck_snippet_wrapper');
+  var deck_id = deck_ref.dataset.id;
+  var is_checked = change.target.checked;
+  
+  // log messages in the console
+  console.log("deck toggled:", deck_id, "->", is_checked);
+  
+  if (is_checked) {
+  if (!study_index.includes(deck_id)) { study_index.push(deck_id); }
+} else {
+  study_index = study_index.filter(id => id !== deck_id);
+}
 
-//   // check if the click was on (or inside) an element
-//   if (event.target.closest('.deck_snippet_toggle_wrapper')) {
-    
-//     // log messages in the console
-//     console.log("button toggled"); 
-
-//   }
-
-// });
+});
 
 // listener to pushes changes to deck names to realtime database
 document.getElementById('deck_title').addEventListener('dblclick', event => {
@@ -296,6 +302,8 @@ function render_dashboard() {
   console.log('rendering dashboard');
 
   document.getElementById('scene_sync_date').innerText = 'synced ' + synced_timestamp;
+
+  decks_index.forEach (function (list_item) {study_index.push(list_item.unique_id);});
 
   // select the element to render inside
   var dynamic_list_decks = document.getElementById('dynamic_list_decks');
@@ -602,4 +610,17 @@ function get_unique_id_from_hash() {
   var current_hash_id = parts[parts.length - 1];
 
   return current_hash_id;
+}
+
+function build_study_index() {
+  
+  // specify array to loop through and perform actions
+  decks_index.forEach (
+      
+    // specify the actions to perform on each list item
+    function (list_item) {
+      console.log(list_item.unique_id);
+      study_index.push(list_item.unique_id);
+    }
+  );
 }
