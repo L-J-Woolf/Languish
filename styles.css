@@ -54,7 +54,7 @@ body {
   opacity: 0.15;
 }
 
-.is_developer_mode {
+#developer_menu {
   display: none;
 }
 

@@ -3,7 +3,7 @@ var deck_snippet = `
 
 <div class="deck_snippet_wrapper">
   <label class="deck_snippet_toggle_wrapper">
-    <input type="checkbox" checked="checked">
+    <input data-action="toggle_deck" type="checkbox" checked="checked">
     <span class="deck_snippet_custom_checkbox_off"><i class="ph-fill ph-circle"></i></span>
     <span class="deck_snippet_custom_checkbox_on"><i class="ph-fill ph-check-circle"></i></span>
   </label>
@@ -23,13 +23,13 @@ var deck_snippet = `
 // reusable HTML snippet
 var card_snippet = `
 
-<div class="card_snippet_wrapper">
+<div class="card_snippet_wrapper" data-id="$unique_id">
   <div class="card_snippet_header">
     <div class="card_snippet_label">Card</div>
-    <div class="button_secondary_ghost"><i class="ph-bold ph-trash-simple"></i></div>
+    <div class="button_secondary_ghost" data-action="delete_card"><i class="ph-bold ph-trash-simple"></i></div>
   </div>
-  <div class="card_snippet_question" data-placeholder="Question..." contenteditable="true"></div>
-  <div class="card_snippet_answer" data-placeholder="Answer..." contenteditable="true"></div>
+  <div class="card_snippet_question" data-action="edit_question" data-placeholder="Question..." contenteditable="true"></div>
+  <div class="card_snippet_answer" data-action="edit_answer" data-placeholder="Answer..." contenteditable="true"></div>
 </div>
 
 `;

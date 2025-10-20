@@ -7,6 +7,7 @@ var cards_index = [];
 var study_index = [];
 var synced_timestamp = 'last sync unknown';
 var is_first_load = true;
+var is_developer_mode = false;
 
 // specify firebase credentials and identifiers
 var firebase_config = {
@@ -74,6 +75,7 @@ async function index_database() {
   decks_index = Object.entries(decks_data).map(([realtime_id, realtime_object]) => ({
     unique_id: realtime_id,
     deck_name: realtime_object.name,
+    toggled: realtime_object.toggled
     // map array labels to realtime database keys
   }));
 
@@ -152,7 +154,7 @@ function install_realtime_listener() {
 
 // fucntion to refresh user interface
 async function refresh() {
-  console.log("data base updated...");
+  console.log("database updated...");
   await index_database();
   await route();
 }
@@ -173,28 +175,6 @@ document.getElementById('btn_delete_deck').addEventListener("click", function() 
 // listen for events on an element and execute code
 document.getElementById('btn_add_card').addEventListener("click", function() {
   add_card_to_database();
-});
-
-// listen for changes to the toggle buttons on the dashboard
-document.getElementById('dynamic_list_decks').addEventListener('change', function(change) {
-  
-  // only react if a checkbox inside the toggle wrapper changed
-  if (!change.target.matches('.deck_snippet_toggle_wrapper input[type="checkbox"]')) return;
-  
-  // find the deck card
-  var deck_ref = change.target.closest('.deck_snippet_wrapper');
-  var deck_id = deck_ref.dataset.id;
-  var is_checked = change.target.checked;
-  
-  // log messages in the console
-  console.log("deck toggled:", deck_id, "->", is_checked);
-  
-  if (is_checked) {
-  if (!study_index.includes(deck_id)) { study_index.push(deck_id); }
-} else {
-  study_index = study_index.filter(id => id !== deck_id);
-}
-
 });
 
 // listener to pushes changes to deck names to realtime database
@@ -236,43 +216,92 @@ document.getElementById('deck_title').addEventListener('dblclick', event => {
 
 });
 
-// listen for click events on card delete buttons
+// listen for click events on deck items
+document.getElementById('dynamic_list_decks').addEventListener('click', function(event) {
+  
+  // Find the clicked control, even if an icon or span inside the button was clicked
+  var target = event.target.closest('[data-action]');
+
+  // guard agianst null clicks
+  if (!target) return;
+
+  var clicked_item = event.target.closest('.deck_snippet_wrapper'); // find the parent container of the clicked item
+  var unique_id = clicked_item.dataset.id; // store the unique id of the parent container
+  var action = target.dataset.action; // determine the correct action
+
+  if (action === "toggle_deck") {toggle_deck(unique_id, target)}
+
+});
+
+function toggle_deck(unique_id, target) {
+  console.log('deck toggled: ' + target.checked + ' (' + unique_id + ')');
+  edit_deck_toggled_status(unique_id, target.checked);
+}
+
+// listen for click events on card items
 document.getElementById('dynamic_list_cards').addEventListener('click', function(event) {
   
-  // find the parent container of the clicked item
-  var clicked_item = event.target.closest('.card_snippet_wrapper');
+  // Find the clicked control, even if an icon or span inside the button was clicked
+  var target = event.target.closest('[data-action]');
 
-  // check if the click was on (or inside) an element
-  if (event.target.closest('.button_secondary_ghost')) {
-    delete_card(clicked_item.dataset.id)
-  }
+  // guard agianst null clicks
+  if (!target) return;
+
+  var clicked_item = event.target.closest('.card_snippet_wrapper'); // find the parent container of the clicked item
+  var unique_id = clicked_item.dataset.id; // store the unique id of the parent container
+  var action = target.dataset.action; // determine the correct action
+
+  if (action === "edit_question") {edit_question(unique_id, target)}
+  if (action === "edit_answer") {edit_answer(unique_id, target)}
+  if (action === "delete_card") {delete_card(unique_id)}
 
 });
 
-// listen for defocus events on card questions and answers
-document.getElementById('dynamic_list_cards').addEventListener('focusout', function(event) {
+function edit_question(unique_id, target) {
   
-  // find the parent container of the clicked item
-  var clicked_item = event.target.closest('.card_snippet_wrapper');
-
-  // check if the click was on (or inside) an element
-  if (event.target.classList.contains('card_snippet_question')) {
-    console.log('element B lost focus');
-    var question_to_modify = clicked_item.querySelector('.card_snippet_question');
-    var answer_to_modify = clicked_item.querySelector('.card_snippet_answer');
-    var card_unique_id = clicked_item.dataset.id;
-    edit_card_in_database(question_to_modify.innerText, answer_to_modify.innerText, card_unique_id);
+  // log messages in the console
+  console.log("Question was clicked: " + unique_id);
+  
+  // set styles
+  target.style.background = '#54555D';
+  
+  // listen for offfocus
+  target.addEventListener('blur', on_blur);
+  
+  // on de-focus
+  function on_blur(event) {
+    target.removeEventListener('blur', on_blur);
+    target.style.removeProperty("background");
+    edit_question_in_database(target.innerText, unique_id);
+    console.log("Question was edited: " + target.innerText);
   }
 
-  // check if the click was on (or inside) an element
-  if (event.target.classList.contains('card_snippet_answer')) {
-    console.log('element C lost focus');
-    var question_to_modify = clicked_item.querySelector('.card_snippet_question');
-    var answer_to_modify = clicked_item.querySelector('.card_snippet_answer');
-    var card_unique_id = clicked_item.dataset.id;
-    edit_card_in_database(question_to_modify.innerText, answer_to_modify.innerText, card_unique_id);
+}
+
+function edit_answer(unique_id, target) {
+  // log messages in the console
+  console.log("Answer was clicked: " + unique_id);
+  
+  // set styles
+  target.style.background = "#54555D";
+  
+  // listen for offfocus
+  target.addEventListener('blur', on_blur);
+  
+  // on de-focus
+  function on_blur(event) {
+    target.removeEventListener('blur', on_blur);
+    target.style.removeProperty("background");
+    edit_answer_in_database(target.innerText, unique_id);
+    console.log("Answer was edited: " + target.innerText);
   }
-});
+
+}
+
+function delete_card(unique_id) {
+  console.log('delete card: ' + unique_id);
+  delete_card(unique_id);
+}
 
 // ---------------------------------------------------------
 // RENDER FUNCTIONS 
@@ -303,7 +332,7 @@ function render_dashboard() {
 
   document.getElementById('scene_sync_date').innerText = 'synced ' + synced_timestamp;
 
-  decks_index.forEach (function (list_item) {study_index.push(list_item.unique_id);});
+  //decks_index.forEach (function (list_item) {study_index.push(list_item.unique_id);});
 
   // select the element to render inside
   var dynamic_list_decks = document.getElementById('dynamic_list_decks');
@@ -328,6 +357,8 @@ function render_dashboard() {
       snippet.setAttribute('data-id', list_item.unique_id); // set id
       snippet.querySelector(".deck_snippet_name").textContent = list_item.deck_name; // set deck name
       snippet.querySelector(".deck_snippet_count").textContent = cards_index.filter(item => item.deck.includes(list_item.unique_id)).length + ' cards'; // set count
+      if (list_item.toggled === true) { snippet.querySelector('input[type="checkbox"]').checked = true;  }
+      else if (list_item.toggled === false) { snippet.querySelector('input[type="checkbox"]').checked = false;  }
     }
   );
 }
@@ -362,9 +393,8 @@ function render_deck_scene(deck_id_to_render) {
 
         // fill its fields
         snippet.setAttribute('data-id', list_item.unique_id); // set id
-        snippet.querySelector(".button_secondary_ghost").setAttribute('data-id', list_item.unique_id); // set id
         snippet.querySelector(".card_snippet_question").innerText = list_item.question; // set question
-        snippet.querySelector(".card_snippet_answer").innerText = list_item.answer; // // set question
+        snippet.querySelector(".card_snippet_answer").innerText = list_item.answer; // // set answer
       }
     );
 }
@@ -392,7 +422,8 @@ function add_deck_to_database() {
 
   // push a new item (firebase will give it a unique ID)
   item_ref.push({
-    name: deck_name
+    name: deck_name,
+    toggled: true
   });
 
   // show messages in the console
@@ -411,6 +442,20 @@ function edit_deck_in_database(deck_name, unique_id) {
   });
 
   console.log('deck updated:', deck_name, unique_id);
+}
+
+  // function to edit an item into the database
+function edit_deck_toggled_status(unique_id, toggle_status) {
+  
+  // point to the specific item using its id
+  var item_ref = realtime_database.ref('decks/' + unique_id);
+
+  // update only the provided fields
+  item_ref.update({
+    toggled: toggle_status
+  });
+
+  console.log('deck updated:', unique_id, toggle_status);
 }
 
 // function to delete a deck from the Realtime Database by its unique ID
@@ -450,6 +495,36 @@ function add_card_to_database() {
 }
 
 // function to edit an item into the database
+function edit_question_in_database(question, unique_id) {
+  
+  // point to the specific item using its id
+  var item_ref = realtime_database.ref('cards/' + unique_id);
+
+  // update only the provided fields
+  item_ref.update({
+    question: question
+  });
+
+  // show messages in the console
+  console.log('card updated:', question, unique_id);
+}
+
+// function to edit an item into the database
+function edit_answer_in_database(answer, unique_id) {
+  
+  // point to the specific item using its id
+  var item_ref = realtime_database.ref('cards/' + unique_id);
+
+  // update only the provided fields
+  item_ref.update({
+    answer: answer
+  });
+
+  // show messages in the console
+  console.log('card updated:', answer, unique_id);
+}
+
+// function to edit an item into the database
 function edit_card_in_database(question, answer, unique_id) {
   
   // point to the specific item using its id
@@ -479,6 +554,19 @@ function delete_card(item_to_delete) {
 // ---------------------------------------------------------
 // HELPERS
 // ---------------------------------------------------------
+
+function toggle_developer_mode() {
+  if (is_developer_mode === false) {
+    console.log("enabling developer mode");
+    document.getElementById('developer_menu').style.display = "block";
+    is_developer_mode = true;
+  }
+  else if (is_developer_mode === true) {
+    console.log("disabling developer mode");
+    document.getElementById('developer_menu').style.display = "none";
+    is_developer_mode = false;
+  }
+}
 
 // Function to fetch the current timestamp
 function get_timestamp() {

@@ -44,17 +44,12 @@ if ("serviceWorker" in navigator) {
 <!-- global tint -->
 <div id="tint"></div>
 
-<!-- developer menu -->
-<button class="is_developer_mode" onclick="console.log(decks_index)">log decks_index</button>
-<button class="is_developer_mode" onclick="console.log(cards_index)">log cards_index</button>
-<button class="is_developer_mode" onclick="console.log(study_index)">log study_index</button>
-
 <!-- scene: decks  -->
 <div class="scene" id="#/dashboard">
 
     <!-- header  -->
     <div class="header_primary">
-        <div class="header_primary_title">languish</div>
+        <div onclick="toggle_developer_mode()" class="header_primary_title">languish</div>
     </div> 
 
     <div class="content">
@@ -99,8 +94,16 @@ if ("serviceWorker" in navigator) {
         <a href="#/study" class="button_primary" id="btn_practice_all">
             <div class="button_primary_label">Practice</div>
         </a>
+
+        <!-- developer menu -->
+        <div id="developer_menu">
+            <button onclick="console.log(decks_index)">log decks_index</button>
+            <button onclick="console.log(cards_index)">log cards_index</button>
+            <button onclick="console.log(study_index)">log study_index</button>
+        </div>
+
     </div>
-    
+
     <!-- dynamic list: decks -->
     <div class="decks_wrapper">
         <div class="deck_list_title">Decks</div>
