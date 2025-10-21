@@ -75,8 +75,8 @@ async function index_database() {
   decks_index = Object.entries(decks_data).map(([realtime_id, realtime_object]) => ({
     unique_id: realtime_id,
     deck_name: realtime_object.name,
+    order: realtime_object.order,
     toggled: realtime_object.toggled
-    // map array labels to realtime database keys
   }));
 
   // build decks array (array_label: realtime_db_key)
@@ -87,7 +87,6 @@ async function index_database() {
     answer: realtime_object.answer,
     score: realtime_object.score,
     last_reviewed: realtime_object.last_reviewed
-    // map array labels to realtime database keys
   }));
 
   // update global synced timestamp
@@ -300,7 +299,7 @@ function edit_answer(unique_id, target) {
 
 function delete_card(unique_id) {
   console.log('delete card: ' + unique_id);
-  delete_card(unique_id);
+  delete_card_from_database(unique_id);
 }
 
 // ---------------------------------------------------------
@@ -332,19 +331,19 @@ function render_dashboard() {
 
   document.getElementById('scene_sync_date').innerText = 'synced ' + synced_timestamp;
 
-  //decks_index.forEach (function (list_item) {study_index.push(list_item.unique_id);});
-
   // select the element to render inside
   var dynamic_list_decks = document.getElementById('dynamic_list_decks');
 
   // ensure the element has an innerhtml property
   dynamic_list_decks.innerHTML = null;
 
+  var decks_index_temp = Array.from(decks_index);
+
+  // sort the array before looping through
+  decks_index_temp.sort((item_1, item_2) => item_1.order - item_2.order);
+
   // specify array to loop through and perform actions
-  decks_index.forEach (
-      
-    // specify the actions to perform on each list item
-    function (list_item) {
+  decks_index_temp.forEach (function (list_item) {
 
       // insert html template
       dynamic_list_decks.insertAdjacentHTML("beforeend", deck_snippet);
@@ -423,6 +422,7 @@ function add_deck_to_database() {
   // push a new item (firebase will give it a unique ID)
   item_ref.push({
     name: deck_name,
+    order: 999,
     toggled: true
   });
 
@@ -444,7 +444,7 @@ function edit_deck_in_database(deck_name, unique_id) {
   console.log('deck updated:', deck_name, unique_id);
 }
 
-  // function to edit an item into the database
+// function to edit an item into the database
 function edit_deck_toggled_status(unique_id, toggle_status) {
   
   // point to the specific item using its id
@@ -456,6 +456,20 @@ function edit_deck_toggled_status(unique_id, toggle_status) {
   });
 
   console.log('deck updated:', unique_id, toggle_status);
+}
+
+// function to edit an item into the database
+function edit_deck_order_in_database(unique_id, order) {
+  
+  // point to the specific item using its id
+  var item_ref = realtime_database.ref('decks/' + unique_id);
+
+  // update only the provided fields
+  item_ref.update({
+    order: order
+  });
+
+  console.log('deck updated:', unique_id, order);
 }
 
 // function to delete a deck from the Realtime Database by its unique ID
@@ -470,7 +484,7 @@ function delete_deck(item_to_delete) {
   var cards_to_delete = cards_index.filter(item => item.deck.includes(item_to_delete));
 
   cards_to_delete.forEach(function(item) {
-    delete_card(item.unique_id)
+    delete_card_from_database(item.unique_id)
   });
 
 }
@@ -541,7 +555,7 @@ function edit_card_in_database(question, answer, unique_id) {
 }
 
 // function to delete a card from the Realtime Database by its unique ID
-function delete_card(item_to_delete) {
+function delete_card_from_database(item_to_delete) {
 
   //build a reference to the specific card you want to delete
   var card_ref = realtime_database.ref('cards/' + item_to_delete);
@@ -554,6 +568,11 @@ function delete_card(item_to_delete) {
 // ---------------------------------------------------------
 // HELPERS
 // ---------------------------------------------------------
+
+function debug() {
+  console.log('debugging');
+  console.log(decks_index);
+}
 
 function toggle_developer_mode() {
   if (is_developer_mode === false) {
@@ -609,39 +628,27 @@ function speakGerman(text_to_speak) {
 
 function generate_default_deck_name() {
   var strings = [
-    "strawberries are not berries",
+    "strawberries aren't berries",
     "Sharks existed before trees",
-    "Sloths hold breath longer than dolphins",
     "Honey never spoils",
     "Octopuses have three hearts",
     "Wombat poo is cube-shaped",
     "Space smells like burnt steak",
     "Penguins propose with pebbles",
-    "A day on Venus is longer than a year",
-    "The Eiffel Tower grows in summer",
     "Bananas are berries",
     "Tomatoes are fruits",
     "Koalas have fingerprints",
-    "Sharks don't get bone cancer",
-    "Butterflies taste with their feet",
     "Cows have best friends",
-    "Ostriches run faster than horses",
-    "A group of flamingos is flamboyance",
     "Crows remember human faces",
     "Goldfish have 3 month memory",
-    "Sea otters hold hands to sleep",
-    "Stomach gets new lining weekly",
+    "Otters hold hands while sleeping",
     "Pineapples take 2 years to grow",
-    "More stars than sand grains",
     "Jellyfish are 95% water",
-    "Turtles breathe through their butts",
+    "Turtles breathe with their butts",
     "Sharks have lived 400m years",
     "Pigeons can do maths",
     "Ants never sleep",
-    "Blue whale tongue weighs a car",
-    "Cats can’t taste sweetness",
-    "Earth’s core is hot as the sun",
-    "Butterflies remember caterpillars",
+    "Cats can't taste sweetness",
     "Cucumbers are 95% water",
     "Snails can sleep for 3 years",
     "The moon causes tides",
@@ -650,14 +657,31 @@ function generate_default_deck_name() {
     "Giraffes have 7 neck bones",
     "Sharks have no bones",
     "Apples float in water",
-    "The dot on an i is a tittle",
     "Carrots were once purple",
     "Bees can recognise faces",
     "Oysters can change gender",
-    "Clouds can weigh millions",
-    "Some turtles live for 150 years",
     "Banana plants are herbs",
-    "An owls head rotates 270 degrees"
+    "Camels have three eyelids",
+    "Sloths can hold their breath",
+    "Dolphins have individual names",
+    "Polar bears have black skin",
+    "Flamingos aren't born pink",
+    "Starfish have no brains",
+    "Zebras can't be domesticated",
+    "Avocados are toxic to birds",
+    "Lobsters don't age biologically",
+    "Goats have rectangular pupils",
+    "Platypuses glow under blacklight",
+    "Hippos secrete pink sunscreen",
+    "Slugs have four noses",
+    "Rabbits can't vomit",
+    "Venus is hotter than Mercury",
+    "Glass is actually a liquid",
+    "Grapes explode in microwaves",
+    "Saturn would float in water",
+    "Your nose never stops growing",
+    "Humans share 50% DNA with bananas",
+    "An owl's head rotates 270 degrees"
   ];
   
   const randomIndex = Math.floor(Math.random() * strings.length);
@@ -711,4 +735,178 @@ function build_study_index() {
       study_index.push(list_item.unique_id);
     }
   );
+}
+
+// ---------------------------------------------------------
+// DRAG & DROP
+// ---------------------------------------------------------
+
+// This variable will store the item being dragged
+var dragged_item = null;
+var dragged_over_item = null;
+
+
+// fires when you start dragging
+document.getElementById('dynamic_list_decks').addEventListener('dragstart', function(drag_event) {
+	
+	// determine the target of the drag
+	dragged_item = drag_event.target.closest('.deck_snippet_wrapper');
+	
+	// add a class to the dragged item
+	dragged_item.classList.add('dragging');
+
+	// log messages in the console
+	console.log('dragstart');
+
+});
+
+
+// fires when you stop dragging
+document.getElementById('dynamic_list_decks').addEventListener('dragend', function(drag_event) {
+
+	// add a class to the dragged item
+	dragged_item.classList.remove('dragging');
+
+	// dragged_over_item.classList.remove('drop-above', 'drop-below');
+
+	// log messages in the console
+	console.log('dragend');
+
+});
+
+//  fires when you drag over an item
+document.getElementById('dynamic_list_decks').addEventListener('dragover', function(drag_event) {
+	
+	// Prevent default behavior
+	drag_event.preventDefault();
+
+	// determine the target of the drag
+	dragged_over_item = drag_event.target.closest('.deck_snippet_wrapper');
+
+	// Calculate if mouse is in top half or bottom half of the item
+	var rect = dragged_over_item.getBoundingClientRect();
+	var mouseY = drag_event.clientY;
+	var itemMiddle = rect.top + (rect.height / 2);
+
+	// Remove old classes from all items first
+	var allItems = document.querySelectorAll('.deck_snippet_wrapper');
+	allItems.forEach(function(item) {
+		item.classList.remove('drop-above', 'drop-below');
+	});
+
+	// Don't do anything if dragging over itself or if target is null
+	if (!dragged_over_item || dragged_over_item === dragged_item) return;
+
+	// Add appropriate class based on mouse position
+	if (mouseY < itemMiddle) {
+		// Mouse is in top half - will drop ABOVE this item
+		dragged_over_item.classList.add('drop-above');
+	} else {
+		// Mouse is in bottom half - will drop BELOW this item
+		dragged_over_item.classList.add('drop-below');
+	}
+
+	// log messages in the console
+	// console.log('dragover');
+
+});
+
+// // fires when you drag off an item
+// document.getElementById('dynamic_list_decks').addEventListener('dragleave', function(drag_event) {
+	
+// 	// determine the target of the drag
+// 	var dragged_over_item = drag_event.target.closest('.deck_snippet_wrapper');
+
+// 	// Don't do anything if dragging off itself or if target is null
+// 	if (!dragged_over_item || dragged_over_item === dragged_item) return;
+
+// 	// Find the element now under the cursor
+//     const toElement = document.elementFromPoint(drag_event.clientX, drag_event.clientY);
+
+//     if (toElement && dragged_over_item.contains(toElement)) {
+//         // Still inside the same wrapper, ignore
+//         return;
+//     }
+
+// 	// log messages in the console
+// 	console.log('dragleave');
+
+// });
+
+// fires when you release the mouse to drop
+document.getElementById('dynamic_list_decks').addEventListener('drop', function(drag_event) {
+	
+	// Prevent default behavior
+	drag_event.preventDefault();
+
+	// determine the target of the drop
+	var dropped_over_item = drag_event.target.closest('.deck_snippet_wrapper');
+
+	// // remove a class from the dropped item
+	 dropped_over_item.classList.remove('drop-above', 'drop-below');
+
+	// Don't do anything if dropping over itself or if target is null
+	if (!dropped_over_item || dropped_over_item === dragged_item) return;
+
+	// function to run on drop
+	render_new_order(dropped_over_item, drag_event);
+	collect_new_order();
+
+	// log messages in the console
+	console.log('drop');
+
+});
+
+// helper function to reorder the items
+function render_new_order(dropped_over_item, drag_event) {
+	
+	// Calculate if we should insert above or below
+	var rect = dropped_over_item.getBoundingClientRect();
+	var mouseY = drag_event.clientY;
+	var itemMiddle = rect.top + (rect.height / 2);
+	var insertAbove = mouseY < itemMiddle;
+	
+	if (insertAbove) {
+		// Insert before the target
+		dropped_over_item.parentNode.insertBefore(dragged_item, dropped_over_item);
+	} else {
+		// Insert after the target
+		dropped_over_item.parentNode.insertBefore(dragged_item, dropped_over_item.nextSibling);
+	}
+	
+}
+
+// Function to collect the new order and send to database
+function collect_new_order() {
+  
+	// find the parent element that contains all the items
+	var dynamic_list_decks = document.getElementById('dynamic_list_decks');
+	  
+	// get all child items inside that parent (only those with the given class)
+	var deck_snippet_wrapper = dynamic_list_decks.querySelectorAll('.deck_snippet_wrapper');
+  
+	// create an empty array to hold the results
+	var orderWithPositions = [];
+  
+	// loop through each item and add an object with {id, position}
+	deck_snippet_wrapper.forEach(function(item, index) {
+		var id = item.getAttribute('data-id');
+		orderWithPositions.push({
+			id: id,
+			position: index
+		});
+	});
+
+	// loop through each item and add an object with {id, position}
+	orderWithPositions.forEach(function(item) {
+		console.log('Updating Deck: ' + item.id + ' at position ' + item.position);
+    
+    // test code to update the positions in the database
+    edit_deck_order_in_database(item.id, item.position);
+
+	});
+	
+	// 5. Print the result to the console
+	console.log('Order with positions:', orderWithPositions);
+
 }

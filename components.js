@@ -1,7 +1,7 @@
 // reusable HTML snippet
 var deck_snippet = `
 
-<div class="deck_snippet_wrapper">
+<div class="deck_snippet_wrapper" data-id="$unique_id" draggable="true">
   <label class="deck_snippet_toggle_wrapper">
     <input data-action="toggle_deck" type="checkbox" checked="checked">
     <span class="deck_snippet_custom_checkbox_off"><i class="ph-fill ph-circle"></i></span>

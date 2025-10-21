@@ -100,6 +100,7 @@ if ("serviceWorker" in navigator) {
             <button onclick="console.log(decks_index)">log decks_index</button>
             <button onclick="console.log(cards_index)">log cards_index</button>
             <button onclick="console.log(study_index)">log study_index</button>
+            <button onclick="debug()">debug</button>
         </div>
 
     </div>
@@ -116,12 +117,8 @@ if ("serviceWorker" in navigator) {
     </div>
     
     <!-- fixed actions -->
-    <div class="fixed_layer">
-        <div class="floating_bar_wrapper">
-            <div class="floating_action_button" id="btn_add_deck">
-                <div class="floating_action_button_icon"><i class="ph-bold ph-plus"></i></div>
-            </div>
-        </div>
+    <div class="floating_action_button" id="btn_add_deck">
+        <div class="floating_action_button_icon"><i class="ph-bold ph-plus"></i></div>
     </div>
 
     </div>
@@ -140,30 +137,25 @@ if ("serviceWorker" in navigator) {
     </div>
 
     <div class="content">
-
-    <div class="primary_section">
-        <a href="#/study" class="button_primary">
-            <div class="button_primary_label">Practice</div>
-        </a>
-        <div class="deck_status_wrapper">
-            <div class="deck_status_label" id="deck_status">$deck_status</div>
-        </div>
-    </div>
-
-    <!-- dynamic list: cards -->
-    <div class="dynamic_list_cards" id="dynamic_list_cards"></div>
-    
-    <!-- fixed layer -->
-    <div class="fixed_layer">
-        <div class="floating_bar_wrapper">
-            <div class="floating_action_button" id="btn_add_card">
-                <div class="floating_action_button_icon"><i class="ph-bold ph-plus"></i></div>
+        <!-- section -->
+        <div class="primary_section">
+            <a href="#/study" class="button_primary">
+                <div class="button_primary_label">Practice</div>
+            </a>
+            <div class="deck_status_wrapper">
+                <div class="deck_status_label" id="deck_status">$deck_status</div>
             </div>
         </div>
-    </div>
 
+        <!-- dynamic list: cards -->
+        <div class="dynamic_list_cards" id="dynamic_list_cards"></div>
+        
+        <!-- fixed layer -->
+        <div class="floating_action_button" id="btn_add_card">
+            <div class="floating_action_button_icon"><i class="ph-bold ph-plus"></i></div>
+        </div>
     </div>
-
+    
 </div>
 
 <!-- scene: cards  -->
