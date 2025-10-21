@@ -811,28 +811,6 @@ document.getElementById('dynamic_list_decks').addEventListener('dragover', funct
 
 });
 
-// // fires when you drag off an item
-// document.getElementById('dynamic_list_decks').addEventListener('dragleave', function(drag_event) {
-	
-// 	// determine the target of the drag
-// 	var dragged_over_item = drag_event.target.closest('.deck_snippet_wrapper');
-
-// 	// Don't do anything if dragging off itself or if target is null
-// 	if (!dragged_over_item || dragged_over_item === dragged_item) return;
-
-// 	// Find the element now under the cursor
-//     const toElement = document.elementFromPoint(drag_event.clientX, drag_event.clientY);
-
-//     if (toElement && dragged_over_item.contains(toElement)) {
-//         // Still inside the same wrapper, ignore
-//         return;
-//     }
-
-// 	// log messages in the console
-// 	console.log('dragleave');
-
-// });
-
 // fires when you release the mouse to drop
 document.getElementById('dynamic_list_decks').addEventListener('drop', function(drag_event) {
 	
