@@ -31,9 +31,9 @@
   --blue_medium: #3E9DC7;
   --blue_dark: #3A8EB3;
 
-  --yellow_light: #F1CC06;
-  --yellow_medium: #DBBA08;
-  --yellow_dark: #C5A70A;
+  --yellow_light: #F6DA39;
+  --yellow_medium: #E0C736;
+  --yellow_dark: #C9B233;
 
   --orange_light: #EE8343;
   --orange_medium: #D9783F;
@@ -67,7 +67,7 @@ body {
 }
 
 #developer_menu {
-  display: none;
+  display: block;
 }
 
 .content {
@@ -649,15 +649,15 @@ outline: none;
 }
 
 .studycard_snippet {
-  background-color: #38393e;
-  border: 1px solid #46474e;
+  background-color: var(--layer);
+  border: 1px solid var(--stroke);
   border-radius: 9px;
   flex-flow: column;
   flex: 1;
   justify-content: center;
   align-items: center;
   display: flex;
-  box-shadow: inset 0 2px #81b64c;
+  box-shadow: inset 0 2px var(--green_light);
 }
 
 .studycard_question {
@@ -667,7 +667,7 @@ outline: none;
   justify-content: center;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid #46474e;
+  border-bottom: 1px solid var(--stroke);
 }
 
 .studycard_answer {

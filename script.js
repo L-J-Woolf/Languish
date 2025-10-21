@@ -123,7 +123,7 @@ async function route() {
 
   else if (current_hash.includes('#/study')) { 
   console.log('hash includes #/study');
-  render_study_list();
+  render_study_scene();
   load_scene('#/study');
   }
 
@@ -399,10 +399,51 @@ function render_deck_scene(deck_id_to_render) {
 }
 
 // function to render cards list
-function render_study_list() {
+function render_study_scene() {
+  console.log('rendering study scene');
+  build_study_index();
+}
+
+// function to render cards list
+function build_study_index() {
 
   // show messages in the console
-  console.log('rendering study scene');
+  console.log('Building Study Index');
+
+  // Filter decks that are toggled ON
+  var toggled_decks = decks_index.filter(function(item_ref) {
+    return item_ref.toggled === true;
+  });
+
+  console.log('Toggled Decks: ' , toggled_decks);
+
+  // Extract a list of toggled deck IDs
+  var toggled_ids = toggled_decks.map(function(item_ref) {
+    return item_ref.unique_id;
+  });
+
+  console.log('Toggled Ids: ' , toggled_ids);
+
+  // Filter cards that belong to any toggled deck
+  var cards_from_toggled_decks = cards_index.filter(function(item_ref) {
+    // Check if this card's "decks" value matches one of the toggled deck IDs
+    return toggled_ids.includes(item_ref.deck);
+  });
+
+  // Sort the cards by score (lowest first), then by last_reviewed (oldest first)
+  cards_from_toggled_decks.sort(function(item_ref_a, item_ref_b) {
+    if (item_ref_a.score !== item_ref_b.score) {
+      return item_ref_a.score - item_ref_b.score; // sort by score first
+    }
+
+    // if scores are equal, sort by date
+    var dateA = new Date(item_ref_a.last_reviewed);
+    var dateB = new Date(item_ref_b.last_reviewed);
+    return dateA - dateB; // earlier date first
+  });
+
+  // log study candidates
+  console.log('Cards Selected & Ordered: ', cards_from_toggled_decks);
 
 }
 
@@ -570,8 +611,9 @@ function delete_card_from_database(item_to_delete) {
 // ---------------------------------------------------------
 
 function debug() {
-  console.log('debugging');
-  console.log(decks_index);
+  //console.log('debugging');
+  //console.log(decks_index);
+  build_study_index();
 }
 
 function toggle_developer_mode() {
@@ -722,19 +764,6 @@ function get_unique_id_from_hash() {
   var current_hash_id = parts[parts.length - 1];
 
   return current_hash_id;
-}
-
-function build_study_index() {
-  
-  // specify array to loop through and perform actions
-  decks_index.forEach (
-      
-    // specify the actions to perform on each list item
-    function (list_item) {
-      console.log(list_item.unique_id);
-      study_index.push(list_item.unique_id);
-    }
-  );
 }
 
 // ---------------------------------------------------------
