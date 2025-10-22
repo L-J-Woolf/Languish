@@ -26,7 +26,14 @@ var card_snippet = `
 <div class="card_snippet_wrapper" data-id="$unique_id">
   <div class="card_snippet_header">
     <div class="card_snippet_label">Card</div>
-    <div class="button_secondary_ghost" data-action="delete_card"><i class="ph-bold ph-trash-simple"></i></div>
+    <div class="dropdown_wrapper">  
+            <div class="dropdown_button" tabindex="0"><i class="ph-bold ph-dots-three"></i></div>
+            <div class="dropdown_menu">
+                <a tabindex="0" class="dropdown_item">Study</a>
+                <a tabindex="0" class="dropdown_item">Edit</a>
+                <a tabindex="0" class="dropdown_item" data-action="delete_card">Delete</a>
+            </div>
+        </div>
   </div>
   <div class="card_snippet_question" data-action="edit_question" data-placeholder="Question..." contenteditable="true"></div>
   <div class="card_snippet_answer" data-action="edit_answer" data-placeholder="Answer..." contenteditable="true"></div>

@@ -236,6 +236,73 @@ padding: 0 12px;
   background-color: var(--highlight);
 }
 
+.dropdown_wrapper {
+  position: relative;
+  display: flex;
+  flex-flow: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+}
+
+.dropdown_button {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  background-color: var(--stroke);
+  border: 1px solid var(--highlight);
+  border-radius: 9px;
+}
+
+.dropdown_button:hover {
+  background-color: var(--pressed);
+}
+
+.dropdown_button:active {
+  background-color: var(--highlight);
+}
+
+.dropdown_wrapper:focus-within .dropdown_menu {
+  display: flex;
+}
+
+.dropdown_menu {
+  position: absolute;
+  display: none;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  background-color: var(--stroke);
+  border: 1px solid var(--highlight);
+  border-radius: 9px;
+  top: 42px;
+  overflow: hidden;
+}
+
+.dropdown_item {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 120px;
+  height: 42px;
+  padding-left: 18px;
+  padding-right: 18px;
+  background-color: var(--stroke);
+  color: var(--white);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.dropdown_item:hover {
+  background-color: var(--pressed);
+}
+
+.dropdown_item:active {
+  background-color: var(--highlight);
+}
+
 /* deck styles */
 
 .decks_wrapper {
@@ -429,8 +496,8 @@ padding: 0 12px;
 
 .card_snippet_wrapper {
   border-radius: 9px;
-  border-top: 3px solid var(--green_light);
-  overflow: hidden;
+  /* border-top: 3px solid var(--green_light); */
+  /* overflow: hidden; */
 }
 
 .card_snippet_header {
@@ -438,9 +505,11 @@ padding: 0 12px;
   justify-content: space-between;
   align-items: center;
   gap: 3px;
-  height: 36px;
-  padding: 6px 18px 6px 18px;
+  height: 54px;
+  padding-left: 18px;
+  padding-right: 9px;
   background: var(--stroke);
+  border-radius: 9px 9px 0 0;
 }
 
 .card_snippet_label {
@@ -461,12 +530,13 @@ padding: 0 12px;
 .card_snippet_answer {
   padding: 18px;
   background-color: var(--layer);
-  border-top: 1px solid var(--stroke);
+  border: 1px solid var(--stroke);
   border-right: 1px solid var(--stroke);
   border-bottom: 1px solid var(--stroke);
   border-left: 1px solid var(--stroke);
   font-size: 15px;
   color: var(--white-75);
+  border-radius: 0 0 9px 9px;
 }
 
 .card_snippet_question:empty::before,

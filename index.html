@@ -134,7 +134,14 @@ if ("serviceWorker" in navigator) {
     <div class="secondary_header_wrapper">
         <a class="button_secondary_solid" href="#/dashboard"><i class="ph-bold ph-arrow-left"></i></a>
         <div class="secondary_header_title" id="deck_title">$title</div>
-        <a class="button_secondary_outline" id="btn_delete_deck" href="#/dashboard"><i class="ph-bold ph-trash"></i></a>
+        <div class="dropdown_wrapper">  
+            <div class="dropdown_button" tabindex="0"><i class="ph-bold ph-dots-three"></i></div>
+            <div class="dropdown_menu">
+                <a tabindex="0" class="dropdown_item">Study</a>
+                <a tabindex="0" class="dropdown_item">Edit</a>
+                <a tabindex="0" class="dropdown_item" id="btn_delete_deck" href="#/dashboard">Delete</a>
+            </div>
+        </div>
     </div>
 
     <div class="content">
@@ -166,7 +173,14 @@ if ("serviceWorker" in navigator) {
     <div class="secondary_header_wrapper">
         <a class="button_secondary_solid" href="#/dashboard"><i class="ph-bold ph-arrow-left"></i></a>
         <div class="secondary_header_title">$tracker</div>
-        <a class="button_secondary_outline"><i class="ph-bold ph-dots-three"></i></a>
+        <div class="dropdown_wrapper">  
+            <div class="dropdown_button" tabindex="0"><i class="ph-bold ph-dots-three"></i></div>
+            <div class="dropdown_menu">
+                <a tabindex="0" class="dropdown_item" href="">Study</a>
+                <a tabindex="0" class="dropdown_item" href="">Edit</a>
+                <a tabindex="0" class="dropdown_item" href="">Delete</a>
+            </div>
+        </div>
     </div>
 
     <div class="study_content_wrapper">
