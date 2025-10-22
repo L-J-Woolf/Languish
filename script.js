@@ -123,7 +123,7 @@ async function route() {
 
   else if (current_hash.includes('#/study')) { 
   console.log('hash includes #/study');
-  render_study_scene();
+  render_study_scene(current_hash_id);
   load_scene('#/study');
   }
 
@@ -232,6 +232,7 @@ document.getElementById('dynamic_list_decks').addEventListener('click', function
 
 });
 
+// listener for toggling decks on and off
 function toggle_deck(unique_id, target) {
   console.log('deck toggled: ' + target.checked + ' (' + unique_id + ')');
   edit_deck_toggled_status(unique_id, target.checked);
@@ -252,10 +253,12 @@ document.getElementById('dynamic_list_cards').addEventListener('click', function
 
   if (action === "edit_question") {edit_question(unique_id, target)}
   if (action === "edit_answer") {edit_answer(unique_id, target)}
+  if (action === "study_card") {study_card(unique_id)}
   if (action === "delete_card") {delete_card(unique_id)}
 
 });
 
+// listen for click events on cards questions
 function edit_question(unique_id, target) {
   
   // log messages in the console
@@ -277,6 +280,7 @@ function edit_question(unique_id, target) {
 
 }
 
+// listen for click events on cards answers
 function edit_answer(unique_id, target) {
   // log messages in the console
   console.log("Answer was clicked: " + unique_id);
@@ -297,10 +301,67 @@ function edit_answer(unique_id, target) {
 
 }
 
+// listen for clicks on the study card button
+function study_card(unique_id) {
+  console.log('studying card: ' + unique_id);
+  //Set the hash
+  location.hash = '#/study/card/' + unique_id;
+}
+
+// listen for clicks on the delete card button
 function delete_card(unique_id) {
   console.log('delete card: ' + unique_id);
   delete_card_from_database(unique_id);
 }
+
+// listen for events on an element and execute code
+document.getElementById('btn_reveal').addEventListener("click", function() {
+  console.log("revealing card");
+  document.getElementById('btn_reveal').style.display = "none";
+  document.getElementById('btn_rate').style.display = "flex";
+  document.getElementById('studycard_answer').style.display = "flex";
+  document.getElementById('studycard_instructions').textContent = "How well did you know this?";
+});
+
+// listen for events on an element and execute code
+document.getElementById('btn_rate').addEventListener('click', function(event) {
+
+  document.getElementById('btn_reveal').style.display = "block";
+  document.getElementById('btn_rate').style.display = "none";
+  document.getElementById('studycard_answer').style.display = "none";
+  document.getElementById('studycard_instructions').textContent = "Reveal answer";
+
+  // Find the clicked control, even if an icon or span inside the button was clicked
+  var target = event.target.closest('[data-action]');
+  
+  // guard agianst null clicks
+  if (!target) return;
+  
+  // determine the correct action
+  var action = target.dataset.action;
+
+  if (action === "rate_card_1") {
+    console.log("Card Rated: Red");
+    edit_card_score_in_database(get_unique_id_from_hash(), 1);
+  }
+  if (action === "rate_card_2") {
+    console.log("Card Rated: Orange");
+    edit_card_score_in_database(get_unique_id_from_hash(), 2);
+  }
+  if (action === "rate_card_3") {
+    console.log("Card Rated: Yellow");
+    edit_card_score_in_database(get_unique_id_from_hash(), 3);
+  }
+  if (action === "rate_card_4") {
+    console.log("Card Rated: Green");
+    edit_card_score_in_database(get_unique_id_from_hash(), 4);
+  }
+  if (action === "rate_card_5") {
+    console.log("Card Rated: Blue");
+    edit_card_score_in_database(get_unique_id_from_hash(), 5);
+  }
+
+});
 
 // ---------------------------------------------------------
 // RENDER FUNCTIONS 
@@ -399,9 +460,26 @@ function render_deck_scene(deck_id_to_render) {
 }
 
 // function to render cards list
-function render_study_scene() {
-  console.log('rendering study scene');
-  build_study_index();
+function render_study_scene(card_id_to_render) {
+
+  // show messages in the console
+  console.log('rendering study scene for: ' + card_id_to_render);
+
+  // reset scene
+  // document.getElementById('btn_reveal').style.display = "block";
+  // document.getElementById('btn_rate').style.display = "none";
+  // document.getElementById('studycard_answer').style.display = "none";
+  // document.getElementById('studycard_instructions').textContent = "Reveal answer";
+
+  var title = document.getElementById('study_scene_title');
+  var question = document.getElementById('studycard_question_content');
+  var answer = document.getElementById('studycard_answer_content');
+  var card = cards_index.find(item => item.unique_id === card_id_to_render);
+
+  title.textContent = "hello";
+  question.textContent = card.question;
+  answer.textContent = card.answer;
+
 }
 
 // function to render cards list
@@ -593,6 +671,22 @@ function edit_card_in_database(question, answer, unique_id) {
 
   // show messages in the console
   console.log('card updated:', question, answer, unique_id);
+}
+
+// function to edit an item into the database
+function edit_card_score_in_database(unique_id, score) {
+  
+  // point to the specific item using its id
+  var item_ref = realtime_database.ref('cards/' + unique_id);
+
+  // update only the provided fields
+  item_ref.update({
+    score: score,
+    last_reviewed: Date.now()
+  });
+
+  // show messages in the console
+  console.log('card updated:', unique_id, score);
 }
 
 // function to delete a card from the Realtime Database by its unique ID

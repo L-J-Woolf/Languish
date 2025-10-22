@@ -29,7 +29,7 @@ var card_snippet = `
     <div class="dropdown_wrapper">  
             <div class="dropdown_button" tabindex="0"><i class="ph-bold ph-dots-three"></i></div>
             <div class="dropdown_menu">
-                <a tabindex="0" class="dropdown_item">Study</a>
+                <a tabindex="0" class="dropdown_item" data-action="study_card">Study</a>
                 <a tabindex="0" class="dropdown_item">Edit</a>
                 <a tabindex="0" class="dropdown_item" data-action="delete_card">Delete</a>
             </div>

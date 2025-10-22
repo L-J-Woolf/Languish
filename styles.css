@@ -742,7 +742,7 @@ outline: none;
 
 .studycard_answer {
   /* display: none !important; */
-  display: flex;
+  display: none;
   flex-flow: column;
   flex: 1;
   justify-content: center;
@@ -769,7 +769,7 @@ outline: none;
 }
 
 .studycard_ratings_wrapper {
-  display: flex;
+  display: none;
   flex-direction: row;
   justify-content: space-between;
   gap: 12px;
