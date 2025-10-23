@@ -372,6 +372,10 @@ document.getElementById('btn_reveal').addEventListener("click", function() {
   document.getElementById('btn_rate').style.display = "flex";
   document.getElementById('studycard_answer').style.display = "flex";
   document.getElementById('studycard_instructions').textContent = "How well did you know this?";
+  
+  var hash_id = get_unique_id_from_hash();
+  var card = cards_index.find(item => item.unique_id === hash_id);
+  speakGerman(card.answer);
 });
 
 // listen for events on an element and execute code
