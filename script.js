@@ -208,6 +208,19 @@ document.getElementById('btn_add_card').addEventListener("click", function() {
   add_card_to_database();
 });
 
+// listen for events on a practice button
+document.getElementById('btn_practice_all').addEventListener("click", function() {
+  console.log("Practing All"); 
+  build_study_index_all();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+});
+
+// listen for events on a practice button
+document.getElementById('btn_practice_deck').addEventListener("click", function() {
+  build_study_index_deck();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+});
+
 // listener to pushes changes to deck names to realtime database
 document.getElementById('deck_title').addEventListener('dblclick', event => {
   
@@ -371,29 +384,86 @@ document.getElementById('btn_rate').addEventListener('click', function(event) {
   
   // determine the correct action
   var action = target.dataset.action;
+  var score = 0;
 
   if (action === "rate_card_1") {
     console.log("Card Rated: Red");
-    edit_card_score_in_database(get_unique_id_from_hash(), 1);
+    score = 1;
+    //edit_card_score_in_database(get_unique_id_from_hash(), 1);
+    //iterate_study_scene();
   }
   if (action === "rate_card_2") {
     console.log("Card Rated: Orange");
-    edit_card_score_in_database(get_unique_id_from_hash(), 2);
+    score = 2;
+    //iterate_study_scene();
+    //edit_card_score_in_database(get_unique_id_from_hash(), 2);
   }
   if (action === "rate_card_3") {
     console.log("Card Rated: Yellow");
-    edit_card_score_in_database(get_unique_id_from_hash(), 3);
+    score = 3;
+    //iterate_study_scene();
+    //edit_card_score_in_database(get_unique_id_from_hash(), 3);
   }
   if (action === "rate_card_4") {
     console.log("Card Rated: Green");
-    edit_card_score_in_database(get_unique_id_from_hash(), 4);
+    score = 4;
+    //iterate_study_scene();
+    //edit_card_score_in_database(get_unique_id_from_hash(), 4);
   }
   if (action === "rate_card_5") {
     console.log("Card Rated: Blue");
-    edit_card_score_in_database(get_unique_id_from_hash(), 5);
+    score = 5;
+    //iterate_study_scene();
+    //edit_card_score_in_database(get_unique_id_from_hash(), 5);
   }
 
+  rate_and_interate(get_unique_id_from_hash(), score);
+
 });
+
+async function rate_and_interate(card_id, score) {
+    await edit_card_score_in_database(card_id, score);
+    await iterate_study_scene();
+  }
+
+async function rate_card(card_id, score) {
+  edit_card_score_in_database(card_id, score);
+}
+
+async function iterate_study_scene() {
+  console.log('Iterating Study Scene');
+
+  var hash = window.location.hash;
+  var match = hash.match(/#\/study\/(\d+)\/[-\w]+/);
+  var iteration = match ? Number(match[1]) : null;
+
+  console.log('Current Iteration: ' + iteration);
+
+  var next_iteration = iteration + 1;
+
+  console.log('Next Iteration: ' + next_iteration);
+
+  if (study_index[next_iteration] === undefined) {
+    console.log('No More Cards');
+    //location.hash = '#/dashboard';
+    location.hash = '#/study/0/' + study_index[0].unique_id;
+  }
+
+  else {location.hash = '#/study/' + next_iteration + '/' + study_index[next_iteration].unique_id;}
+}
+
+function toggle_developer_mode() {
+  if (is_developer_mode === false) {
+    console.log("enabling developer mode");
+    document.getElementById('developer_menu').style.display = "block";
+    is_developer_mode = true;
+  }
+  else if (is_developer_mode === true) {
+    console.log("disabling developer mode");
+    document.getElementById('developer_menu').style.display = "none";
+    is_developer_mode = false;
+  }
+}
 
 // ---------------------------------------------------------
 // RENDER FUNCTIONS 
@@ -511,49 +581,6 @@ function render_study_scene(card_id_to_render) {
   title.textContent = "hello";
   question.textContent = card.question;
   answer.textContent = card.answer;
-
-}
-
-// function to render cards list
-function build_study_index() {
-
-  // show messages in the console
-  console.log('Building Study Index');
-
-  // Filter decks that are toggled ON
-  var toggled_decks = decks_index.filter(function(item_ref) {
-    return item_ref.toggled === true;
-  });
-
-  console.log('Toggled Decks: ' , toggled_decks);
-
-  // Extract a list of toggled deck IDs
-  var toggled_ids = toggled_decks.map(function(item_ref) {
-    return item_ref.unique_id;
-  });
-
-  console.log('Toggled Ids: ' , toggled_ids);
-
-  // Filter cards that belong to any toggled deck
-  var cards_from_toggled_decks = cards_index.filter(function(item_ref) {
-    // Check if this card's "decks" value matches one of the toggled deck IDs
-    return toggled_ids.includes(item_ref.deck);
-  });
-
-  // Sort the cards by score (lowest first), then by last_reviewed (oldest first)
-  cards_from_toggled_decks.sort(function(item_ref_a, item_ref_b) {
-    if (item_ref_a.score !== item_ref_b.score) {
-      return item_ref_a.score - item_ref_b.score; // sort by score first
-    }
-
-    // if scores are equal, sort by date
-    var dateA = new Date(item_ref_a.last_reviewed);
-    var dateB = new Date(item_ref_b.last_reviewed);
-    return dateA - dateB; // earlier date first
-  });
-
-  // log study candidates
-  console.log('Cards Selected & Ordered: ', cards_from_toggled_decks);
 
 }
 
@@ -738,38 +765,20 @@ function delete_card_from_database(item_to_delete) {
 
 function debug() {
   console.log('debugging');
-  //console.log(decks_index);
-  //build_study_index();
-  study_index = [
-    {unique_id: "-ObgNX3PmqnJrjZKp1bH",question: "the cat"},
-    {unique_id: "-ObgWRcMUVjcAjy3X4gP",question: "the bread"},
-    {unique_id: "-Obgap9qLk_YmOSk4LrY",question: "the dog"},
-    {unique_id: "-ObgapP7zMyfLPgYSXDA",question: "hot"},
-    {unique_id: "-ObgoJsdVTYlbeSZLwoL",question: "to run"}
-  ];
+  // console.log(decks_index);
+  // build_study_index();
+  // study_index = [
+  //   {unique_id: "-ObgNX3PmqnJrjZKp1bH",question: "the cat"},
+  //   {unique_id: "-ObgWRcMUVjcAjy3X4gP",question: "the bread"},
+  //   {unique_id: "-Obgap9qLk_YmOSk4LrY",question: "the dog"},
+  //   {unique_id: "-ObgapP7zMyfLPgYSXDA",question: "hot"},
+  //   {unique_id: "-ObgoJsdVTYlbeSZLwoL",question: "to run"}
+  // ];
 
-  console.log(study_index);
+  // console.log(study_index);
 
-  location.hash = '#/study/0/' + study_index[0].unique_id;
+  // location.hash = '#/study/0/' + study_index[0].unique_id;
 
-}
-
-function debug2() {
-  console.log('debugging2');
-
-  var hash = window.location.hash;
-  var match = hash.match(/#\/study\/(\d+)\/[-\w]+/);
-  var iteration = match ? Number(match[1]) : null;
-
-  console.log('Current Iteration: ' + iteration);
-
-  var next_iteration = iteration + 1;
-
-  console.log('Next Iteration: ' + next_iteration);
-
-  if (study_index[next_iteration] === undefined) {console.log('No More Cards');}
-
-  else {location.hash = '#/study/' + next_iteration + '/' + study_index[next_iteration].unique_id;}
 }
 
 function toggle_developer_mode() {
@@ -1071,5 +1080,91 @@ function collect_new_order() {
 	
 	// 5. Print the result to the console
 	console.log('Order with positions:', orderWithPositions);
+
+}
+
+// ---------------------------------------------------------
+// STUDY INDEX FUNCTIONS 
+// ---------------------------------------------------------
+
+// function to render cards list
+function build_study_index_all() {
+
+  // show messages in the console
+  console.log('Building Study Index: All');
+
+  // Filter decks that are toggled ON
+  var toggled_decks = decks_index.filter(function(item_ref) {
+    return item_ref.toggled === true;
+  });
+
+  console.log('Toggled Decks: ' , toggled_decks);
+
+  // Extract a list of toggled deck IDs
+  var toggled_ids = toggled_decks.map(function(item_ref) {
+    return item_ref.unique_id;
+  });
+
+  console.log('Toggled Ids: ' , toggled_ids);
+
+  // Filter cards that belong to any toggled deck
+  var cards_from_toggled_decks = cards_index.filter(function(item_ref) {
+    // Check if this card's "decks" value matches one of the toggled deck IDs
+    return toggled_ids.includes(item_ref.deck);
+  });
+
+  // Sort the cards by score (lowest first), then by last_reviewed (oldest first)
+  cards_from_toggled_decks.sort(function(item_ref_a, item_ref_b) {
+    if (item_ref_a.score !== item_ref_b.score) {
+      return item_ref_a.score - item_ref_b.score; // sort by score first
+    }
+
+    // if scores are equal, sort by date
+    var dateA = new Date(item_ref_a.last_reviewed);
+    var dateB = new Date(item_ref_b.last_reviewed);
+    return dateA - dateB; // earlier date first
+  });
+
+  // log study candidates
+  console.log('Cards Selected & Ordered: ', cards_from_toggled_decks);
+
+  study_index = cards_from_toggled_decks;
+
+  console.log('Study Index: ', study_index);
+
+}
+
+// function to render cards list
+function build_study_index_deck() {
+
+  // show messages in the console
+  console.log('Building Study Index: Deck');
+
+  var deck_id = get_unique_id_from_hash();
+
+  // Filter cards that belong to any toggled deck
+  var candidates = cards_index.filter(function(item_ref) {
+    // Check if this card's "decks" value matches one of the toggled deck IDs
+    return deck_id.includes(item_ref.deck);
+  });
+
+  // Sort the cards by score (lowest first), then by last_reviewed (oldest first)
+  candidates.sort(function(item_ref_a, item_ref_b) {
+    if (item_ref_a.score !== item_ref_b.score) {
+      return item_ref_a.score - item_ref_b.score; // sort by score first
+    }
+
+    // if scores are equal, sort by date
+    var dateA = new Date(item_ref_a.last_reviewed);
+    var dateB = new Date(item_ref_b.last_reviewed);
+    return dateA - dateB; // earlier date first
+  });
+
+  // log study candidates
+  console.log('Cards Selected & Ordered: ', candidates);
+
+  study_index = candidates;
+
+  console.log('Study Index: ', study_index);
 
 }
