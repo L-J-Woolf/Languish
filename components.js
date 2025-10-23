@@ -31,6 +31,7 @@ var card_snippet = `
             <div class="dropdown_menu">
                 <a tabindex="0" class="dropdown_item" data-action="study_card">Study</a>
                 <a tabindex="0" class="dropdown_item">Edit</a>
+                <div tabindex="0" class="dropdown_divider"></div>
                 <a tabindex="0" class="dropdown_item" data-action="delete_card">Delete</a>
             </div>
         </div>

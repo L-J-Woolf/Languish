@@ -254,6 +254,7 @@ padding: 0 12px;
   background-color: var(--stroke);
   border: 1px solid var(--highlight);
   border-radius: 9px;
+  cursor: pointer;
 }
 
 .dropdown_button:hover {
@@ -300,6 +301,13 @@ padding: 0 12px;
 }
 
 .dropdown_item:active {
+  background-color: var(--highlight);
+}
+
+.dropdown_divider {
+  height: 1px;
+  width: 100%;;
+  margin: 6px 0 6px 0;
   background-color: var(--highlight);
 }
 

@@ -101,6 +101,7 @@ if ("serviceWorker" in navigator) {
             <button onclick="console.log(cards_index)">log cards_index</button>
             <button onclick="console.log(study_index)">log study_index</button>
             <button onclick="build_study_index()">build_study_index</button>
+            <button onclick="toggle_all()">toggle_all</button>
             <button onclick="debug()">debug</button>
         </div>
 
@@ -139,6 +140,7 @@ if ("serviceWorker" in navigator) {
             <div class="dropdown_menu">
                 <a tabindex="0" class="dropdown_item">Study</a>
                 <a tabindex="0" class="dropdown_item">Edit</a>
+                <div tabindex="0" class="dropdown_divider"></div>
                 <a tabindex="0" class="dropdown_item" id="btn_delete_deck" href="#/dashboard">Delete</a>
             </div>
         </div>
@@ -178,7 +180,9 @@ if ("serviceWorker" in navigator) {
             <div class="dropdown_menu">
                 <a tabindex="0" class="dropdown_item">Study</a>
                 <a tabindex="0" class="dropdown_item">Edit</a>
+                <div tabindex="0" class="dropdown_divider"></div>
                 <a tabindex="0" class="dropdown_item">Delete</a>
+                <button onclick="debug2()">debug</button>
             </div>
         </div>
     </div>

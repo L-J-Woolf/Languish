@@ -162,6 +162,38 @@ async function refresh() {
 // LISTENERS 
 // ---------------------------------------------------------
 
+// function to toggle all deck checkboxes (on or off)
+function toggle_all() {
+  
+  // collect all elements that contain a deck toggle input
+  var toggles_ref = Array.from(document.getElementsByClassName('deck_snippet_toggle_wrapper'));
+  
+  // check whether *all* of the inputs are currently checked
+  var checked_items = toggles_ref.every(wrapper => {
+    var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
+    return toggle_input  && toggle_input .checked;
+  });
+
+  // Loop through each wrapper and toggle accordingly
+  toggles_ref.forEach(function(wrapper) {
+    
+    // Find the input element inside this wrapper
+    var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
+    
+    // Proceed only if an input element was found
+    if (toggle_input ) {
+      
+      // If all were checked, click to uncheck them, If some were unchecked, click only those unchecked
+      if (checked_items || !toggle_input .checked) {toggle_input.click();}
+
+    }
+
+  });
+
+  // log messages in the console
+  console.log(checked_items ? 'All unchecked' : 'All checked');
+}
+
 // listener for adding decks
 document.getElementById('btn_add_deck').addEventListener("click", function() {
   add_deck_to_database();
@@ -705,9 +737,39 @@ function delete_card_from_database(item_to_delete) {
 // ---------------------------------------------------------
 
 function debug() {
-  //console.log('debugging');
+  console.log('debugging');
   //console.log(decks_index);
-  build_study_index();
+  //build_study_index();
+  study_index = [
+    {unique_id: "-ObgNX3PmqnJrjZKp1bH",question: "the cat"},
+    {unique_id: "-ObgWRcMUVjcAjy3X4gP",question: "the bread"},
+    {unique_id: "-Obgap9qLk_YmOSk4LrY",question: "the dog"},
+    {unique_id: "-ObgapP7zMyfLPgYSXDA",question: "hot"},
+    {unique_id: "-ObgoJsdVTYlbeSZLwoL",question: "to run"}
+  ];
+
+  console.log(study_index);
+
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+
+}
+
+function debug2() {
+  console.log('debugging2');
+
+  var hash = window.location.hash;
+  var match = hash.match(/#\/study\/(\d+)\/[-\w]+/);
+  var iteration = match ? Number(match[1]) : null;
+
+  console.log('Current Iteration: ' + iteration);
+
+  var next_iteration = iteration + 1;
+
+  console.log('Next Iteration: ' + next_iteration);
+
+  if (study_index[next_iteration] === undefined) {console.log('No More Cards');}
+
+  else {location.hash = '#/study/' + next_iteration + '/' + study_index[next_iteration].unique_id;}
 }
 
 function toggle_developer_mode() {
