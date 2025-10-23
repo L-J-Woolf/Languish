@@ -162,36 +162,78 @@ async function refresh() {
 // LISTENERS 
 // ---------------------------------------------------------
 
+// listen for events on a practice button
+document.getElementById('btn_practice_all').addEventListener("click", function() {
+  console.log("Practing All"); 
+  build_study_index_all();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+});
+
+// listen for events on the toggle all button
+// document.getElementById('btn_toggle_all').addEventListener("click", function() {
+//   console.log("Toggling All"); 
+//   toggle_all();
+// });
+
 // function to toggle all deck checkboxes (on or off)
-function toggle_all() {
+// function toggle_all() {
   
-  // collect all elements that contain a deck toggle input
-  var toggles_ref = Array.from(document.getElementsByClassName('deck_snippet_toggle_wrapper'));
+//   // collect all elements that contain a deck toggle input
+//   var toggles_ref = Array.from(document.getElementsByClassName('deck_snippet_toggle_wrapper'));
   
-  // check whether *all* of the inputs are currently checked
-  var checked_items = toggles_ref.every(wrapper => {
-    var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
-    return toggle_input  && toggle_input .checked;
-  });
+//   // check whether *all* of the inputs are currently checked
+//   var checked_items = toggles_ref.every(wrapper => {
+//     var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
+//     return toggle_input  && toggle_input .checked;
+//   });
 
-  // Loop through each wrapper and toggle accordingly
-  toggles_ref.forEach(function(wrapper) {
+//   // Loop through each wrapper and toggle accordingly
+//   toggles_ref.forEach(function(wrapper) {
     
-    // Find the input element inside this wrapper
-    var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
+//     // Find the input element inside this wrapper
+//     var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
     
-    // Proceed only if an input element was found
-    if (toggle_input ) {
+//     // Proceed only if an input element was found
+//     if (toggle_input ) {
       
-      // If all were checked, click to uncheck them, If some were unchecked, click only those unchecked
-      if (checked_items || !toggle_input .checked) {toggle_input.click();}
+//       // If all were checked, click to uncheck them, If some were unchecked, click only those unchecked
+//       if (checked_items || !toggle_input .checked) {toggle_input.click();}
 
-    }
+//     }
 
-  });
+//   });
 
-  // log messages in the console
-  console.log(checked_items ? 'All unchecked' : 'All checked');
+//   // log messages in the console
+//   console.log(checked_items ? 'All unchecked' : 'All checked');
+// }
+
+// listen for events on a practice button
+document.getElementById('btn_practice_deck').addEventListener("click", function() {
+  build_study_index_deck();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+});
+
+// listen for click events on deck items
+document.getElementById('dynamic_list_decks').addEventListener('click', function(event) {
+  
+  // Find the clicked control, even if an icon or span inside the button was clicked
+  var target = event.target.closest('[data-action]');
+
+  // guard agianst null clicks
+  if (!target) return;
+
+  var clicked_item = event.target.closest('.deck_snippet_wrapper'); // find the parent container of the clicked item
+  var unique_id = clicked_item.dataset.id; // store the unique id of the parent container
+  var action = target.dataset.action; // determine the correct action
+
+  if (action === "toggle_deck") {toggle_deck(unique_id, target)}
+
+});
+
+// function for toggling decks on and off
+function toggle_deck(unique_id, target) {
+  console.log('deck toggled: ' + target.checked + ' (' + unique_id + ')');
+  edit_deck_toggled_status(unique_id, target.checked);
 }
 
 // listener for adding decks
@@ -206,19 +248,6 @@ document.getElementById('btn_delete_deck').addEventListener("click", function() 
 // listen for events on an element and execute code
 document.getElementById('btn_add_card').addEventListener("click", function() {
   add_card_to_database();
-});
-
-// listen for events on a practice button
-document.getElementById('btn_practice_all').addEventListener("click", function() {
-  console.log("Practing All"); 
-  build_study_index_all();
-  location.hash = '#/study/0/' + study_index[0].unique_id;
-});
-
-// listen for events on a practice button
-document.getElementById('btn_practice_deck').addEventListener("click", function() {
-  build_study_index_deck();
-  location.hash = '#/study/0/' + study_index[0].unique_id;
 });
 
 // listener to pushes changes to deck names to realtime database
@@ -259,29 +288,6 @@ document.getElementById('deck_title').addEventListener('dblclick', event => {
   }
 
 });
-
-// listen for click events on deck items
-document.getElementById('dynamic_list_decks').addEventListener('click', function(event) {
-  
-  // Find the clicked control, even if an icon or span inside the button was clicked
-  var target = event.target.closest('[data-action]');
-
-  // guard agianst null clicks
-  if (!target) return;
-
-  var clicked_item = event.target.closest('.deck_snippet_wrapper'); // find the parent container of the clicked item
-  var unique_id = clicked_item.dataset.id; // store the unique id of the parent container
-  var action = target.dataset.action; // determine the correct action
-
-  if (action === "toggle_deck") {toggle_deck(unique_id, target)}
-
-});
-
-// listener for toggling decks on and off
-function toggle_deck(unique_id, target) {
-  console.log('deck toggled: ' + target.checked + ' (' + unique_id + ')');
-  edit_deck_toggled_status(unique_id, target.checked);
-}
 
 // listen for click events on card items
 document.getElementById('dynamic_list_cards').addEventListener('click', function(event) {
@@ -389,47 +395,45 @@ document.getElementById('btn_rate').addEventListener('click', function(event) {
   if (action === "rate_card_1") {
     console.log("Card Rated: Red");
     score = 1;
-    //edit_card_score_in_database(get_unique_id_from_hash(), 1);
-    //iterate_study_scene();
   }
+
   if (action === "rate_card_2") {
     console.log("Card Rated: Orange");
     score = 2;
-    //iterate_study_scene();
-    //edit_card_score_in_database(get_unique_id_from_hash(), 2);
   }
+
   if (action === "rate_card_3") {
     console.log("Card Rated: Yellow");
     score = 3;
-    //iterate_study_scene();
-    //edit_card_score_in_database(get_unique_id_from_hash(), 3);
   }
+
   if (action === "rate_card_4") {
     console.log("Card Rated: Green");
     score = 4;
-    //iterate_study_scene();
-    //edit_card_score_in_database(get_unique_id_from_hash(), 4);
+
   }
+
   if (action === "rate_card_5") {
     console.log("Card Rated: Blue");
     score = 5;
-    //iterate_study_scene();
-    //edit_card_score_in_database(get_unique_id_from_hash(), 5);
   }
 
   rate_and_interate(get_unique_id_from_hash(), score);
 
 });
 
+// function to rate and then iterate cards while studying
 async function rate_and_interate(card_id, score) {
     await edit_card_score_in_database(card_id, score);
     await iterate_study_scene();
   }
 
+// function to rate a card
 async function rate_card(card_id, score) {
   edit_card_score_in_database(card_id, score);
 }
 
+// function to iterate the study scene through the study_index
 async function iterate_study_scene() {
   console.log('Iterating Study Scene');
 
@@ -443,15 +447,16 @@ async function iterate_study_scene() {
 
   console.log('Next Iteration: ' + next_iteration);
 
-  if (study_index[next_iteration] === undefined) {
-    console.log('No More Cards');
-    //location.hash = '#/dashboard';
-    location.hash = '#/study/0/' + study_index[0].unique_id;
+  if (next_iteration === 10 || study_index[next_iteration] === undefined) {
+    console.log('Session Complete');
+    location.hash = '#/dashboard';
+    //location.hash = '#/study/0/' + study_index[0].unique_id;
   }
 
   else {location.hash = '#/study/' + next_iteration + '/' + study_index[next_iteration].unique_id;}
 }
 
+// function to toggle dev mode on and off
 function toggle_developer_mode() {
   if (is_developer_mode === false) {
     console.log("enabling developer mode");
@@ -573,14 +578,33 @@ function render_study_scene(card_id_to_render) {
   // document.getElementById('studycard_answer').style.display = "none";
   // document.getElementById('studycard_instructions').textContent = "Reveal answer";
 
+
   var title = document.getElementById('study_scene_title');
   var question = document.getElementById('studycard_question_content');
   var answer = document.getElementById('studycard_answer_content');
+  var button_parent = document.getElementById('btn_reveal');
+  var button_actual = button_parent.querySelector('.button_primary');
   var card = cards_index.find(item => item.unique_id === card_id_to_render);
+  var card_wrap = document.querySelector('.studycard_snippet');
 
-  title.textContent = "hello";
+  title.textContent = card.score;
   question.textContent = card.question;
   answer.textContent = card.answer;
+
+  
+  if (card.score === 1) {button_actual.style.backgroundColor = "#C34A3F"}
+  else if (card.score === 2) {button_actual.style.backgroundColor = "#EE8343"}
+  else if (card.score === 3) {button_actual.style.backgroundColor = "#F6DA39"}
+  else if (card.score === 4) {button_actual.style.backgroundColor = "#7FAC3A"}
+  else if (card.score === 5) {button_actual.style.backgroundColor = "#43ACD9"}
+  else {button_actual.style.backgroundColor = "#54555D"}
+
+  if (card.score === 1) {card_wrap.style.boxShadow = "inset 0 2px 0 #C34A3F";}
+  else if (card.score === 2) {card_wrap.style.boxShadow = "inset 0 2px 0 #EE8343"}
+  else if (card.score === 3) {card_wrap.style.boxShadow = "inset 0 2px 0 #F6DA39"}
+  else if (card.score === 4) {card_wrap.style.boxShadow = "inset 0 2px 0 #7FAC3A"}
+  else if (card.score === 5) {card_wrap.style.boxShadow = "inset 0 2px 0 #43ACD9"}
+  else {button_actual.style.boxShadow = "#54555D"}
 
 }
 
