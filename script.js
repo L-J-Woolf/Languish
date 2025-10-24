@@ -566,6 +566,14 @@ function render_deck_scene(deck_id_to_render) {
         snippet.setAttribute('data-id', list_item.unique_id); // set id
         snippet.querySelector(".card_snippet_question").innerText = list_item.question; // set question
         snippet.querySelector(".card_snippet_answer").innerText = list_item.answer; // // set answer
+
+        if (list_item.score === 0) {snippet.style.borderTop = "3px solid #54555D"}
+        if (list_item.score === 1) {snippet.style.borderTop = "3px solid #C34A3F"}
+        if (list_item.score === 2) {snippet.style.borderTop = "3px solid #EE8343"}
+        if (list_item.score === 3) {snippet.style.borderTop = "3px solid #F6DA39"}
+        if (list_item.score === 4) {snippet.style.borderTop = "3px solid #7FAC3A"}
+        if (list_item.score === 5) {snippet.style.borderTop = "3px solid #43ACD9"}
+
       }
     );
 }
@@ -595,20 +603,19 @@ function render_study_scene(card_id_to_render) {
   question.textContent = card.question;
   answer.textContent = card.answer;
 
-  
+  if (card.score === 0) {button_actual.style.backgroundColor = "#54555D"}
   if (card.score === 1) {button_actual.style.backgroundColor = "#C34A3F"}
-  else if (card.score === 2) {button_actual.style.backgroundColor = "#EE8343"}
-  else if (card.score === 3) {button_actual.style.backgroundColor = "#F6DA39"}
-  else if (card.score === 4) {button_actual.style.backgroundColor = "#7FAC3A"}
-  else if (card.score === 5) {button_actual.style.backgroundColor = "#43ACD9"}
-  else {button_actual.style.backgroundColor = "#54555D"}
+  if (card.score === 2) {button_actual.style.backgroundColor = "#EE8343"}
+  if (card.score === 3) {button_actual.style.backgroundColor = "#F6DA39"}
+  if (card.score === 4) {button_actual.style.backgroundColor = "#7FAC3A"}
+  if (card.score === 5) {button_actual.style.backgroundColor = "#43ACD9"}
 
-  if (card.score === 1) {card_wrap.style.boxShadow = "inset 0 2px 0 #C34A3F";}
-  else if (card.score === 2) {card_wrap.style.boxShadow = "inset 0 2px 0 #EE8343"}
-  else if (card.score === 3) {card_wrap.style.boxShadow = "inset 0 2px 0 #F6DA39"}
-  else if (card.score === 4) {card_wrap.style.boxShadow = "inset 0 2px 0 #7FAC3A"}
-  else if (card.score === 5) {card_wrap.style.boxShadow = "inset 0 2px 0 #43ACD9"}
-  else {button_actual.style.boxShadow = "#54555D"}
+  if (card.score === 0) {card_wrap.style.boxShadow = "inset 0 2px 0 #54555D"}
+  if (card.score === 1) {card_wrap.style.boxShadow = "inset 0 2px 0 #C34A3F"}
+  if (card.score === 2) {card_wrap.style.boxShadow = "inset 0 2px 0 #EE8343"}
+  if (card.score === 3) {card_wrap.style.boxShadow = "inset 0 2px 0 #F6DA39"}
+  if (card.score === 4) {card_wrap.style.boxShadow = "inset 0 2px 0 #7FAC3A"}
+  if (card.score === 5) {card_wrap.style.boxShadow = "inset 0 2px 0 #43ACD9"}
 
 }
 
@@ -793,6 +800,10 @@ function delete_card_from_database(item_to_delete) {
 
 function debug() {
   console.log('debugging');
+
+  // updates a card { rt_key: value , rt_key: value }
+  update_card_test('-OcIjLX4qzgsXSyFBMEv', { question: "after" , answer: "nach" });
+
   // console.log(decks_index);
   // build_study_index();
   // study_index = [
@@ -807,6 +818,19 @@ function debug() {
 
   // location.hash = '#/study/0/' + study_index[0].unique_id;
 
+}
+
+// function to update a card in the database
+function update_card_test(unique_id, fields_to_update) {
+  
+  // get a reference to the card in the database
+  var item_ref = realtime_database.ref('cards/' + unique_id);
+  
+  // update any and all feilds
+  item_ref.update(fields_to_update);
+
+  // log messages in the console
+  console.log(`card ${unique_id} updated:`, fields_to_update);
 }
 
 function toggle_developer_mode() {
@@ -1136,13 +1160,13 @@ function build_study_index_all() {
   console.log('Toggled Ids: ' , toggled_ids);
 
   // Filter cards that belong to any toggled deck
-  var cards_from_toggled_decks = cards_index.filter(function(item_ref) {
+  var candidates = cards_index.filter(function(item_ref) {
     // Check if this card's "decks" value matches one of the toggled deck IDs
     return toggled_ids.includes(item_ref.deck);
   });
 
   // Sort the cards by score (lowest first), then by last_reviewed (oldest first)
-  cards_from_toggled_decks.sort(function(item_ref_a, item_ref_b) {
+  candidates.sort(function(item_ref_a, item_ref_b) {
     if (item_ref_a.score !== item_ref_b.score) {
       return item_ref_a.score - item_ref_b.score; // sort by score first
     }
@@ -1153,11 +1177,10 @@ function build_study_index_all() {
     return dateA - dateB; // earlier date first
   });
 
+  // set study index
+  study_index = candidates;
+
   // log study candidates
-  console.log('Cards Selected & Ordered: ', cards_from_toggled_decks);
-
-  study_index = cards_from_toggled_decks;
-
   console.log('Study Index: ', study_index);
 
 }
@@ -1188,11 +1211,10 @@ function build_study_index_deck() {
     return dateA - dateB; // earlier date first
   });
 
-  // log study candidates
-  console.log('Cards Selected & Ordered: ', candidates);
-
+  // set study index
   study_index = candidates;
 
+  // log study candidates
   console.log('Study Index: ', study_index);
 
 }
