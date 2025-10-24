@@ -801,13 +801,6 @@ function delete_card_from_database(item_to_delete) {
 function debug() {
   console.log('debugging');
 
-  function play_success() {const audio = new Audio('sounds/right.mp3');audio.play();}
-
-  function play_fail() {const audio = new Audio('sounds/wrong.mp3');audio.play();}
-
-  play_success();
-  play_fail();
-
   // updates a card { rt_key: value , rt_key: value }
   //update_card_test('-OcIjLX4qzgsXSyFBMEv', { question: "after" , answer: "nach" });
 
@@ -1226,6 +1219,23 @@ function build_study_index_deck() {
 
 }
 
-function play_success() {const audio = new Audio('sounds/right.mp3');audio.play();}
 
-function play_fail() {const audio = new Audio('sounds/wrong.mp3');audio.play();}
+// Preload the audio files
+var audio_success = new Audio('sounds/success.mp3'); audio_success.preload = 'auto'; audio_success.load();
+var audio_fail = new Audio('sounds/failure2.mp3'); audio_fail.preload = 'auto'; audio_fail.load();
+
+// play the audio files
+function play_success() {
+  const audio = new Audio('sounds/success.mp3');
+  audio.play();
+}
+
+function play_success() {
+    audio_success.currentTime = 0;
+    audio_success.play();
+}
+
+function play_fail() {
+    audio_fail.currentTime = 0;
+    audio_fail.play();
+}
