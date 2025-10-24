@@ -398,28 +398,28 @@ document.getElementById('btn_rate').addEventListener('click', function(event) {
 
   if (action === "rate_card_1") {
     console.log("Card Rated: Red");
-    score = 1;
+    score = 1; play_fail();
   }
 
   if (action === "rate_card_2") {
     console.log("Card Rated: Orange");
-    score = 2;
+    score = 2; play_success();
   }
 
   if (action === "rate_card_3") {
     console.log("Card Rated: Yellow");
-    score = 3;
+    score = 3; play_success();
   }
 
   if (action === "rate_card_4") {
     console.log("Card Rated: Green");
-    score = 4;
+    score = 4; play_success();
 
   }
 
   if (action === "rate_card_5") {
     console.log("Card Rated: Blue");
-    score = 5;
+    score = 5; play_success();
   }
 
   rate_and_interate(get_unique_id_from_hash(), score);
@@ -801,8 +801,15 @@ function delete_card_from_database(item_to_delete) {
 function debug() {
   console.log('debugging');
 
+  function play_success() {const audio = new Audio('sounds/right.mp3');audio.play();}
+
+  function play_fail() {const audio = new Audio('sounds/wrong.mp3');audio.play();}
+
+  play_success();
+  play_fail();
+
   // updates a card { rt_key: value , rt_key: value }
-  update_card_test('-OcIjLX4qzgsXSyFBMEv', { question: "after" , answer: "nach" });
+  //update_card_test('-OcIjLX4qzgsXSyFBMEv', { question: "after" , answer: "nach" });
 
   // console.log(decks_index);
   // build_study_index();
@@ -1218,3 +1225,7 @@ function build_study_index_deck() {
   console.log('Study Index: ', study_index);
 
 }
+
+function play_success() {const audio = new Audio('sounds/right.mp3');audio.play();}
+
+function play_fail() {const audio = new Audio('sounds/wrong.mp3');audio.play();}
