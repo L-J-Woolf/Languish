@@ -2,6 +2,7 @@
 // GLOBALS 
 // ---------------------------------------------------------
 
+var stats_index = [];
 var decks_index = [];
 var cards_index = [];
 var study_index = [];
@@ -70,8 +71,17 @@ async function index_database() {
   var db = snapshot.val();
   var decks_data = db?.decks || {};
   var cards_data = db?.cards || {};
+  var stats_data = db?.stats || {};
 
-  // build decks array (array_label: realtime_db_key)
+  // build array (array_label: realtime_db_key)
+  stats_index = Object.entries(stats_data).map(([realtime_id, realtime_object]) => ({
+    unique_id: realtime_id,
+    date: realtime_object.date,
+    total: realtime_object.total,
+    timestamp: realtime_object.timestamp
+  }));
+
+  // build array (array_label: realtime_db_key)
   decks_index = Object.entries(decks_data).map(([realtime_id, realtime_object]) => ({
     unique_id: realtime_id,
     deck_name: realtime_object.name,
@@ -79,7 +89,7 @@ async function index_database() {
     toggled: realtime_object.toggled
   }));
 
-  // build decks array (array_label: realtime_db_key)
+  // build array (array_label: realtime_db_key)
   cards_index = Object.entries(cards_data).map(([realtime_id, realtime_object]) => ({
     unique_id: realtime_id,
     deck: realtime_object.deck,
@@ -155,7 +165,7 @@ function install_realtime_listener() {
 async function refresh() {
   console.log("database updated...");
   await index_database();
-  await route();
+  //await route();
 }
 
 // ---------------------------------------------------------
@@ -429,6 +439,7 @@ document.getElementById('btn_rate').addEventListener('click', function(event) {
 // function to rate and then iterate cards while studying
 async function rate_and_interate(card_id, score) {
     await edit_card_score_in_database(card_id, score);
+    await update_stats();
     await iterate_study_scene();
   }
 
@@ -502,6 +513,10 @@ function render_dashboard() {
   console.log('rendering dashboard');
 
   document.getElementById('scene_sync_date').innerText = 'synced ' + synced_timestamp;
+  document.getElementById('metric_streak').textContent = get_daily_streak();
+  document.getElementById('metric_total_studied').textContent = get_cards_studied_total();
+  document.getElementById('metric_7_day_avg').textContent = get_average_last_7_days();
+  document.getElementById('metric_30_day_avg').textContent = get_average_last_30_days();
 
   // select the element to render inside
   var dynamic_list_decks = document.getElementById('dynamic_list_decks');
@@ -795,30 +810,166 @@ function delete_card_from_database(item_to_delete) {
 }
 
 // ---------------------------------------------------------
+// TASKS
+// ---------------------------------------------------------
+
+async function update_stats() {
+  
+  var database_ref = realtime_database.ref('stats'); // get a reference to the database
+  var date_ref = get_todays_timestamp(); //get a reference to todays date
+  var stats_ref = stats_index.find(item => item.timestamp === date_ref); // get a reference to todays stats
+  
+  // if stats for today exist, increment the total
+  if (stats_ref) {
+    console.log('Updating Stats: ' + get_todays_date());
+    var item_ref = realtime_database.ref('stats/' + stats_ref.unique_id);
+    var existing_total = stats_ref.total;
+    item_ref.update({
+      date: get_todays_date(),
+      total: existing_total + 1,
+      timestamp: get_todays_timestamp()
+    });
+  }
+
+  // if stats for today do not exist, create a new entry
+  else {
+    console.log('Creating New Stats: ' + get_todays_date());
+    database_ref.push({
+      date: get_todays_date(),
+      total: 1,
+      timestamp: get_todays_timestamp()
+    });
+  }
+
+}
+
+// ---------------------------------------------------------
 // HELPERS
 // ---------------------------------------------------------
 
-function debug() {
-  console.log('debugging');
+// function to get the current total for cards studied
+function get_cards_studied_total() {
+  
+  // set varible to store value
+  var studied_total = null;
 
-  // updates a card { rt_key: value , rt_key: value }
-  //update_card_test('-OcIjLX4qzgsXSyFBMEv', { question: "after" , answer: "nach" });
+  // get a reference to the currents date object in the realtime db
+  var date_ref = stats_index.find( item => item.timestamp === get_todays_timestamp() );
+ 
+  // if there is no date object in the realtime db, set to 0
+  if (date_ref === undefined) {studied_total = 0}
 
-  // console.log(decks_index);
-  // build_study_index();
-  // study_index = [
-  //   {unique_id: "-ObgNX3PmqnJrjZKp1bH",question: "the cat"},
-  //   {unique_id: "-ObgWRcMUVjcAjy3X4gP",question: "the bread"},
-  //   {unique_id: "-Obgap9qLk_YmOSk4LrY",question: "the dog"},
-  //   {unique_id: "-ObgapP7zMyfLPgYSXDA",question: "hot"},
-  //   {unique_id: "-ObgoJsdVTYlbeSZLwoL",question: "to run"}
-  // ];
+  // else get the current running total
+  else {studied_total = date_ref.total;}
 
-  // console.log(study_index);
+  // log messages in the console
+  console.log("Total Cards Studied (Today):", studied_total);
 
-  // location.hash = '#/study/0/' + study_index[0].unique_id;
-
+  // return result
+  return studied_total;
 }
+
+function get_average_last_7_days() {
+
+  // get a reference to todays timestamp
+  var today = get_todays_timestamp();
+  
+  // get a reference for the number of days to calculate
+  var timeframe = 7;
+
+  // get a reference for the total sum
+  var total_sum = 0;
+
+  // Loop over the last 7 days (including today)
+  for (var i = 0; i < timeframe; i++) {
+
+    // Calculate timestamp for each previous day
+    var date_ref = today - (i * 24 * 60 * 60 * 1000);
+
+    // Try to find a matching record in stats_index
+    var item_ref = stats_index.find(function(item) {
+      return item.timestamp === date_ref;
+    });
+
+    // If found, use its total; otherwise, count 0
+    var daily_total = item_ref ? item_ref.total : 0;
+
+    total_sum += daily_total;
+  }
+
+  // Calculate average
+  var average_last_7_days = Math.round(total_sum / timeframe);
+  console.log("Average cards studied (last 7 days):", average_last_7_days);
+  return average_last_7_days;
+}
+
+function get_average_last_30_days() {
+
+  // get a reference to todays timestamp
+  var today = get_todays_timestamp();
+  
+  // get a reference for the number of days to calculate
+  var timeframe = 30;
+
+  // get a reference for the total sum
+  var total_sum = 0;
+
+  // Loop over the last 7 days (including today)
+  for (var i = 0; i < timeframe; i++) {
+
+    // Calculate timestamp for each previous day
+    var date_ref = today - (i * 24 * 60 * 60 * 1000);
+
+    // Try to find a matching record in stats_index
+    var item_ref = stats_index.find(function(item) {
+      return item.timestamp === date_ref;
+    });
+
+    // If found, use its total; otherwise, count 0
+    var daily_total = item_ref ? item_ref.total : 0;
+
+    total_sum += daily_total;
+  }
+
+  // Calculate average
+  var average_last_30_days = Math.round(total_sum / timeframe);
+  console.log("Average cards studied (last 30 days):", average_last_30_days);
+  return average_last_30_days;
+}
+
+// function to calculate the daily streak
+function get_daily_streak() {
+
+  // Reference to today's timestamp
+  var today = get_todays_timestamp();
+
+  // Counter for consecutive days
+  var consecutive_days = 0;
+
+  // We'll iterate backwards indefinitely until a null day is found
+  for (var i = 0; ; i++) {
+    // Calculate timestamp for each previous day
+    var date_ref = today - (i * 24 * 60 * 60 * 1000);
+
+    // Try to find a matching record in stats_index
+    var item_ref = stats_index.find(function(item) {
+      return item.timestamp === date_ref;
+    });
+
+    // Check if a total exists
+    if (item_ref && item_ref.total != null) {
+      consecutive_days++;
+    } else {
+      // Stop counting when we reach a null or missing day
+      break;
+    }
+  }
+  
+  console.log("Streak:", consecutive_days);
+  return consecutive_days;
+}
+
+
 
 // function to update a card in the database
 function update_card_test(unique_id, fields_to_update) {
@@ -981,6 +1132,27 @@ function get_unique_id_from_hash() {
   var current_hash_id = parts[parts.length - 1];
 
   return current_hash_id;
+}
+
+// helper to fetch todays date (formatted: 0000-00-00)
+function get_todays_date() {
+  var new_date = new Date();
+  var year = new_date.getFullYear();
+  var month = new_date.getMonth() + 1;
+  var day = new_date.getDate();
+  if (month < 10) month = '0' + month;
+  if (day < 10) day = '0' + day;
+  return `${year}-${month}-${day}`;
+}
+
+// helper to fetch todays date as a timestamp
+function get_todays_timestamp() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const d = now.getDate();
+  const midnight = new Date(y, m, d);
+  return midnight.getTime();
 }
 
 // ---------------------------------------------------------

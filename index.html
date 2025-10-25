@@ -62,14 +62,14 @@ if ("serviceWorker" in navigator) {
                 <div class="metric">
                     <div class="metric_icon"><i class="ph-fill ph-fire"></i></div>
                     <div class="metric_right_column">
-                        <div class="metric_data">4</div>
+                        <div class="metric_data" id="metric_streak">$$</div>
                         <div class="metric_label">Day streak</div>
                     </div>
                 </div>
                 <div class="metric">
                     <div class="metric_icon"><i class="ph-fill ph-lightning"></i></div>
                     <div class="metric_right_column">
-                        <div class="metric_data">87</div>
+                        <div class="metric_data" id="metric_total_studied">$$</div>
                         <div class="metric_label">Studied today</div>
                     </div>
                 </div>
@@ -78,14 +78,14 @@ if ("serviceWorker" in navigator) {
                 <div class="metric">
                     <div class="metric_icon"><i class="ph-fill ph-calendar-heart"></i></div>
                     <div class="metric_right_column">
-                        <div class="metric_data">56</div>
+                        <div class="metric_data" id="metric_7_day_avg">$$</div>
                         <div class="metric_label">7 day avg</div>
                     </div>
                 </div>
                 <div class="metric">
                     <div class="metric_icon"><i class="ph-fill ph-calendar-star"></i></div>
                     <div class="metric_right_column">
-                        <div class="metric_data">32</div>
+                        <div class="metric_data" id="metric_30_day_avg">$$</div>
                         <div class="metric_label">30 day avg</div>
                     </div>
                 </div>
@@ -102,7 +102,10 @@ if ("serviceWorker" in navigator) {
             <button onclick="console.log(study_index)">log study_index</button>
             <button onclick="build_study_index()">build_study_index</button>
             <button onclick="toggle_all()">toggle_all</button>
-            <button onclick="debug()">debug</button>
+            <button onclick="update_stats()">update_stats</button>
+            <button onclick="get_cards_studied_total()">get_cards_studied_total</button>
+            <button onclick="get_average_last_7_days()">get_average_last_7_days</button>
+            <button onclick="count_consecutive_days_with_totals()">count_consecutive_days_with_totals</button>
         </div>
 
     </div>
