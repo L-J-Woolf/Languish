@@ -25,7 +25,7 @@ var card_snippet = `
 
 <div class="card_snippet_wrapper" data-id="$unique_id">
   <div class="card_snippet_header">
-    <div class="card_snippet_label">Card</div>
+    <div class="card_snippet_label"> </div>
     <div class="dropdown_wrapper">  
             <div class="dropdown_button" tabindex="0"><i class="ph-bold ph-dots-three"></i></div>
             <div class="dropdown_menu">

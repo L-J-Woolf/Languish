@@ -6,6 +6,7 @@ var stats_index = [];
 var decks_index = [];
 var cards_index = [];
 var study_index = [];
+var candidates = [];
 var synced_timestamp = 'last sync unknown';
 var is_first_load = true;
 var is_developer_mode = false;
@@ -175,7 +176,7 @@ async function refresh() {
 // listen for events on a practice button
 document.getElementById('btn_practice_all').addEventListener("click", function() {
   console.log("Practing All"); 
-  build_study_index_all();
+  create_study_index();
   location.hash = '#/study/0/' + study_index[0].unique_id;
 });
 
@@ -615,8 +616,24 @@ function render_study_scene(card_id_to_render) {
   var card_wrap = document.querySelector('.studycard_snippet');
 
   title.textContent = card.score;
-  question.textContent = card.question;
-  answer.textContent = card.answer;
+  // question.textContent = card.question;
+  // answer.textContent = card.answer;
+
+  function is_timestamp_even() {
+    var new_timestamp = Date.now();
+    return new_timestamp % 2 === 0;
+  }
+        
+  if (is_timestamp_even()) {
+    console.log("Even!");
+    question.textContent = card.question;
+    answer.textContent = card.answer;
+        
+  } else {
+    console.log("Odd!");
+    question.textContent = card.answer;
+    answer.textContent = card.question;
+  }
 
   if (card.score === 0) {button_actual.style.backgroundColor = "#54555D"}
   if (card.score === 1) {button_actual.style.backgroundColor = "#C34A3F"}
@@ -625,18 +642,31 @@ function render_study_scene(card_id_to_render) {
   if (card.score === 4) {button_actual.style.backgroundColor = "#7FAC3A"}
   if (card.score === 5) {button_actual.style.backgroundColor = "#43ACD9"}
 
-  if (card.score === 0) {card_wrap.style.boxShadow = "inset 0 2px 0 #54555D"}
-  if (card.score === 1) {card_wrap.style.boxShadow = "inset 0 2px 0 #C34A3F"}
-  if (card.score === 2) {card_wrap.style.boxShadow = "inset 0 2px 0 #EE8343"}
-  if (card.score === 3) {card_wrap.style.boxShadow = "inset 0 2px 0 #F6DA39"}
-  if (card.score === 4) {card_wrap.style.boxShadow = "inset 0 2px 0 #7FAC3A"}
-  if (card.score === 5) {card_wrap.style.boxShadow = "inset 0 2px 0 #43ACD9"}
+  if (card.score === 0) {card_wrap.style.boxShadow = "inset 0 4px 0 #54555D"}
+  if (card.score === 1) {card_wrap.style.boxShadow = "inset 0 4px 0 #C34A3F"}
+  if (card.score === 2) {card_wrap.style.boxShadow = "inset 0 4px 0 #EE8343"}
+  if (card.score === 3) {card_wrap.style.boxShadow = "inset 0 4px 0 #F6DA39"}
+  if (card.score === 4) {card_wrap.style.boxShadow = "inset 0 4px 0 #7FAC3A"}
+  if (card.score === 5) {card_wrap.style.boxShadow = "inset 0 4px 0 #43ACD9"}
 
 }
 
 // ---------------------------------------------------------
-// DATABASE FUNCTIONS 
+// TASKS: DATABASE UPDATES
 // ---------------------------------------------------------
+
+// function to update a card in the database
+function update_card_test(unique_id, fields_to_update) {
+  
+  // get a reference to the card in the database
+  var item_ref = realtime_database.ref('cards/' + unique_id);
+  
+  // update any and all feilds
+  item_ref.update(fields_to_update);
+
+  // log messages in the console
+  console.log(`card ${unique_id} updated:`, fields_to_update);
+}
 
 // function to add an item into the database
 function add_deck_to_database() {
@@ -844,7 +874,25 @@ async function update_stats() {
 }
 
 // ---------------------------------------------------------
-// HELPERS
+// TASKS: AUDIO
+// ---------------------------------------------------------
+
+// Preload the audio files
+var audio_success = new Audio('sounds/success.mp3'); audio_success.preload = 'auto'; audio_success.load();
+var audio_fail = new Audio('sounds/failure2.mp3'); audio_fail.preload = 'auto'; audio_fail.load();
+
+function play_success() {
+    audio_success.currentTime = 0;
+    audio_success.play();
+}
+
+function play_fail() {
+    audio_fail.currentTime = 0;
+    audio_fail.play();
+}
+
+// ---------------------------------------------------------
+// HELPERS: METRICS
 // ---------------------------------------------------------
 
 // function to get the current total for cards studied
@@ -967,34 +1015,6 @@ function get_daily_streak() {
   
   console.log("Streak:", consecutive_days);
   return consecutive_days;
-}
-
-
-
-// function to update a card in the database
-function update_card_test(unique_id, fields_to_update) {
-  
-  // get a reference to the card in the database
-  var item_ref = realtime_database.ref('cards/' + unique_id);
-  
-  // update any and all feilds
-  item_ref.update(fields_to_update);
-
-  // log messages in the console
-  console.log(`card ${unique_id} updated:`, fields_to_update);
-}
-
-function toggle_developer_mode() {
-  if (is_developer_mode === false) {
-    console.log("enabling developer mode");
-    document.getElementById('developer_menu').style.display = "block";
-    is_developer_mode = true;
-  }
-  else if (is_developer_mode === true) {
-    console.log("disabling developer mode");
-    document.getElementById('developer_menu').style.display = "none";
-    is_developer_mode = false;
-  }
 }
 
 // Function to fetch the current timestamp
@@ -1391,23 +1411,108 @@ function build_study_index_deck() {
 
 }
 
+// ---------------------------------------------------------
+// TASKS: STUDY INDEX 
+// ---------------------------------------------------------
 
-// Preload the audio files
-var audio_success = new Audio('sounds/success.mp3'); audio_success.preload = 'auto'; audio_success.load();
-var audio_fail = new Audio('sounds/failure2.mp3'); audio_fail.preload = 'auto'; audio_fail.load();
+function create_study_index() {
+  
+  // log messages in the console
+  console.log('Building Study Index');
 
-// play the audio files
-function play_success() {
-  const audio = new Audio('sounds/success.mp3');
-  audio.play();
+  // reset globals
+  study_index = [];
+  candidates = cards_index; 
+
+  // sort and filter
+  candidates = exclude_untoggled_decks(candidates);
+  candidates = sort_by_score_then_date(candidates);
+  splice_and_push(5, candidates, study_index);
+  candidates = sort_by_last_reviewed(candidates);
+  splice_and_push(5, candidates, study_index);
+  study_index = randomise_order(study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
 }
 
-function play_success() {
-    audio_success.currentTime = 0;
-    audio_success.play();
+// ---------------------------------------------------------
+// HELPERS: STUDY INDEX 
+// ---------------------------------------------------------
+
+function sort_by_score(array) {
+
+  // log messages in the console
+  console.log('Sorting By Score...');
+
+  // return result
+  return [...array].sort((item_a, item_b) => item_a['score'] - item_b['score']);
+
 }
 
-function play_fail() {
-    audio_fail.currentTime = 0;
-    audio_fail.play();
+function sort_by_last_reviewed(array) {
+
+  // log messages in the console
+  console.log('Sorting By Last Reviewed...');
+
+  // return result
+  return [...array].sort((item_a, item_b) => item_a['last_reviewed'] - item_b['last_reviewed']);
+
+}
+
+function sort_by_score_then_date(array) {
+
+  // log messages in the console
+  console.log('Sorting By Score & Last Reviewed...');
+
+  // return result
+  return [...array].sort((a, b) => {
+  if (a.score !== b.score) {return a.score - b.score;}
+    return new Date(a.last_reviewed) - new Date(b.last_reviewed);
+  });
+
+}
+
+function exclude_untoggled_decks(array) {
+
+  // log messages in the console
+  console.log('Excluding Untoggled Decks...');
+
+  // reference decks
+  var decks_to_exclude = decks_index;
+
+  // filter and map ids to exclude
+  decks_to_exclude = decks_to_exclude.filter(deck => deck.toggled === false)
+  decks_to_exclude = decks_to_exclude.map(deck => deck.unique_id);
+
+  // return result
+  return array.filter(item => !decks_to_exclude.includes(item.deck));
+
+}
+
+function splice_and_push(item_number, from_array, to_array) {
+  
+  // log messages in the console
+  console.log('Splicing and Pushing Items...');
+
+  // Remove items from the from_array
+  var temp_items = from_array.splice(0, item_number);
+  
+  // Push them to the to_array
+  to_array.push(...temp_items);
+  
+  // return the to_array (now with new items)
+  return to_array;
+
+}
+
+function randomise_order(array) {
+
+  // log messages in the console
+  console.log('Randomising Card Order...');
+
+  // return result
+  return [...array].sort(() => Math.random() - 0.5);
+
 }
