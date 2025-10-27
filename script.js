@@ -6,8 +6,6 @@ var stats_index = [];
 var decks_index = [];
 var cards_index = [];
 var study_index = [];
-var candidates = [];
-var synced_timestamp = 'last sync unknown';
 var is_first_load = true;
 var is_developer_mode = false;
 
@@ -38,11 +36,11 @@ document.addEventListener('DOMContentLoaded', initialise_app);
 
 async function initialise_app() {
   
-  console.log("initialising app");
+  console.log("Initialising app");
   await index_database();
   await route();
   install_realtime_listener();
-  console.log("initialisation complete");
+  console.log("Initialisation complete");
 
 }
 
@@ -51,19 +49,19 @@ window.addEventListener('hashchange', on_hash_change);
 
 // function to handle hash changes
 function on_hash_change() {
-  console.log("Hash changed! URL: " + window.location.hash);
+  console.log("Hash change detected, URL: " + window.location.hash);
   route();
 }
 
 // ---------------------------------------------------------
-// START-UP FUNCTIONS 
+// START-UP TASKS 
 // ---------------------------------------------------------
 
 // manually sync the local database with the realtime database
 async function index_database() {
   
   // log messages in the console
-  console.log("indexing database...");
+  console.log("Indexing database...");
 
   // get a live reference to the realtime database
   var snapshot = await realtime_database.ref('/').once('value');
@@ -100,11 +98,8 @@ async function index_database() {
     last_reviewed: realtime_object.last_reviewed
   }));
 
-  // update global synced timestamp
-  synced_timestamp = get_timestamp();
-
   // log messages in the console
-  console.log('database synced & indexed: ' + synced_timestamp);
+  console.log('Database synced & indexed: ' + get_timestamp());
 }
 
 // route
@@ -112,7 +107,7 @@ async function index_database() {
 async function route() {
 
   var current_hash = window.location.hash;
-  var current_hash_id = get_unique_id_from_hash()
+  var current_hash_id = get_hash_id();
 
   if (!current_hash || current_hash === "#" || current_hash === "#/") {
     // No hash? set default
@@ -121,25 +116,25 @@ async function route() {
   }
 
   if (current_hash.includes('#/dashboard')) { 
-  console.log('hash includes #/dashboard');
+  console.log('Hash includes #/dashboard');
   render_dashboard();
   load_scene('#/dashboard');
   }
 
   else if (current_hash.includes('#/decks/')) { 
-  console.log('hash includes #/decks/');
+  console.log('Hash includes #/decks/');
   render_deck_scene(current_hash_id);
   load_scene('#/decks');
   }
 
   else if (current_hash.includes('#/study')) { 
-  console.log('hash includes #/study');
+  console.log('Hash includes #/study');
   render_study_scene(current_hash_id);
   load_scene('#/study');
   }
 
   else { 
-  console.log('no hash rule detected, default scene loading');
+  console.log('No hash rule detected, loading default scene');
   render_dashboard();
   load_scene('#/dashboard');
   }
@@ -148,26 +143,29 @@ async function route() {
 function install_realtime_listener() {
   
   // log messages in the console
-  console.log("installing realtime listener");
+  console.log("Installing realtime listener");
   
   // connect listener to database
   realtime_database.ref("/").on("value", (snapshot) => {
   const data = snapshot.val();
   
-  // first run, do not refresh
+  // if just installed, do not refresh
   if (is_first_load === true) {is_first_load = false;}
   
-  // subsequent runs
-  else {refresh();}
+  // else perform these actions when triggered
+  else {
+    refresh();
+  }
   });
 }
 
 // fucntion to refresh user interface
 async function refresh() {
-  console.log("database updated...");
+  console.log("Database updated...");
   await index_database();
-  //await route();
+  await route();
 }
+
 
 // ---------------------------------------------------------
 // LISTENERS 
@@ -176,7 +174,7 @@ async function refresh() {
 // listen for events on a practice button
 document.getElementById('btn_practice_all').addEventListener("click", function() {
   console.log("Practing All"); 
-  create_study_index();
+  create_study_index_for_all();
   location.hash = '#/study/0/' + study_index[0].unique_id;
 });
 
@@ -220,7 +218,7 @@ document.getElementById('btn_practice_all').addEventListener("click", function()
 
 // listen for events on a practice button
 document.getElementById('btn_practice_deck').addEventListener("click", function() {
-  build_study_index_deck();
+  create_study_index_for_deck();
   location.hash = '#/study/0/' + study_index[0].unique_id;
 });
 
@@ -253,7 +251,7 @@ document.getElementById('btn_add_deck').addEventListener("click", function() {
 });
 
 document.getElementById('btn_delete_deck').addEventListener("click", function() {
-  delete_deck(get_unique_id_from_hash())
+  delete_deck(get_hash_id())
 });
 
 // listen for events on an element and execute code
@@ -294,7 +292,7 @@ document.getElementById('deck_title').addEventListener('dblclick', event => {
     element_to_modify.style.removeProperty("padding");
     // element_to_modify.style.background = "#38393E";
     element_to_modify.contentEditable = "false";
-    edit_deck_in_database(element_to_modify.textContent, get_unique_id_from_hash());
+    edit_deck_in_database(element_to_modify.textContent, get_hash_id());
     element_to_modify.removeEventListener('blur', on_blur);
   }
 
@@ -366,8 +364,8 @@ function edit_answer(unique_id, target) {
 // listen for clicks on the study card button
 function study_card(unique_id) {
   console.log('studying card: ' + unique_id);
-  //Set the hash
-  location.hash = '#/study/card/' + unique_id;
+  create_study_index_for_card(unique_id);
+  location.hash = '#/study/0/' + study_index[0].unique_id;
 }
 
 // listen for clicks on the delete card button
@@ -384,7 +382,7 @@ document.getElementById('btn_reveal').addEventListener("click", function() {
   document.getElementById('studycard_answer').style.display = "flex";
   document.getElementById('studycard_instructions').textContent = "How well did you know this?";
   
-  var hash_id = get_unique_id_from_hash();
+  var hash_id = get_hash_id();
   var card = cards_index.find(item => item.unique_id === hash_id);
   speakGerman(card.answer);
 });
@@ -433,7 +431,7 @@ document.getElementById('btn_rate').addEventListener('click', function(event) {
     score = 5; play_success();
   }
 
-  rate_and_interate(get_unique_id_from_hash(), score);
+  rate_and_interate(get_hash_id(), score);
 
 });
 
@@ -513,7 +511,7 @@ function render_dashboard() {
   // show messages in the console
   console.log('rendering dashboard');
 
-  document.getElementById('scene_sync_date').innerText = 'synced ' + synced_timestamp;
+  document.getElementById('scene_sync_date').innerText = 'synced ' + get_timestamp();
   document.getElementById('metric_streak').textContent = get_daily_streak();
   document.getElementById('metric_total_studied').textContent = get_cards_studied_total();
   document.getElementById('metric_7_day_avg').textContent = get_average_last_7_days();
@@ -557,7 +555,7 @@ function render_deck_scene(deck_id_to_render) {
   console.log('rendering cards list for: ' + deck_id_to_render);
 
   // render page details
-  document.getElementById('deck_title').innerText = find_deck_by_id(deck_id_to_render).deck_name;
+  document.getElementById('deck_title').innerText = filter_array_by_property(decks_index , 'unique_id' , deck_id_to_render)[0].deck_name;
   document.getElementById('deck_status').innerText = cards_index.filter(item => item.deck.includes(deck_id_to_render)).length + ' cards';
 
   // select the element to render inside
@@ -600,13 +598,6 @@ function render_study_scene(card_id_to_render) {
   // show messages in the console
   console.log('rendering study scene for: ' + card_id_to_render);
 
-  // reset scene
-  // document.getElementById('btn_reveal').style.display = "block";
-  // document.getElementById('btn_rate').style.display = "none";
-  // document.getElementById('studycard_answer').style.display = "none";
-  // document.getElementById('studycard_instructions').textContent = "Reveal answer";
-
-
   var title = document.getElementById('study_scene_title');
   var question = document.getElementById('studycard_question_content');
   var answer = document.getElementById('studycard_answer_content');
@@ -616,8 +607,6 @@ function render_study_scene(card_id_to_render) {
   var card_wrap = document.querySelector('.studycard_snippet');
 
   title.textContent = card.score;
-  // question.textContent = card.question;
-  // answer.textContent = card.answer;
 
   function is_timestamp_even() {
     var new_timestamp = Date.now();
@@ -652,7 +641,7 @@ function render_study_scene(card_id_to_render) {
 }
 
 // ---------------------------------------------------------
-// TASKS: DATABASE UPDATES
+// TASKS: UPDATE DATABASE
 // ---------------------------------------------------------
 
 // function to update a card in the database
@@ -674,18 +663,15 @@ function add_deck_to_database() {
   // get a reference to the database
   var item_ref = realtime_database.ref('decks');
 
-  // fun code to generate a ramdom default name for the deck
-  var deck_name = generate_default_deck_name();
-
   // push a new item (firebase will give it a unique ID)
   item_ref.push({
-    name: deck_name,
+    name: 'New Deck',
     order: 999,
     toggled: true
   });
 
   // show messages in the console
-  console.log('new deck added:', deck_name);
+  console.log('New deck added');
 }
 
 // function to edit an item into the database
@@ -755,7 +741,7 @@ function add_card_to_database() {
 
   // push a new item (firebase will give it a unique ID)
   item_ref.push({
-    deck: get_unique_id_from_hash(),
+    deck: get_hash_id(),
     question: "",
     answer: "",
     score: 0,
@@ -840,40 +826,6 @@ function delete_card_from_database(item_to_delete) {
 }
 
 // ---------------------------------------------------------
-// TASKS
-// ---------------------------------------------------------
-
-async function update_stats() {
-  
-  var database_ref = realtime_database.ref('stats'); // get a reference to the database
-  var date_ref = get_todays_timestamp(); //get a reference to todays date
-  var stats_ref = stats_index.find(item => item.timestamp === date_ref); // get a reference to todays stats
-  
-  // if stats for today exist, increment the total
-  if (stats_ref) {
-    console.log('Updating Stats: ' + get_todays_date());
-    var item_ref = realtime_database.ref('stats/' + stats_ref.unique_id);
-    var existing_total = stats_ref.total;
-    item_ref.update({
-      date: get_todays_date(),
-      total: existing_total + 1,
-      timestamp: get_todays_timestamp()
-    });
-  }
-
-  // if stats for today do not exist, create a new entry
-  else {
-    console.log('Creating New Stats: ' + get_todays_date());
-    database_ref.push({
-      date: get_todays_date(),
-      total: 1,
-      timestamp: get_todays_timestamp()
-    });
-  }
-
-}
-
-// ---------------------------------------------------------
 // TASKS: AUDIO
 // ---------------------------------------------------------
 
@@ -892,6 +844,40 @@ function play_fail() {
 }
 
 // ---------------------------------------------------------
+// TASKS: METRICS
+// ---------------------------------------------------------
+
+async function update_stats() {
+  
+  var database_ref = realtime_database.ref('stats'); // get a reference to the database
+  var date_ref = get_raw_timestamp(); //get a reference to todays date
+  var stats_ref = stats_index.find(item => item.timestamp === date_ref); // get a reference to todays stats
+  
+  // if stats for today exist, increment the total
+  if (stats_ref) {
+    console.log('Updating Stats: ' + get_todays_date());
+    var item_ref = realtime_database.ref('stats/' + stats_ref.unique_id);
+    var existing_total = stats_ref.total;
+    item_ref.update({
+      date: get_todays_date(),
+      total: existing_total + 1,
+      timestamp: get_raw_timestamp()
+    });
+  }
+
+  // if stats for today do not exist, create a new entry
+  else {
+    console.log('Creating New Stats: ' + get_todays_date());
+    database_ref.push({
+      date: get_todays_date(),
+      total: 1,
+      timestamp: get_raw_timestamp()
+    });
+  }
+
+}
+
+// ---------------------------------------------------------
 // HELPERS: METRICS
 // ---------------------------------------------------------
 
@@ -902,7 +888,7 @@ function get_cards_studied_total() {
   var studied_total = null;
 
   // get a reference to the currents date object in the realtime db
-  var date_ref = stats_index.find( item => item.timestamp === get_todays_timestamp() );
+  var date_ref = stats_index.find( item => item.timestamp === get_raw_timestamp() );
  
   // if there is no date object in the realtime db, set to 0
   if (date_ref === undefined) {studied_total = 0}
@@ -920,7 +906,7 @@ function get_cards_studied_total() {
 function get_average_last_7_days() {
 
   // get a reference to todays timestamp
-  var today = get_todays_timestamp();
+  var today = get_raw_timestamp();
   
   // get a reference for the number of days to calculate
   var timeframe = 7;
@@ -954,7 +940,7 @@ function get_average_last_7_days() {
 function get_average_last_30_days() {
 
   // get a reference to todays timestamp
-  var today = get_todays_timestamp();
+  var today = get_raw_timestamp();
   
   // get a reference for the number of days to calculate
   var timeframe = 30;
@@ -989,7 +975,7 @@ function get_average_last_30_days() {
 function get_daily_streak() {
 
   // Reference to today's timestamp
-  var today = get_todays_timestamp();
+  var today = get_raw_timestamp();
 
   // Counter for consecutive days
   var consecutive_days = 0;
@@ -1017,6 +1003,15 @@ function get_daily_streak() {
   return consecutive_days;
 }
 
+// ---------------------------------------------------------
+// HELPERS: GLOBAL
+// ---------------------------------------------------------
+
+// helper to filter an array by a property type and its value
+function filter_array_by_property(array, property, value) {
+  return array.filter(item => item[property] == value);
+}
+
 // Function to fetch the current timestamp
 function get_timestamp() {
   
@@ -1034,17 +1029,25 @@ function get_timestamp() {
   return new Intl.DateTimeFormat('en-AU', format).format(now).toLowerCase(); 
 }
 
-// fucntion to update the synced timestamp
-function update_synced_timestamp() {
+// helper to fetch todays date (formatted: 0000-00-00)
+function get_todays_date() {
+  var new_date = new Date();
+  var year = new_date.getFullYear();
+  var month = new_date.getMonth() + 1;
+  var day = new_date.getDate();
+  if (month < 10) month = '0' + month;
+  if (day < 10) day = '0' + day;
+  return `${year}-${month}-${day}`;
+}
 
-  // locate html element by id, and store it a varible
-  var scene_sync_date = document.getElementById('scene_sync_date');
-  
-  // update the specified element
-  scene_sync_date.innerHTML = 'synced ' + timestamp();
-
-  // log messages in the console
-  console.log("sync timestamp updated");
+// helper to fetch todays date as a timestamp (unformatted)
+function get_raw_timestamp() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const d = now.getDate();
+  const midnight = new Date(y, m, d);
+  return midnight.getTime();
 }
 
 // function to to speak aloud a string in german
@@ -1056,89 +1059,7 @@ function speakGerman(text_to_speak) {
   speechSynthesis.speak(utterance);
 }
 
-function generate_default_deck_name() {
-  var strings = [
-    "strawberries aren't berries",
-    "Sharks existed before trees",
-    "Honey never spoils",
-    "Octopuses have three hearts",
-    "Wombat poo is cube-shaped",
-    "Space smells like burnt steak",
-    "Penguins propose with pebbles",
-    "Bananas are berries",
-    "Tomatoes are fruits",
-    "Koalas have fingerprints",
-    "Cows have best friends",
-    "Crows remember human faces",
-    "Goldfish have 3 month memory",
-    "Otters hold hands while sleeping",
-    "Pineapples take 2 years to grow",
-    "Jellyfish are 95% water",
-    "Turtles breathe with their butts",
-    "Sharks have lived 400m years",
-    "Pigeons can do maths",
-    "Ants never sleep",
-    "Cats can't taste sweetness",
-    "Cucumbers are 95% water",
-    "Snails can sleep for 3 years",
-    "The moon causes tides",
-    "Heart can beat outside body",
-    "Elephants mourn their dead",
-    "Giraffes have 7 neck bones",
-    "Sharks have no bones",
-    "Apples float in water",
-    "Carrots were once purple",
-    "Bees can recognise faces",
-    "Oysters can change gender",
-    "Banana plants are herbs",
-    "Camels have three eyelids",
-    "Sloths can hold their breath",
-    "Dolphins have individual names",
-    "Polar bears have black skin",
-    "Flamingos aren't born pink",
-    "Starfish have no brains",
-    "Zebras can't be domesticated",
-    "Avocados are toxic to birds",
-    "Lobsters don't age biologically",
-    "Goats have rectangular pupils",
-    "Platypuses glow under blacklight",
-    "Hippos secrete pink sunscreen",
-    "Slugs have four noses",
-    "Rabbits can't vomit",
-    "Venus is hotter than Mercury",
-    "Glass is actually a liquid",
-    "Grapes explode in microwaves",
-    "Saturn would float in water",
-    "Your nose never stops growing",
-    "Humans share 50% DNA with bananas",
-    "An owl's head rotates 270 degrees"
-  ];
-  
-  const randomIndex = Math.floor(Math.random() * strings.length);
-  return strings[randomIndex];
-}
-
-function find_deck_by_id(id_of_deck_to_find) {
-  return decks_index.find(item => item.unique_id === id_of_deck_to_find);
-}
-
-function find_card_by_id(id_of_card_to_find) {
-  return cards_index.find(item => item.unique_id === id_of_card_to_find);
-}
-
-function find_decks_by_keyword(keyword_to_look_for) {
-  return decks_index.filter(item => item.deck_name.includes(keyword_to_look_for));
-}
-
-function find_cards_by_keyword(keyword_to_look_for) {
-  return cards_index.filter(item => item.question.includes(keyword_to_look_for));
-}
-
-function find_cards_by_deck_id(deck_id_to_look_for) {
-  return cards_index.filter(item => item.deck.includes(deck_id_to_look_for));
-}
-
-function get_unique_id_from_hash() {
+function get_hash_id() {
   // Step 1: Get the current hash part of the URL ("#/decks/deck_name/unique_id")
   var hash = window.location.hash; 
 
@@ -1152,27 +1073,6 @@ function get_unique_id_from_hash() {
   var current_hash_id = parts[parts.length - 1];
 
   return current_hash_id;
-}
-
-// helper to fetch todays date (formatted: 0000-00-00)
-function get_todays_date() {
-  var new_date = new Date();
-  var year = new_date.getFullYear();
-  var month = new_date.getMonth() + 1;
-  var day = new_date.getDate();
-  if (month < 10) month = '0' + month;
-  if (day < 10) day = '0' + day;
-  return `${year}-${month}-${day}`;
-}
-
-// helper to fetch todays date as a timestamp
-function get_todays_timestamp() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth();
-  const d = now.getDate();
-  const midnight = new Date(y, m, d);
-  return midnight.getTime();
 }
 
 // ---------------------------------------------------------
@@ -1328,101 +1228,17 @@ function collect_new_order() {
 }
 
 // ---------------------------------------------------------
-// STUDY INDEX FUNCTIONS 
-// ---------------------------------------------------------
-
-// function to render cards list
-function build_study_index_all() {
-
-  // show messages in the console
-  console.log('Building Study Index: All');
-
-  // Filter decks that are toggled ON
-  var toggled_decks = decks_index.filter(function(item_ref) {
-    return item_ref.toggled === true;
-  });
-
-  console.log('Toggled Decks: ' , toggled_decks);
-
-  // Extract a list of toggled deck IDs
-  var toggled_ids = toggled_decks.map(function(item_ref) {
-    return item_ref.unique_id;
-  });
-
-  console.log('Toggled Ids: ' , toggled_ids);
-
-  // Filter cards that belong to any toggled deck
-  var candidates = cards_index.filter(function(item_ref) {
-    // Check if this card's "decks" value matches one of the toggled deck IDs
-    return toggled_ids.includes(item_ref.deck);
-  });
-
-  // Sort the cards by score (lowest first), then by last_reviewed (oldest first)
-  candidates.sort(function(item_ref_a, item_ref_b) {
-    if (item_ref_a.score !== item_ref_b.score) {
-      return item_ref_a.score - item_ref_b.score; // sort by score first
-    }
-
-    // if scores are equal, sort by date
-    var dateA = new Date(item_ref_a.last_reviewed);
-    var dateB = new Date(item_ref_b.last_reviewed);
-    return dateA - dateB; // earlier date first
-  });
-
-  // set study index
-  study_index = candidates;
-
-  // log study candidates
-  console.log('Study Index: ', study_index);
-
-}
-
-// function to render cards list
-function build_study_index_deck() {
-
-  // show messages in the console
-  console.log('Building Study Index: Deck');
-
-  var deck_id = get_unique_id_from_hash();
-
-  // Filter cards that belong to any toggled deck
-  var candidates = cards_index.filter(function(item_ref) {
-    // Check if this card's "decks" value matches one of the toggled deck IDs
-    return deck_id.includes(item_ref.deck);
-  });
-
-  // Sort the cards by score (lowest first), then by last_reviewed (oldest first)
-  candidates.sort(function(item_ref_a, item_ref_b) {
-    if (item_ref_a.score !== item_ref_b.score) {
-      return item_ref_a.score - item_ref_b.score; // sort by score first
-    }
-
-    // if scores are equal, sort by date
-    var dateA = new Date(item_ref_a.last_reviewed);
-    var dateB = new Date(item_ref_b.last_reviewed);
-    return dateA - dateB; // earlier date first
-  });
-
-  // set study index
-  study_index = candidates;
-
-  // log study candidates
-  console.log('Study Index: ', study_index);
-
-}
-
-// ---------------------------------------------------------
 // TASKS: STUDY INDEX 
 // ---------------------------------------------------------
 
-function create_study_index() {
+function create_study_index_for_all() {
   
   // log messages in the console
   console.log('Building Study Index');
 
   // reset globals
   study_index = [];
-  candidates = cards_index; 
+  var candidates = cards_index; 
 
   // sort and filter
   candidates = exclude_untoggled_decks(candidates);
@@ -1431,6 +1247,41 @@ function create_study_index() {
   candidates = sort_by_last_reviewed(candidates);
   splice_and_push(5, candidates, study_index);
   study_index = randomise_order(study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
+function create_study_index_for_deck() {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  var candidates = filter_array_by_property(cards_index, 'deck', get_hash_id());
+
+  // sort and filter
+  candidates = sort_by_score_then_date(candidates);
+  splice_and_push(5, candidates, study_index);
+  candidates = sort_by_last_reviewed(candidates);
+  splice_and_push(5, candidates, study_index);
+  study_index = randomise_order(study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
+function create_study_index_for_card(unique_id) {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  study_index = filter_array_by_property(cards_index, 'unique_id', unique_id);
 
   // log messages in the console
   console.log('Study Index Complete: ', study_index);

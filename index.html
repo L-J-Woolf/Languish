@@ -99,14 +99,11 @@ if ("serviceWorker" in navigator) {
         <div id="developer_menu">
             <button onclick="console.log(decks_index)">log decks_index</button>
             <button onclick="console.log(cards_index)">log cards_index</button>
-            <button onclick="console.log(study_index)">log study_index</button>
-            <button onclick="build_study_index()">build_study_index</button>
             <button onclick="toggle_all()">toggle_all</button>
-            <button onclick="update_stats()">update_stats</button>
-            <button onclick="get_cards_studied_total()">get_cards_studied_total</button>
-            <button onclick="get_average_last_7_days()">get_average_last_7_days</button>
-            <button onclick="count_consecutive_days_with_totals()">count_consecutive_days_with_totals</button>
             <button onclick="create_study_index()">create_study_index</button>
+            <button onclick="console.log(filter_cards_by_property('score', '1'))">filter_cards_by_property</button>
+            <button onclick="create_study_index_deck()">create_study_index_deck</button>
+            <button onclick="filter_array_by_property(decks_index, 'toggled', true)">filter_array_by_property</button>
         </div>
 
     </div>
