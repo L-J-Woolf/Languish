@@ -79,7 +79,7 @@ body {
 /* header styles */
 
 .header_primary {
-  z-index: 60;
+  z-index: 90;
   position: fixed; top: 0px;
   display: flex;
   justify-content: center;
@@ -97,7 +97,7 @@ body {
 }
 
 .secondary_header_wrapper {
-  z-index: 60;
+  z-index: 90;
   position: fixed; top: 0px;
   display: flex;
   justify-content: space-between;
