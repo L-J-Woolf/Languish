@@ -166,64 +166,40 @@ async function refresh() {
   await route();
 }
 
-
 // ---------------------------------------------------------
-// LISTENERS 
+// LISTENERS 2.0
 // ---------------------------------------------------------
 
-// listen for events on a practice button
-document.getElementById('btn_practice_all').addEventListener("click", function() {
-  console.log("Practing All"); 
-  create_study_index_for_all();
-  location.hash = '#/study/0/' + study_index[0].unique_id;
+document.addEventListener('click', function(event) {
+
+  // find the clicked control
+  var target = event.target.closest('[data-action]'); if (!target) return;
+
+  // perform the relavent task
+  if (target.dataset.action === 'action_practice_all') {action_practice_all();}
+  if (target.dataset.action === 'action_practice_deck') {action_practice_deck();}
+  if (target.dataset.action === 'action_add_deck') {action_add_deck();}
+  if (target.dataset.action === 'action_delete_deck') {action_delete_deck();}
+  if (target.dataset.action === 'action_add_card') {action_add_card();}
+  if (target.dataset.action === 'action_back') {action_back();}
+  if (target.dataset.action === 'action_toggle_all') {action_toggle_all();}
+  
 });
 
-// listen for events on the toggle all button
-// document.getElementById('btn_toggle_all').addEventListener("click", function() {
-//   console.log("Toggling All"); 
-//   toggle_all();
-// });
-
-// function to toggle all deck checkboxes (on or off)
-// function toggle_all() {
-  
-//   // collect all elements that contain a deck toggle input
-//   var toggles_ref = Array.from(document.getElementsByClassName('deck_snippet_toggle_wrapper'));
-  
-//   // check whether *all* of the inputs are currently checked
-//   var checked_items = toggles_ref.every(wrapper => {
-//     var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
-//     return toggle_input  && toggle_input .checked;
-//   });
-
-//   // Loop through each wrapper and toggle accordingly
-//   toggles_ref.forEach(function(wrapper) {
-    
-//     // Find the input element inside this wrapper
-//     var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
-    
-//     // Proceed only if an input element was found
-//     if (toggle_input ) {
-      
-//       // If all were checked, click to uncheck them, If some were unchecked, click only those unchecked
-//       if (checked_items || !toggle_input .checked) {toggle_input.click();}
-
-//     }
-
-//   });
-
-//   // log messages in the console
-//   console.log(checked_items ? 'All unchecked' : 'All checked');
-// }
-
-// listen for events on a practice button
-document.getElementById('btn_practice_deck').addEventListener("click", function() {
-  create_study_index_for_deck();
-  location.hash = '#/study/0/' + study_index[0].unique_id;
-});
-
-// listen for click events on deck items
 document.getElementById('dynamic_list_decks').addEventListener('click', function(event) {
+  
+  // Find the clicked control
+  var target = event.target.closest('[data-action]'); if (!target) return;
+
+  var clicked_item = event.target.closest('.deck_snippet_wrapper'); // find the parent container of the clicked item
+  var unique_id = clicked_item.dataset.id; // store the unique id of the parent container
+  var action = target.dataset.action; // determine the correct action
+
+  if (action === "action_toggle_deck") {action_toggle_deck(unique_id, target)}
+
+});
+
+document.getElementById('dynamic_list_cards').addEventListener('click', function(event) {
   
   // Find the clicked control, even if an icon or span inside the button was clicked
   var target = event.target.closest('[data-action]');
@@ -231,33 +207,105 @@ document.getElementById('dynamic_list_decks').addEventListener('click', function
   // guard agianst null clicks
   if (!target) return;
 
-  var clicked_item = event.target.closest('.deck_snippet_wrapper'); // find the parent container of the clicked item
+  var clicked_item = event.target.closest('.card_snippet_wrapper'); // find the parent container of the clicked item
   var unique_id = clicked_item.dataset.id; // store the unique id of the parent container
   var action = target.dataset.action; // determine the correct action
 
-  if (action === "toggle_deck") {toggle_deck(unique_id, target)}
+  if (action === "edit_question") {edit_question(unique_id, target)}
+  if (action === "edit_answer") {edit_answer(unique_id, target)}
+  if (action === "study_card") {study_card(unique_id)}
+  if (action === "action_delete_card") {action_delete_card(unique_id)}
 
 });
 
+// ---------------------------------------------------------
+// ACTIONS 2.0
+// ---------------------------------------------------------
+
+function action_practice_all() {
+  console.log('Action: Practice All');
+  create_study_index_for_all();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+}
+
+function action_practice_deck() {
+  console.log('Action: Practice Deck');
+  create_study_index_for_deck();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+}
+
+function action_add_deck() {
+  console.log('Action: Add Deck');
+  add_deck_to_database();
+}
+
+function action_delete_deck() {
+  console.log('Action: Delete Deck');
+  delete_deck(get_hash_id());
+}
+
+function action_add_card() {
+  console.log('Action: Add Deck');
+  add_card_to_database();
+}
+
+function action_delete_card(unique_id) {
+  console.log('Action: Delete Card');
+  delete_card_from_database(unique_id);
+}
+
+function action_back() {
+  console.log('Action: Back');
+  window.history.back();
+}
+
 // function for toggling decks on and off
-function toggle_deck(unique_id, target) {
+function action_toggle_deck(unique_id, target) {
   console.log('deck toggled: ' + target.checked + ' (' + unique_id + ')');
   edit_deck_toggled_status(unique_id, target.checked);
 }
 
-// listener for adding decks
-document.getElementById('btn_add_deck').addEventListener("click", function() {
-  add_deck_to_database();
-});
+// function for toggling all decks on and off
+function action_toggle_all() {
+  console.log('Action: Toggle All');
+  task_toggle_all()
+}
 
-document.getElementById('btn_delete_deck').addEventListener("click", function() {
-  delete_deck(get_hash_id())
-});
+// ---------------------------------------------------------
+// LISTENERS 
+// ---------------------------------------------------------
 
-// listen for events on an element and execute code
-document.getElementById('btn_add_card').addEventListener("click", function() {
-  add_card_to_database();
-});
+// function to toggle all deck checkboxes (on or off)
+function task_toggle_all() {
+  
+  // collect all elements that contain a deck toggle input
+  var toggles_ref = Array.from(document.getElementsByClassName('deck_snippet_toggle_wrapper'));
+  
+  // check whether *all* of the inputs are currently checked
+  var checked_items = toggles_ref.every(wrapper => {
+    var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
+    return toggle_input  && toggle_input .checked;
+  });
+
+  // Loop through each wrapper and toggle accordingly
+  toggles_ref.forEach(function(wrapper) {
+    
+    // Find the input element inside this wrapper
+    var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
+    
+    // Proceed only if an input element was found
+    if (toggle_input ) {
+      
+      // If all were checked, click to uncheck them, If some were unchecked, click only those unchecked
+      if (checked_items || !toggle_input .checked) {toggle_input.click();}
+
+    }
+
+  });
+
+  // log messages in the console
+  console.log(checked_items ? 'All unchecked' : 'All checked');
+}
 
 // listener to pushes changes to deck names to realtime database
 document.getElementById('deck_title').addEventListener('dblclick', event => {
@@ -295,26 +343,6 @@ document.getElementById('deck_title').addEventListener('dblclick', event => {
     edit_deck_in_database(element_to_modify.textContent, get_hash_id());
     element_to_modify.removeEventListener('blur', on_blur);
   }
-
-});
-
-// listen for click events on card items
-document.getElementById('dynamic_list_cards').addEventListener('click', function(event) {
-  
-  // Find the clicked control, even if an icon or span inside the button was clicked
-  var target = event.target.closest('[data-action]');
-
-  // guard agianst null clicks
-  if (!target) return;
-
-  var clicked_item = event.target.closest('.card_snippet_wrapper'); // find the parent container of the clicked item
-  var unique_id = clicked_item.dataset.id; // store the unique id of the parent container
-  var action = target.dataset.action; // determine the correct action
-
-  if (action === "edit_question") {edit_question(unique_id, target)}
-  if (action === "edit_answer") {edit_answer(unique_id, target)}
-  if (action === "study_card") {study_card(unique_id)}
-  if (action === "delete_card") {delete_card(unique_id)}
 
 });
 
@@ -366,12 +394,6 @@ function study_card(unique_id) {
   console.log('studying card: ' + unique_id);
   create_study_index_for_card(unique_id);
   location.hash = '#/study/0/' + study_index[0].unique_id;
-}
-
-// listen for clicks on the delete card button
-function delete_card(unique_id) {
-  console.log('delete card: ' + unique_id);
-  delete_card_from_database(unique_id);
 }
 
 // listen for events on an element and execute code

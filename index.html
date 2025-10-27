@@ -54,76 +54,73 @@ if ("serviceWorker" in navigator) {
 
     <div class="content">
     
-    <!-- summary  -->
-    <div class="summary_wrapper">
-        <div class="summary_title">Dashbaord</div>
-        <div class="metrics_column">
-            <div class="metrics_row">
-                <div class="metric">
-                    <div class="metric_icon"><i class="ph-fill ph-fire"></i></div>
-                    <div class="metric_right_column">
-                        <div class="metric_data" id="metric_streak">$$</div>
-                        <div class="metric_label">Day streak</div>
+        <!-- summary  -->
+        <div class="summary_wrapper">
+            <div class="summary_title">Dashbaord</div>
+            <div class="metrics_column">
+                <div class="metrics_row">
+                    <div class="metric">
+                        <div class="metric_icon"><i class="ph-fill ph-fire"></i></div>
+                        <div class="metric_right_column">
+                            <div class="metric_data" id="metric_streak">$$</div>
+                            <div class="metric_label">Day streak</div>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric_icon"><i class="ph-fill ph-lightning"></i></div>
+                        <div class="metric_right_column">
+                            <div class="metric_data" id="metric_total_studied">$$</div>
+                            <div class="metric_label">Studied today</div>
+                        </div>
                     </div>
                 </div>
-                <div class="metric">
-                    <div class="metric_icon"><i class="ph-fill ph-lightning"></i></div>
-                    <div class="metric_right_column">
-                        <div class="metric_data" id="metric_total_studied">$$</div>
-                        <div class="metric_label">Studied today</div>
+                <div class="metrics_row">
+                    <div class="metric">
+                        <div class="metric_icon"><i class="ph-fill ph-calendar-heart"></i></div>
+                        <div class="metric_right_column">
+                            <div class="metric_data" id="metric_7_day_avg">$$</div>
+                            <div class="metric_label">7 day avg</div>
+                        </div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric_icon"><i class="ph-fill ph-calendar-star"></i></div>
+                        <div class="metric_right_column">
+                            <div class="metric_data" id="metric_30_day_avg">$$</div>
+                            <div class="metric_label">30 day avg</div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="metrics_row">
-                <div class="metric">
-                    <div class="metric_icon"><i class="ph-fill ph-calendar-heart"></i></div>
-                    <div class="metric_right_column">
-                        <div class="metric_data" id="metric_7_day_avg">$$</div>
-                        <div class="metric_label">7 day avg</div>
-                    </div>
-                </div>
-                <div class="metric">
-                    <div class="metric_icon"><i class="ph-fill ph-calendar-star"></i></div>
-                    <div class="metric_right_column">
-                        <div class="metric_data" id="metric_30_day_avg">$$</div>
-                        <div class="metric_label">30 day avg</div>
-                    </div>
-                </div>
+            
+            <button class="button_primary" data-action="action_practice_all">Practice All</button>
+
+            <!-- developer menu -->
+            <div id="developer_menu">
+                <button onclick="console.log(decks_index)">log decks_index</button>
+                <button onclick="console.log(cards_index)">log cards_index</button>
+                <button onclick="action_toggle_all()">action_toggle_all</button>
+                <button onclick="create_study_index()">create_study_index</button>
+                <button onclick="console.log(filter_cards_by_property('score', '1'))">filter_cards_by_property</button>
+                <button onclick="create_study_index_deck()">create_study_index_deck</button>
+                <button onclick="filter_array_by_property(decks_index, 'toggled', true)">filter_array_by_property</button>
             </div>
-        </div>
-        <a class="button_primary" id="btn_practice_all">
-            <div class="button_primary_label">Practice All</div>
-        </a>
 
-        <!-- developer menu -->
-        <div id="developer_menu">
-            <button onclick="console.log(decks_index)">log decks_index</button>
-            <button onclick="console.log(cards_index)">log cards_index</button>
-            <button onclick="toggle_all()">toggle_all</button>
-            <button onclick="create_study_index()">create_study_index</button>
-            <button onclick="console.log(filter_cards_by_property('score', '1'))">filter_cards_by_property</button>
-            <button onclick="create_study_index_deck()">create_study_index_deck</button>
-            <button onclick="filter_array_by_property(decks_index, 'toggled', true)">filter_array_by_property</button>
         </div>
 
-    </div>
+        <!-- dynamic list: decks -->
+        <div class="decks_wrapper">
+            <div class="deck_list_title">Decks</div>
+            <div class="dynamic_list_decks" id="dynamic_list_decks"></div>
+        </div>
 
-    <!-- dynamic list: decks -->
-    <div class="decks_wrapper">
-        <div class="deck_list_title">Decks</div>
-        <div class="dynamic_list_decks" id="dynamic_list_decks"></div>
-    </div>
-
-    <!-- sync status  -->
-    <div class="synced_status_wrapper">
-        <div class="synced_status_label" id="scene_sync_date">last sync unknown</div>
-    </div>
+        <!-- sync status  -->
+        <div class="synced_status_wrapper">
+            <div class="synced_status_label" id="scene_sync_date">last sync unknown</div>
+        </div>
+        
+        <!-- fixed actions -->
+        <button class="button_floating" data-action="action_add_deck"><i class="ph-bold ph-plus"></i></button>
     
-    <!-- fixed actions -->
-    <div class="floating_action_button" id="btn_add_deck">
-        <div class="floating_action_button_icon"><i class="ph-bold ph-plus"></i></div>
-    </div>
-
     </div>
 
 </div>
@@ -134,7 +131,7 @@ if ("serviceWorker" in navigator) {
     
     <!-- header -->
     <div class="secondary_header_wrapper">
-        <a class="button_secondary_solid" href="#/dashboard"><i class="ph-bold ph-arrow-left"></i></a>
+        <a class="button_secondary_solid" data-action="action_back"><i class="ph-bold ph-arrow-left"></i></a>
         <div class="secondary_header_title" id="deck_title">$title</div>
         <div class="dropdown_wrapper">  
             <div class="dropdown_button" tabindex="0"><i class="ph-bold ph-dots-three"></i></div>
@@ -142,7 +139,7 @@ if ("serviceWorker" in navigator) {
                 <a tabindex="0" class="dropdown_item">Study</a>
                 <a tabindex="0" class="dropdown_item">Edit</a>
                 <div tabindex="0" class="dropdown_divider"></div>
-                <a tabindex="0" class="dropdown_item" id="btn_delete_deck" href="#/dashboard">Delete</a>
+                <a tabindex="0" class="dropdown_item" data-action="action_delete_deck" href="#/dashboard">Delete</a>
             </div>
         </div>
     </div>
@@ -150,9 +147,7 @@ if ("serviceWorker" in navigator) {
     <div class="content">
         <!-- section -->
         <div class="primary_section">
-            <a class="button_primary" id="btn_practice_deck">
-                <div class="button_primary_label">Practice Deck</div>
-            </a>
+            <button class="button_primary" data-action="action_practice_deck">Practice Deck</button>
             <div class="deck_status_wrapper">
                 <div class="deck_status_label" id="deck_status">$deck_status</div>
             </div>
@@ -161,10 +156,9 @@ if ("serviceWorker" in navigator) {
         <!-- dynamic list: cards -->
         <div class="dynamic_list_cards" id="dynamic_list_cards"></div>
         
-        <!-- fixed layer -->
-        <div class="floating_action_button" id="btn_add_card">
-            <div class="floating_action_button_icon"><i class="ph-bold ph-plus"></i></div>
-        </div>
+        <!-- fixed actions -->
+        <button class="button_floating" data-action="action_add_card"><i class="ph-bold ph-plus"></i></button>
+
     </div>
     
 </div>
@@ -198,9 +192,7 @@ if ("serviceWorker" in navigator) {
         </div>
         <div class="studycard_instructions" id="studycard_instructions">Reveal answer</div>
         <div class="studycard_reveal_wrapper" id="btn_reveal">
-            <a class="button_primary">
-                <div class="button_primary_label">Reveal</div>
-            </a>
+            <button class="button_primary">Reveal</button>
         </div>
         <div class="studycard_ratings_wrapper" id="btn_rate">
             <div data-action="rate_card_1" class="button_rating red"><i class="ph-fill ph-thumbs-down"></i></div>
