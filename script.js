@@ -460,7 +460,7 @@ document.getElementById('btn_rate').addEventListener('click', function(event) {
     card_is_flipped = true;
   }
 
-  update_card_test(card_ref[0].unique_id, { flipped: card_is_flipped, score: score });
+  update_card_test(card_ref[0].unique_id, { flipped: card_is_flipped, score: score, last_reviewed: Date.now() });
   iterate_study_scene();
   update_stats();
 
