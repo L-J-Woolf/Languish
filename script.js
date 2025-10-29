@@ -95,6 +95,7 @@ async function index_database() {
     question: realtime_object.question,
     answer: realtime_object.answer,
     score: realtime_object.score,
+    is_flipped: realtime_object.flipped,
     last_reviewed: realtime_object.last_reviewed
   }));
 
@@ -183,6 +184,7 @@ document.addEventListener('click', function(event) {
   if (target.dataset.action === 'action_add_card') {action_add_card();}
   if (target.dataset.action === 'action_back') {action_back();}
   if (target.dataset.action === 'action_toggle_all') {action_toggle_all();}
+  if (target.dataset.action === 'action_debug') {action_debug();}
   
 });
 
@@ -221,6 +223,12 @@ document.getElementById('dynamic_list_cards').addEventListener('click', function
 // ---------------------------------------------------------
 // ACTIONS 2.0
 // ---------------------------------------------------------
+
+function action_debug() {
+  console.log('Debugging');
+  //update_card_test('-OcAj8qdy7YTbJ-mguSI', { flipped: true, score: 2 });
+  flip_card();
+}
 
 function action_practice_all() {
   console.log('Action: Practice All');
@@ -412,6 +420,8 @@ document.getElementById('btn_reveal').addEventListener("click", function() {
 // listen for events on an element and execute code
 document.getElementById('btn_rate').addEventListener('click', function(event) {
 
+  play_success();
+
   document.getElementById('btn_reveal').style.display = "block";
   document.getElementById('btn_rate').style.display = "none";
   document.getElementById('studycard_answer').style.display = "none";
@@ -424,50 +434,45 @@ document.getElementById('btn_rate').addEventListener('click', function(event) {
   if (!target) return;
   
   // determine the correct action
-  var action = target.dataset.action;
   var score = 0;
 
-  if (action === "rate_card_1") {
-    console.log("Card Rated: Red");
-    score = 1; play_fail();
+  if (target.dataset.action === "rate_card_1") {score = 1;}
+  if (target.dataset.action === "rate_card_2") {score = 2;}
+  if (target.dataset.action === "rate_card_3") {score = 3;}
+  if (target.dataset.action === "rate_card_4") {score = 4;}
+  if (target.dataset.action === "rate_card_5") {score = 5;}
+
+  var card_ref = filter_array_by_property(cards_index, 'unique_id', get_hash_id());
+  var card_is_flipped = card_ref[0].is_flipped;
+  
+  if (card_is_flipped === false) {
+    console.log("Card Flipped was False, Flipping Card");
+    card_is_flipped = true;
   }
 
-  if (action === "rate_card_2") {
-    console.log("Card Rated: Orange");
-    score = 2; play_success();
+  else if (card_is_flipped === true) {
+    console.log("Card Flipped was True, Unflipping Card");
+    card_is_flipped = false;
   }
 
-  if (action === "rate_card_3") {
-    console.log("Card Rated: Yellow");
-    score = 3; play_success();
+  else {
+    console.log("Card Flipped was Unavailable, Flipping Card for Next Run");
+    card_is_flipped = true;
   }
 
-  if (action === "rate_card_4") {
-    console.log("Card Rated: Green");
-    score = 4; play_success();
-
-  }
-
-  if (action === "rate_card_5") {
-    console.log("Card Rated: Blue");
-    score = 5; play_success();
-  }
-
-  rate_and_interate(get_hash_id(), score);
+  update_card_test(card_ref[0].unique_id, { flipped: card_is_flipped, score: score });
+  iterate_study_scene();
+  update_stats();
 
 });
 
 // function to rate and then iterate cards while studying
-async function rate_and_interate(card_id, score) {
-    await edit_card_score_in_database(card_id, score);
-    await update_stats();
-    await iterate_study_scene();
-  }
-
-// function to rate a card
-async function rate_card(card_id, score) {
-  edit_card_score_in_database(card_id, score);
-}
+// async function rate_and_interate(card_id, score) {
+//   // await edit_card_score_in_database(card_id, score);
+//   await update_card_test(card_ref[0].unique_id, { flipped: card_status, score: score });
+//   await update_stats();
+//   await iterate_study_scene();
+// }
 
 // function to iterate the study scene through the study_index
 async function iterate_study_scene() {
@@ -486,7 +491,6 @@ async function iterate_study_scene() {
   if (next_iteration === 10 || study_index[next_iteration] === undefined) {
     console.log('Session Complete');
     location.hash = '#/dashboard';
-    //location.hash = '#/study/0/' + study_index[0].unique_id;
   }
 
   else {location.hash = '#/study/' + next_iteration + '/' + study_index[next_iteration].unique_id;}
@@ -628,22 +632,23 @@ function render_study_scene(card_id_to_render) {
   var card = cards_index.find(item => item.unique_id === card_id_to_render);
   var card_wrap = document.querySelector('.studycard_snippet');
 
-  title.textContent = card.score;
-
-  function is_timestamp_even() {
-    var new_timestamp = Date.now();
-    return new_timestamp % 2 === 0;
-  }
-        
-  if (is_timestamp_even()) {
-    console.log("Even!");
+  title.textContent = "Studying!";
+      
+  if (card.is_flipped === false) {
+    console.log("English First!");
     question.textContent = card.question;
     answer.textContent = card.answer;
         
-  } else {
-    console.log("Odd!");
+  } else if (card.is_flipped === true) {
+    console.log("German First!");
     question.textContent = card.answer;
     answer.textContent = card.question;
+  }
+
+  else {
+    console.log("No Sides Detected");
+    question.textContent = card.question;
+    answer.textContent = card.answer;
   }
 
   if (card.score === 0) {button_actual.style.backgroundColor = "#54555D"}
