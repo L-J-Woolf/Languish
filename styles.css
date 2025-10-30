@@ -145,7 +145,7 @@ padding: 0 12px;
   height: 54px;
   font-family: inherit;
   font-weight: inherit;
-  font-size: 18px;
+  font-size: 15px;
   color: white;
   text-align: center;
   background-color: var(--green_light);
@@ -351,7 +351,7 @@ padding: 0 12px;
 }
 
 .deck_list_title {
-  color: var(--white-75);
+  color: var(--white);
 }
 
 .dynamic_list_decks {
@@ -360,10 +360,6 @@ padding: 0 12px;
   border-right: 1px solid var(--stroke);
   border-radius: 9px;
   overflow: hidden;
-}
-
-.deck_list_title {
-  color: var(--white-75);
 }
 
 .deck_snippet_wrapper {
@@ -622,7 +618,7 @@ outline: none;
 }
 
 .summary_title {
-  color: var(--white-75);
+  color: var(--white);
 }
 
 .metrics_column {
@@ -695,7 +691,7 @@ outline: none;
 .synced_status_wrapper {
   justify-content: center;
   align-items: center;
-  height: 48px;
+  height: 72px;
   display: flex;
 }
 
@@ -779,7 +775,7 @@ outline: none;
   display: none;
   flex-direction: row;
   justify-content: space-between;
-  gap: 12px;
+  gap: 9px;
 }
 
 .button_rating {
