@@ -462,7 +462,6 @@ padding: 0 12px;
 }
 
 .deck_snippet_custom_checkbox_off {
-  z-index: 60;
   display: flex;
   position: relative;
   font-size: 26px;

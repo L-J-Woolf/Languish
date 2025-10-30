@@ -100,11 +100,10 @@ async function index_database() {
   }));
 
   // log messages in the console
-  console.log('Database synced & indexed: ' + get_timestamp());
+  console.log('Database synced & indexed: ' + get_current_time());
 }
 
 // route
-
 async function route() {
 
   var current_hash = window.location.hash;
@@ -414,7 +413,7 @@ document.getElementById('btn_reveal').addEventListener("click", function() {
   
   var hash_id = get_hash_id();
   var card = cards_index.find(item => item.unique_id === hash_id);
-  speakGerman(card.answer);
+  task_speak_german(card.answer);
 });
 
 // listen for events on an element and execute code
@@ -537,7 +536,7 @@ function render_dashboard() {
   // show messages in the console
   console.log('rendering dashboard');
 
-  document.getElementById('scene_sync_date').innerText = 'synced ' + get_timestamp();
+  document.getElementById('scene_sync_date').innerText = 'synced ' + get_current_time();
   document.getElementById('metric_streak').textContent = get_daily_streak();
   document.getElementById('metric_total_studied').textContent = get_cards_studied_total();
   document.getElementById('metric_7_day_avg').textContent = get_average_last_7_days();
@@ -877,28 +876,28 @@ function play_fail() {
 async function update_stats() {
   
   var database_ref = realtime_database.ref('stats'); // get a reference to the database
-  var date_ref = get_raw_timestamp(); //get a reference to todays date
+  var date_ref = get_timestamp(); //get a reference to todays date
   var stats_ref = stats_index.find(item => item.timestamp === date_ref); // get a reference to todays stats
   
   // if stats for today exist, increment the total
   if (stats_ref) {
-    console.log('Updating Stats: ' + get_todays_date());
+    console.log('Updating Stats: ' + get_current_date());
     var item_ref = realtime_database.ref('stats/' + stats_ref.unique_id);
     var existing_total = stats_ref.total;
     item_ref.update({
-      date: get_todays_date(),
+      date: get_current_date(),
       total: existing_total + 1,
-      timestamp: get_raw_timestamp()
+      timestamp: get_timestamp()
     });
   }
 
   // if stats for today do not exist, create a new entry
   else {
-    console.log('Creating New Stats: ' + get_todays_date());
+    console.log('Creating New Stats: ' + get_current_date());
     database_ref.push({
-      date: get_todays_date(),
+      date: get_current_date(),
       total: 1,
-      timestamp: get_raw_timestamp()
+      timestamp: get_timestamp()
     });
   }
 
@@ -915,7 +914,7 @@ function get_cards_studied_total() {
   var studied_total = null;
 
   // get a reference to the currents date object in the realtime db
-  var date_ref = stats_index.find( item => item.timestamp === get_raw_timestamp() );
+  var date_ref = stats_index.find( item => item.timestamp === get_timestamp() );
  
   // if there is no date object in the realtime db, set to 0
   if (date_ref === undefined) {studied_total = 0}
@@ -933,7 +932,7 @@ function get_cards_studied_total() {
 function get_average_last_7_days() {
 
   // get a reference to todays timestamp
-  var today = get_raw_timestamp();
+  var today = get_timestamp();
   
   // get a reference for the number of days to calculate
   var timeframe = 7;
@@ -967,7 +966,7 @@ function get_average_last_7_days() {
 function get_average_last_30_days() {
 
   // get a reference to todays timestamp
-  var today = get_raw_timestamp();
+  var today = get_timestamp();
   
   // get a reference for the number of days to calculate
   var timeframe = 30;
@@ -1002,7 +1001,7 @@ function get_average_last_30_days() {
 function get_daily_streak() {
 
   // Reference to today's timestamp
-  var today = get_raw_timestamp();
+  var today = get_timestamp();
 
   // Counter for consecutive days
   var consecutive_days = 0;
@@ -1040,7 +1039,7 @@ function filter_array_by_property(array, property, value) {
 }
 
 // Function to fetch the current timestamp
-function get_timestamp() {
+function get_current_time() {
   
   // create variable to store date-time object
   var now = new Date();
@@ -1057,7 +1056,7 @@ function get_timestamp() {
 }
 
 // helper to fetch todays date (formatted: 0000-00-00)
-function get_todays_date() {
+function get_current_date() {
   var new_date = new Date();
   var year = new_date.getFullYear();
   var month = new_date.getMonth() + 1;
@@ -1068,7 +1067,7 @@ function get_todays_date() {
 }
 
 // helper to fetch todays date as a timestamp (unformatted)
-function get_raw_timestamp() {
+function get_timestamp() {
   const now = new Date();
   const y = now.getFullYear();
   const m = now.getMonth();
@@ -1078,7 +1077,7 @@ function get_raw_timestamp() {
 }
 
 // function to to speak aloud a string in german
-function speakGerman(text_to_speak) {
+function task_speak_german(text_to_speak) {
   speechSynthesis.cancel();
   var utterance = new SpeechSynthesisUtterance(text_to_speak);
   utterance.lang = "de-DE";
