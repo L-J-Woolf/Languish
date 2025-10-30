@@ -56,7 +56,7 @@ if ("serviceWorker" in navigator) {
     
         <!-- summary  -->
         <div class="summary_wrapper">
-            <div class="summary_title">Dashboard (251030_2115)</div>
+            <div class="summary_title">Dashboard (251031_1011)</div>
             <div class="metrics_column">
                 <div class="metrics_row">
                     <div class="metric">
@@ -111,6 +111,19 @@ if ("serviceWorker" in navigator) {
         <!-- dynamic list: decks -->
         <div class="decks_wrapper">
             <div class="deck_list_title">Decks</div>
+            <div class="deck_snippet_wrapper">
+                <label class="deck_snippet_toggle_wrapper" id="toggle_all">
+                    <input data-action="action_toggle_all" type="checkbox" checked="checked">
+                    <span class="deck_snippet_custom_checkbox_off"><i class="ph-fill ph-circle"></i></span>
+                    <span class="deck_snippet_custom_checkbox_on"><i class="ph-fill ph-check-circle"></i></span>
+                </label>
+                <a class="deck_snippet_button_wrapper">
+                    <div class="deck_snippet_textcontent">
+                        <div class="deck_snippet_name">All</div>
+                        <div class="deck_snippet_count" id="data_all_card_count">$card_count</div>
+                    </div>
+                </a>
+            </div>
             <div class="dynamic_list_decks" id="dynamic_list_decks"></div>
         </div>
 

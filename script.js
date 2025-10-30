@@ -2,6 +2,7 @@
 // GLOBALS 
 // ---------------------------------------------------------
 
+var settings_index = [];
 var stats_index = [];
 var decks_index = [];
 var cards_index = [];
@@ -71,6 +72,7 @@ async function index_database() {
   var decks_data = db?.decks || {};
   var cards_data = db?.cards || {};
   var stats_data = db?.stats || {};
+  var settings_data = db?.settings || {};
 
   // build array (array_label: realtime_db_key)
   stats_index = Object.entries(stats_data).map(([realtime_id, realtime_object]) => ({
@@ -98,6 +100,12 @@ async function index_database() {
     is_flipped: realtime_object.flipped,
     last_reviewed: realtime_object.last_reviewed
   }));
+
+  // build array (array_label: realtime_db_key)
+  settings_index = {
+  is_all_toggled: settings_data.is_all_toggled,
+  is_dark_mode: settings_data.is_dark_mode
+};
 
   // log messages in the console
   console.log('Database synced & indexed: ' + get_current_time());
@@ -269,6 +277,7 @@ function action_back() {
 // function for toggling decks on and off
 function action_toggle_deck(unique_id, target) {
   console.log('deck toggled: ' + target.checked + ' (' + unique_id + ')');
+  update_setting_test('is_all_toggled', false);
   edit_deck_toggled_status(unique_id, target.checked);
 }
 
@@ -279,79 +288,92 @@ function action_toggle_all() {
 }
 
 // ---------------------------------------------------------
-// LISTENERS 
+// TASKS 2.0 
 // ---------------------------------------------------------
+
+// function to toggle dev mode on and off
+function toggle_developer_mode() {
+  if (is_developer_mode === false) {
+    console.log("enabling developer mode");
+    document.getElementById('developer_menu').style.display = "block";
+    is_developer_mode = true;
+  }
+  else if (is_developer_mode === true) {
+    console.log("disabling developer mode");
+    document.getElementById('developer_menu').style.display = "none";
+    is_developer_mode = false;
+  }
+}
 
 // function to toggle all deck checkboxes (on or off)
 function task_toggle_all() {
   
   // collect all elements that contain a deck toggle input
-  var toggles_ref = Array.from(document.getElementsByClassName('deck_snippet_toggle_wrapper'));
+  var toggles_ref = Array.from(document.querySelectorAll('.dynamic_list_decks input[type="checkbox"]'));
   
-  // check whether *all* of the inputs are currently checked
-  var checked_items = toggles_ref.every(wrapper => {
-    var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
-    return toggle_input  && toggle_input .checked;
-  });
+  // 3. Determine the current state
+  var allChecked = toggles_ref.every(input => input.checked);
+  var noneChecked = toggles_ref.every(input => !input.checked);
+  var someChecked = !allChecked && !noneChecked;
 
-  // Loop through each wrapper and toggle accordingly
-  toggles_ref.forEach(function(wrapper) {
-    
-    // Find the input element inside this wrapper
-    var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
-    
-    // Proceed only if an input element was found
-    if (toggle_input ) {
-      
-      // If all were checked, click to uncheck them, If some were unchecked, click only those unchecked
-      if (checked_items || !toggle_input .checked) {toggle_input.click();}
-
-    }
-
-  });
-
-  // log messages in the console
-  console.log(checked_items ? 'All unchecked' : 'All checked');
+  if (allChecked) {
+    // All checked → uncheck all
+    toggles_ref.forEach(t => { if (t.checked) t.click(); });
+    update_setting_test('is_all_toggled', false);
+    document.querySelector('#toggle_all input[type="checkbox"]').checked = false;
+    console.log('All were checked → all unchecked');
+  } 
+  
+  else if (someChecked) {
+    // Some checked → check the rest
+    toggles_ref.forEach(t => { if (!t.checked) t.click(); });
+    update_setting_test('is_all_toggled', true);
+    document.querySelector('#toggle_all input[type="checkbox"]').checked = true;
+    console.log('Some were checked → now all checked');
+  } 
+  
+  else if (noneChecked) {
+    // None checked → check all
+    toggles_ref.forEach(t => { if (!t.checked) t.click(); });
+    update_setting_test('is_all_toggled', true);
+    document.querySelector('#toggle_all input[type="checkbox"]').checked = true;
+    console.log('None were checked → all checked');
+  }
 }
 
-// listener to pushes changes to deck names to realtime database
-document.getElementById('deck_title').addEventListener('dblclick', event => {
+// function to toggle all deck checkboxes (on or off)
+// function task_toggle_all() {
   
-  // log messages in the console
-  console.log("editing deck name"); 
-
-  // store the current event target for ease of access
-  var element_to_modify = event.currentTarget;
+//   // collect all elements that contain a deck toggle input
+//   var toggles_ref = Array.from(document.getElementsByClassName('deck_snippet_toggle_wrapper'));
   
-  // restyle the event target
-  element_to_modify.contentEditable = "true";
-  element_to_modify.style.background = "#54555D";
-  element_to_modify.style.padding = "0 12px"
-  element_to_modify.focus();
+//   // check whether *all* of the inputs are currently checked
+//   var checked_items = toggles_ref.every(wrapper => {
+//     var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
+//     return toggle_input  && toggle_input .checked;
+//   });
 
-  // add event listeners for de-focus and enter
-  element_to_modify.addEventListener('keydown', on_keydown);
-  element_to_modify.addEventListener('blur', on_blur);
+//   // Loop through each wrapper and toggle accordingly
+//   toggles_ref.forEach(function(wrapper) {
+    
+//     // Find the input element inside this wrapper
+//     var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
+    
+//     // Proceed only if an input element was found
+//     if (toggle_input ) {
+      
+//       // If all were checked, click to uncheck them, If some were unchecked, click only those unchecked
+//       if (checked_items || !toggle_input .checked) {toggle_input.click();}
 
-  // funtion to run when user hits enter
-  function on_keydown(event) {
-    if (event.key !== 'Enter') return; // ignore everything else
-    event.preventDefault();
-    element_to_modify.blur();
-    element_to_modify.removeEventListener('keydown', on_keydown);
-  }
+//     }
 
-  // funtion to run when user de-focusses the input
-  function on_blur(event) {
-    element_to_modify.style.removeProperty("background");
-    element_to_modify.style.removeProperty("padding");
-    // element_to_modify.style.background = "#38393E";
-    element_to_modify.contentEditable = "false";
-    edit_deck_in_database(element_to_modify.textContent, get_hash_id());
-    element_to_modify.removeEventListener('blur', on_blur);
-  }
+//   });
 
-});
+//   // update_setting_test(is_all_toggled, true)
+
+//   // log messages in the console
+//   console.log(checked_items ? 'All unchecked' : 'All checked');
+// }
 
 // listen for click events on cards questions
 function edit_question(unique_id, target) {
@@ -402,6 +424,49 @@ function study_card(unique_id) {
   create_study_index_for_card(unique_id);
   location.hash = '#/study/0/' + study_index[0].unique_id;
 }
+
+// ---------------------------------------------------------
+// LISTENERS 
+// ---------------------------------------------------------
+
+// listener to pushes changes to deck names to realtime database
+document.getElementById('deck_title').addEventListener('dblclick', event => {
+  
+  // log messages in the console
+  console.log("editing deck name"); 
+
+  // store the current event target for ease of access
+  var element_to_modify = event.currentTarget;
+  
+  // restyle the event target
+  element_to_modify.contentEditable = "true";
+  element_to_modify.style.background = "#54555D";
+  element_to_modify.style.padding = "0 12px"
+  element_to_modify.focus();
+
+  // add event listeners for de-focus and enter
+  element_to_modify.addEventListener('keydown', on_keydown);
+  element_to_modify.addEventListener('blur', on_blur);
+
+  // funtion to run when user hits enter
+  function on_keydown(event) {
+    if (event.key !== 'Enter') return; // ignore everything else
+    event.preventDefault();
+    element_to_modify.blur();
+    element_to_modify.removeEventListener('keydown', on_keydown);
+  }
+
+  // funtion to run when user de-focusses the input
+  function on_blur(event) {
+    element_to_modify.style.removeProperty("background");
+    element_to_modify.style.removeProperty("padding");
+    // element_to_modify.style.background = "#38393E";
+    element_to_modify.contentEditable = "false";
+    edit_deck_in_database(element_to_modify.textContent, get_hash_id());
+    element_to_modify.removeEventListener('blur', on_blur);
+  }
+
+});
 
 // listen for events on an element and execute code
 document.getElementById('btn_reveal').addEventListener("click", function() {
@@ -495,20 +560,6 @@ async function iterate_study_scene() {
   else {location.hash = '#/study/' + next_iteration + '/' + study_index[next_iteration].unique_id;}
 }
 
-// function to toggle dev mode on and off
-function toggle_developer_mode() {
-  if (is_developer_mode === false) {
-    console.log("enabling developer mode");
-    document.getElementById('developer_menu').style.display = "block";
-    is_developer_mode = true;
-  }
-  else if (is_developer_mode === true) {
-    console.log("disabling developer mode");
-    document.getElementById('developer_menu').style.display = "none";
-    is_developer_mode = false;
-  }
-}
-
 // ---------------------------------------------------------
 // RENDER FUNCTIONS 
 // ---------------------------------------------------------
@@ -542,6 +593,13 @@ function render_dashboard() {
   document.getElementById('metric_7_day_avg').textContent = get_average_last_7_days();
   document.getElementById('metric_30_day_avg').textContent = get_average_last_30_days();
 
+  var all_cards_total = cards_index.length;
+  var all_total_score = cards_index.reduce((total, item) => total + item.score, 0);
+  var all_mastery = ((all_total_score / (all_cards_total * 5))*100).toFixed(1);
+  document.getElementById('data_all_card_count').textContent = all_cards_total + ' cards' + ' • ' + all_mastery + '%'; // set count
+  if (settings_index.is_all_toggled === true) { document.querySelector('#toggle_all input[type="checkbox"]').checked = true;  }
+  else if (settings_index.is_all_toggled === false) { document.querySelector('#toggle_all input[type="checkbox"]').checked = false;  }
+
   // select the element to render inside
   var dynamic_list_decks = document.getElementById('dynamic_list_decks');
 
@@ -566,7 +624,21 @@ function render_dashboard() {
       snippet.querySelector(".deck_snippet_button_wrapper").href = '#/decks/' + list_item.deck_name + '/' + list_item.unique_id; // set hash
       snippet.setAttribute('data-id', list_item.unique_id); // set id
       snippet.querySelector(".deck_snippet_name").textContent = list_item.deck_name; // set deck name
-      snippet.querySelector(".deck_snippet_count").textContent = cards_index.filter(item => item.deck.includes(list_item.unique_id)).length + ' cards'; // set count
+      
+      var deck_index = cards_index.filter(item => item.deck.includes(list_item.unique_id));
+      var total_cards = deck_index.length;
+      var total_score = deck_index.reduce((total, item) => total + item.score, 0);
+      var mastery = ((total_score / (total_cards * 5))*100).toFixed(0);
+      
+      // console.log('Deck: ' , deck_index);
+      // console.log('Total Cards: ' + total_cards);
+      // console.log('Total Score: ' + total_score);
+      // console.log('Mastery: ' + mastery);
+
+      snippet.querySelector(".deck_snippet_count").textContent = total_cards + ' cards' + ' • ' + mastery + '%'; // set count
+
+      //snippet.querySelector(".deck_snippet_count").textContent = cards_index.filter(item => item.deck.includes(list_item.unique_id)).length + ' cards'; // set count
+
       if (list_item.toggled === true) { snippet.querySelector('input[type="checkbox"]').checked = true;  }
       else if (list_item.toggled === false) { snippet.querySelector('input[type="checkbox"]').checked = false;  }
     }
@@ -849,6 +921,19 @@ function delete_card_from_database(item_to_delete) {
   // remove it from the database
   card_ref.remove();
 
+}
+
+// function to update a setting in the database
+function update_setting_test(setting_to_update, new_value) {
+  
+  // get a reference to the card in the database
+  var item_ref = realtime_database.ref('settings');
+  
+  // update any and all feilds
+  item_ref.update({ [setting_to_update]: new_value });
+
+  // log messages in the console
+  console.log('Setting ' + setting_to_update + ' updated: ' + new_value);
 }
 
 // ---------------------------------------------------------
