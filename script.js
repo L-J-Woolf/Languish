@@ -196,6 +196,7 @@ document.addEventListener('click', function(event) {
   if (target.dataset.action === 'action_toggle_modes_off') {action_toggle_modes_off();}
   if (target.dataset.action === 'action_practice_random') {action_practice_random();}
   if (target.dataset.action === 'action_practice_mastery') {action_practice_mastery();}
+  if (target.dataset.action === 'action_practice_oldest') {action_practice_oldest();}
   
 });
 
@@ -262,6 +263,12 @@ function action_practice_random() {
 function action_practice_mastery() {
   console.log('Action: Practice Random');
   create_study_index_for_mastery();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+}
+
+function action_practice_oldest() {
+  console.log('Action: Practice Random');
+  create_study_index_for_oldest();
   location.hash = '#/study/0/' + study_index[0].unique_id;
 }
 
@@ -1466,6 +1473,26 @@ function create_study_index_for_mastery() {
   // sort and filter
   candidates = exclude_untoggled_decks(candidates);
   candidates = sort_by_score_then_date(candidates);
+  splice_and_push(10, candidates, study_index);
+  study_index = randomise_order(study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
+function create_study_index_for_oldest() {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  var candidates = cards_index; 
+
+  // sort and filter
+  candidates = exclude_untoggled_decks(candidates);
+  candidates = sort_by_last_reviewed(candidates);
   splice_and_push(10, candidates, study_index);
   study_index = randomise_order(study_index);
 
