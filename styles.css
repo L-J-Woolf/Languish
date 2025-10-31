@@ -114,8 +114,8 @@ body {
   right: 0;
   height: 60px;
   padding: 0 18px;
-  background-color: var(--layer);
-  border-bottom: 1px solid var(--stroke);
+  background-color: var(--base);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .secondary_header_title {
@@ -178,10 +178,11 @@ padding: 0 12px;
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 24px;
+  height: 30px;
   color: rgba(255, 255, 255, 0.50);
   font-family: inherit;
   font-weight: inherit;
+  font-size: 18px;
   background-color: rgba(255, 255, 255, 0.00);
   border-radius: 9px;
   border: none;
@@ -308,6 +309,37 @@ padding: 0 12px;
   background-color: var(--green_dark);
 }
 
+.btn_ghost {
+  z-index: 60;
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  color: white; 
+  font-size: 15px;
+  font-family: inherit;
+  font-weight: inherit;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 9px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn_ghost:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+}
+
+.btn_ghost:active {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
 .button_secondary_solid {
   display: flex;
   flex: none;
@@ -391,18 +423,18 @@ padding: 0 12px;
   align-items: center;
   width: 36px;
   height: 36px;
-  background-color: var(--stroke);
-  border: 1px solid var(--highlight);
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: 9px;
   cursor: pointer;
 }
 
 .dropdown_button:hover {
-  background-color: var(--pressed);
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .dropdown_button:active {
-  background-color: var(--highlight);
+  background-color: rgba(255, 255, 255, 0.09);
 }
 
 .dropdown_wrapper:focus-within .dropdown_menu {
@@ -638,19 +670,17 @@ padding: 0 12px;
 /* card styles */
 
 .dynamic_list_cards {
-  grid-column-gap: 12px;
-  grid-row-gap: 12px;
-  flex-flow: column;
-  padding: 6px 24px 24px 24px;
   display: flex;
+  gap: 12px;
+  flex-flow: column;
+  padding: 6px 18px 18px 18px;
   max-width: 600px;
   margin: 0 auto;
+  margin-bottom: 48px;
 }
 
 .card_snippet_wrapper {
   border-radius: 9px;
-  /* border-top: 3px solid var(--green_light); */
-  /* overflow: hidden; */
 }
 
 .card_snippet_header {
@@ -661,41 +691,41 @@ padding: 0 12px;
   height: 54px;
   padding-left: 18px;
   padding-right: 9px;
-  background: var(--stroke);
+  background: rgba(255, 255, 255, 0.09);
   border-radius: 9px 9px 0 0;
 }
 
 .card_snippet_label {
   flex-grow: 1;
-  color: var(--white-25);
+  color: rgba(255, 255, 255, 0.25);
 }
 
 .card_snippet_question {
   padding: 18px;
-  background-color: var(--layer);
-  border-top: 1px solid var(--stroke);
-  border-right: 1px solid var(--stroke);
-  border-left: 1px solid var(--stroke);
+  background-color: rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 15px;
   color: var(--white);
 }
 
 .card_snippet_answer {
   padding: 18px;
-  background-color: var(--layer);
-  border: 1px solid var(--stroke);
-  border-right: 1px solid var(--stroke);
-  border-bottom: 1px solid var(--stroke);
-  border-left: 1px solid var(--stroke);
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 15px;
-  color: var(--white-75);
+  color: rgba(255, 255, 255, 0.75);
   border-radius: 0 0 9px 9px;
 }
 
 .card_snippet_question:empty::before,
 .card_snippet_answer:empty::before {
   content: attr(data-placeholder);
-  color: var(--white-33);
+  color: rgba(255, 255, 255, 0.33);
   pointer-events: none;
 }
 
@@ -710,7 +740,7 @@ outline: none;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 24px 24px 0px 24px;
+  padding: 24px 18px 0px 18px;
   max-width: 600px;
   margin: 0 auto;
 }
@@ -723,7 +753,7 @@ outline: none;
 }
 
 .deck_status_label {
-  color: var(--white-50);
+  color: rgba(255, 255, 255, 0.50);
   font-size: 12px;
 }
 
@@ -830,16 +860,16 @@ outline: none;
   flex-flow: column;
   justify-content: space-between;
   max-width: 600px;
-  min-height: calc(100vh - 120px);
+  min-height: calc(100vh - 96px);
   margin-left: auto;
   margin-right: auto;
-  padding: 96px 24px 24px 24px;
+  padding: 78px 18px 18px 18px;
   position: relative;
 }
 
 .studycard_snippet {
-  background-color: var(--layer);
-  border: 1px solid var(--stroke);
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 9px;
   flex-flow: column;
   flex: 1;
@@ -855,7 +885,7 @@ outline: none;
   flex: 1;
   justify-content: center;
   align-items: center;
-  padding: 24px;
+  padding: 36px;
   width: 100%;
   box-sizing: border-box;
 }
@@ -886,9 +916,9 @@ outline: none;
   justify-content: center;
   align-items: center;
   height: 42px;
-  opacity: .5;
+  color: rgba(255, 255, 255, 0.50);
   text-align: center;
-  font-weight: 500;
+  font-size: 12px;
 }
 
 .studycard_ratings_wrapper {
