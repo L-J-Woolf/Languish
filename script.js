@@ -425,7 +425,7 @@ function edit_question(unique_id, target) {
   console.log("Question was clicked: " + unique_id);
   
   // set styles
-  target.style.background = '#54555D';
+  target.style.background = "rgba(255, 255, 255, 0.12)";
   
   // listen for offfocus
   target.addEventListener('blur', on_blur);
@@ -446,7 +446,7 @@ function edit_answer(unique_id, target) {
   console.log("Answer was clicked: " + unique_id);
   
   // set styles
-  target.style.background = "#54555D";
+  target.style.background = "rgba(255, 255, 255, 0.12)";
   
   // listen for offfocus
   target.addEventListener('blur', on_blur);
@@ -746,7 +746,7 @@ function render_study_scene(card_id_to_render) {
   var card = cards_index.find(item => item.unique_id === card_id_to_render);
   var card_wrap = document.querySelector('.studycard_snippet');
 
-  title.textContent = "Studying!";
+  title.textContent = "Study";
       
   if (card.is_flipped === false) {
     console.log("English First!");
