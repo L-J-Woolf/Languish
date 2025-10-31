@@ -54,45 +54,65 @@ if ("serviceWorker" in navigator) {
 
     <div class="content">
     
+        <!-- search  -->
+         <div class="search_wrapper">
+            <div class="search_input">Search...</div>
+        </div>
+
         <!-- summary  -->
         <div class="summary_wrapper">
-            <div class="summary_title">Dashboard (251031_1011)</div>
-            <div class="metrics_column">
-                <div class="metrics_row">
-                    <div class="metric">
-                        <div class="metric_icon"><i class="ph-fill ph-fire"></i></div>
-                        <div class="metric_right_column">
-                            <div class="metric_data" id="metric_streak">$$</div>
-                            <div class="metric_label">Day streak</div>
-                        </div>
+            <div class="summary_title">Dashboard (251031_1011)</div>  
+            <div class="metrics_grid">
+                <div class="metric">
+                    <div class="metric_content">
+                        <div class="metric_data" id="metric_streak">$$</div>
+                        <div class="metric_label">Day streak</div>
                     </div>
-                    <div class="metric">
-                        <div class="metric_icon"><i class="ph-fill ph-lightning"></i></div>
-                        <div class="metric_right_column">
-                            <div class="metric_data" id="metric_total_studied">$$</div>
-                            <div class="metric_label">Studied today</div>
-                        </div>
-                    </div>
+                    <div class="metric_icon"><i class="ph-fill ph-fire"></i></div>
                 </div>
-                <div class="metrics_row">
-                    <div class="metric">
-                        <div class="metric_icon"><i class="ph-fill ph-calendar-heart"></i></div>
-                        <div class="metric_right_column">
-                            <div class="metric_data" id="metric_7_day_avg">$$</div>
-                            <div class="metric_label">7 day avg</div>
-                        </div>
+                
+                <div class="metric">
+                    <div class="metric_content">
+                        <div class="metric_data" id="metric_total_studied">$$</div>
+                        <div class="metric_label">Cards today</div>
                     </div>
-                    <div class="metric">
-                        <div class="metric_icon"><i class="ph-fill ph-calendar-star"></i></div>
-                        <div class="metric_right_column">
-                            <div class="metric_data" id="metric_30_day_avg">$$</div>
-                            <div class="metric_label">30 day avg</div>
-                        </div>
+                    <div class="metric_icon"><i class="ph-fill ph-lightning"></i></div>
+                </div>
+                
+                <div class="metric">
+                    <div class="metric_content">
+                        <div class="metric_data" id="metric_7_day_avg">$$</div>
+                        <div class="metric_label">7 Day (avg)</div>
                     </div>
+                    <div class="metric_icon"><i class="ph-fill ph-calendar-heart"></i></div>
+                </div>
+                
+                <div class="metric">
+                    <div class="metric_content">
+                        <div class="metric_data" id="metric_30_day_avg">$$</div>
+                        <div class="metric_label">30 Day (avg)</div>
+                    </div>
+                    <div class="metric_icon"><i class="ph-fill ph-calendar-star"></i></div>
                 </div>
             </div>
             
             <button class="button_primary" data-action="action_practice_all">Practice All</button>
+            <button class="btn_hidden" id="btn_toggle_modes_on" data-action="action_toggle_modes_on"><i class="ph-bold ph-caret-down"></i></button>
+            <button class="btn_hidden" id="btn_toggle_modes_off" data-action="action_toggle_modes_off"><i class="ph-bold ph-caret-up"></i></button>
+            <div class="modes_list" id="list_study_modes">
+                <button class="button_mode" data-action="action_practice_random">
+                    <span class="study_mode_label">Shuffle Mode</span>
+                    <span class="study_mode_description">Mix it up with an utterly random shuffle of cards</span>
+                </button>
+                <button class="button_mode" data-action="action_practice_mastery">
+                    <span class="study_mode_label">Mastery Builder</span>
+                    <span class="study_mode_description">Tackle your toughest cards first</span>
+                </button>
+            </div>
+            
+            
+            
+            
 
             <!-- developer menu -->
             <div id="developer_menu">
@@ -111,20 +131,29 @@ if ("serviceWorker" in navigator) {
         <!-- dynamic list: decks -->
         <div class="decks_wrapper">
             <div class="deck_list_title">Decks</div>
-            <div class="deck_snippet_wrapper">
-                <label class="deck_snippet_toggle_wrapper" id="toggle_all">
-                    <input data-action="action_toggle_all" type="checkbox" checked="checked">
-                    <span class="deck_snippet_custom_checkbox_off"><i class="ph-fill ph-circle"></i></span>
-                    <span class="deck_snippet_custom_checkbox_on"><i class="ph-fill ph-check-circle"></i></span>
-                </label>
-                <a class="deck_snippet_button_wrapper">
-                    <div class="deck_snippet_textcontent">
-                        <div class="deck_snippet_name">All</div>
-                        <div class="deck_snippet_count" id="data_all_card_count">$card_count</div>
-                    </div>
-                </a>
+
+            <div class="decks_wrapper_outer">
+               
+                <div class="deck_snippet_wrapper">
+                    <label class="deck_snippet_toggle_wrapper" id="toggle_all">
+                        <input data-action="action_toggle_all" type="checkbox" checked="checked">
+                        <span class="deck_snippet_custom_checkbox_off"><i class="ph-fill ph-circle"></i></span>
+                        <span class="deck_snippet_custom_checkbox_on"><i class="ph-fill ph-check-circle"></i></span>
+                    </label>
+                    <a class="deck_snippet_button_wrapper">
+                        <div class="deck_snippet_textcontent">
+                            <div class="deck_snippet_name">All</div>
+                            <div class="deck_snippet_count" id="data_all_card_count">$card_count</div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="decks_wrapper_inner">
+                    <div class="dynamic_list_decks" id="dynamic_list_decks"></div>
+                </div>
+
             </div>
-            <div class="dynamic_list_decks" id="dynamic_list_decks"></div>
+
         </div>
 
         <!-- sync status  -->

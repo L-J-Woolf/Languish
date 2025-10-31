@@ -12,9 +12,7 @@ var deck_snippet = `
       <div class="deck_snippet_name">$deck_name</div>
       <div class="deck_snippet_count">$card_count</div>
     </div>
-    <div class="deck_snippet_icon_wrapper">
-      <div class="deck_snippet_icon"><i class="ph-bold ph-caret-right"></i></div>
-    </div>
+    <div class="deck_snippet_icon"><i class="ph-bold ph-caret-right"></i></div>
   </a>
 </div>
 

@@ -192,6 +192,10 @@ document.addEventListener('click', function(event) {
   if (target.dataset.action === 'action_back') {action_back();}
   if (target.dataset.action === 'action_toggle_all') {action_toggle_all();}
   if (target.dataset.action === 'action_debug') {action_debug();}
+  if (target.dataset.action === 'action_toggle_modes_on') {action_toggle_modes_on();}
+  if (target.dataset.action === 'action_toggle_modes_off') {action_toggle_modes_off();}
+  if (target.dataset.action === 'action_practice_random') {action_practice_random();}
+  if (target.dataset.action === 'action_practice_mastery') {action_practice_mastery();}
   
 });
 
@@ -249,6 +253,18 @@ function action_practice_deck() {
   location.hash = '#/study/0/' + study_index[0].unique_id;
 }
 
+function action_practice_random() {
+  console.log('Action: Practice Random');
+  create_study_index_for_random();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+}
+
+function action_practice_mastery() {
+  console.log('Action: Practice Random');
+  create_study_index_for_mastery();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+}
+
 function action_add_deck() {
   console.log('Action: Add Deck');
   add_deck_to_database();
@@ -285,6 +301,26 @@ function action_toggle_deck(unique_id, target) {
 function action_toggle_all() {
   console.log('Action: Toggle All');
   task_toggle_all()
+}
+
+function action_toggle_modes_on() {
+  task_toggle_modes_on();
+}
+
+function action_toggle_modes_off() {
+  task_toggle_modes_off();
+}
+
+function task_toggle_modes_on() {
+  document.getElementById('btn_toggle_modes_on').style.display = 'none';
+  document.getElementById('btn_toggle_modes_off').style.display = 'flex';
+  document.getElementById('list_study_modes').style.display = 'flex';
+}
+
+function task_toggle_modes_off() {
+  document.getElementById('btn_toggle_modes_on').style.display = 'flex';
+  document.getElementById('btn_toggle_modes_off').style.display = 'none';
+  document.getElementById('list_study_modes').style.display = 'none';
 }
 
 // ---------------------------------------------------------
@@ -1393,6 +1429,45 @@ function create_study_index_for_card(unique_id) {
   // reset globals
   study_index = [];
   study_index = filter_array_by_property(cards_index, 'unique_id', unique_id);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
+function create_study_index_for_random() {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  var candidates = cards_index; 
+
+  // sort and filter
+  candidates = exclude_untoggled_decks(candidates);
+  candidates = randomise_order(candidates);
+  splice_and_push(10, candidates, study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
+function create_study_index_for_mastery() {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  var candidates = cards_index; 
+
+  // sort and filter
+  candidates = exclude_untoggled_decks(candidates);
+  candidates = sort_by_score_then_date(candidates);
+  splice_and_push(10, candidates, study_index);
+  study_index = randomise_order(study_index);
 
   // log messages in the console
   console.log('Study Index Complete: ', study_index);
