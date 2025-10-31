@@ -1,4 +1,4 @@
-const CACHE = `251031_1410`; // update cache name when changing assets, or old caches can linger.
+const CACHE = `251031_1411`; // update cache name when changing assets, or old caches can linger.
 const ASSETS = [
   ".",
   "index.html",
