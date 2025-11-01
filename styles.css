@@ -978,7 +978,7 @@ outline: none;
   padding: 0 15px;
   color: white;
   font-size: 15px;
-  line-height: 15px;
+  line-height: 48px;
   background: none;
   border: none;
   outline: none;
@@ -989,7 +989,16 @@ outline: none;
   font-family: Quicksand, sans-serif;
   font-size: 15px;
   font-weight: 600;
-  line-height: 18px;
+  line-height: 48px;
+  letter-spacing: -0.1px;
+}
+
+.search_input:focus {
+  color: rgba(255, 255, 255, 1.00);
+  font-family: Quicksand, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 48px;
   letter-spacing: -0.1px;
 }
 
@@ -1018,7 +1027,7 @@ outline: none;
   width: 36px;
   height: 36px;
   font-size: 15px;
-  line-height: 15px;
+  line-height: 36px;
   text-align: center;
   vertical-align: middle;
   color: white;

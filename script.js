@@ -1628,6 +1628,7 @@ document.getElementById('searchbar').addEventListener('input', function() {
 function action_clear_search() {
   console.log('Action: Clear Search');
   task_clear_search();
+  document.getElementById('results_indicator').textContent = '0 results';
   searchbar.focus();
 }
 
@@ -1635,6 +1636,7 @@ function task_render_search() {
   console.log('Rendering Search Scene...');
   var searchbar = document.getElementById('searchbar');
   var results = document.getElementById('dynamic_list_results');
+  document.getElementById('results_indicator').textContent = '0 results';
   results.innerHTML = null;
   searchbar.value = '';
   searchbar.focus();
