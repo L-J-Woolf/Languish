@@ -49,14 +49,14 @@ if ("serviceWorker" in navigator) {
 
     <!-- header  -->
     <div class="header_primary">
-        <div onclick="toggle_developer_mode()" class="header_primary_title">languish</div>
+        <div data-action="action_toggle_dev_mode" class="header_primary_title">languish</div>
     </div> 
 
     <div class="content">
     
         <!-- search  -->
-         <div class="search_wrapper">
-            <div class="search_input">Search...</div>
+         <div class="section_search">
+            <div class="input_search" data-action="action_navigate_to_search">Search...</div>
         </div>
 
         <!-- summary  -->
@@ -113,13 +113,9 @@ if ("serviceWorker" in navigator) {
                     <span class="study_mode_description">Bring back your long-forgotten cards</span>
                 </button>
             </div>
-            
-            
-            
-            
 
             <!-- developer menu -->
-            <div id="developer_menu">
+            <div id="dev_menu" class="dev_menu_hidden">
                 <button onclick="console.log(decks_index)">log decks_index</button>
                 <button onclick="console.log(cards_index)">log cards_index</button>
                 <button onclick="action_toggle_all()">action_toggle_all</button>
@@ -133,10 +129,10 @@ if ("serviceWorker" in navigator) {
         </div>
 
         <!-- dynamic list: decks -->
-        <div class="decks_wrapper">
-            <div class="deck_list_title">Decks</div>
+        <div class="section_decks">
+            <div class="title_decks">Decks</div>
 
-            <div class="decks_wrapper_outer">
+            <div class="decks_outer">
                
                 <div class="deck_snippet_wrapper">
                     <label class="deck_snippet_toggle_wrapper" id="toggle_all">
@@ -152,7 +148,7 @@ if ("serviceWorker" in navigator) {
                     </a>
                 </div>
 
-                <div class="decks_wrapper_inner">
+                <div class="decks_inner">
                     <div class="dynamic_list_decks" id="dynamic_list_decks"></div>
                 </div>
 
@@ -177,7 +173,7 @@ if ("serviceWorker" in navigator) {
 <div class="scene" id="#/decks">
     
     <!-- header -->
-    <div class="secondary_header_wrapper">
+    <div class="secondary_header">
         <button class="btn_ghost" data-action="action_back"><i class="ph-bold ph-arrow-left"></i></button>
         <div class="secondary_header_title" id="deck_title">$title</div>
         <div class="dropdown_wrapper">  
@@ -214,7 +210,7 @@ if ("serviceWorker" in navigator) {
 <div class="scene" id="#/study">
     
     <!-- header -->
-    <div class="secondary_header_wrapper">
+    <div class="secondary_header">
         <button class="btn_ghost" data-action="action_back"><i class="ph-bold ph-arrow-left"></i></button>
         <div class="secondary_header_title" id="study_scene_title">$tracker</div>
         <div class="dropdown_wrapper">  
@@ -228,20 +224,20 @@ if ("serviceWorker" in navigator) {
         </div>
     </div>
 
-    <div class="study_content_wrapper">
+    <div class="studycard_wrapper">
         <div class="studycard_snippet">
             <div class="studycard_question" id="studycard_question">
-                <div class="card_content" id="studycard_question_content">Which shoes are you looking for? I'm looking for the white (ones).</div>
+                <div class="studycard_content" id="studycard_question_content">Which shoes are you looking for? I'm looking for the white (ones).</div>
             </div>
             <div class="studycard_answer" id="studycard_answer">
-                <div class="card_content" id="studycard_answer_content">Welche Schuhe suchst du? Ich suche die weißen.</div>
+                <div class="studycard_content" id="studycard_answer_content">Welche Schuhe suchst du? Ich suche die weißen.</div>
             </div>
         </div>
         <div class="studycard_instructions" id="studycard_instructions">Reveal answer</div>
         <div class="studycard_reveal_wrapper" id="btn_reveal">
             <button class="button_primary">Reveal</button>
         </div>
-        <div class="studycard_ratings_wrapper" id="btn_rate">
+        <div class="studycard_ratings" id="btn_rate">
             <div data-action="rate_card_1" class="button_rating red"><i class="ph-fill ph-thumbs-down"></i></div>
             <div data-action="rate_card_2" class="button_rating orange"></div>
             <div data-action="rate_card_3" class="button_rating yellow"></div>
@@ -250,6 +246,39 @@ if ("serviceWorker" in navigator) {
         </div>
     </div>
 
+</div>
+
+<!-- scene: search  -->
+<div class="scene" id="#/search">
+    
+    <!-- header -->
+    <div class="secondary_header">
+        <button class="btn_ghost" data-action="action_back"><i class="ph-bold ph-arrow-left"></i></button>
+    </div>
+
+    <div class="content">
+
+        <!-- search  -->
+        <div class="section_search">
+
+            <form class="searchbar">
+                <input id="searchbar" class="search_input" placeholder="Search…"/>
+                <button type="button" class="search_btn" data-action="action_clear_search"><i class="ph-bold ph-x"></i></button>
+            </form> 
+
+        </div> 
+
+        <div class="section_results">
+
+            <div id="results_indicator" class="title_decks">Results</div>
+
+            <!-- dynamic list: cards -->
+            <div class="dynamic_list_results" id="dynamic_list_results"></div>
+
+        </div>   
+
+    </div>
+    
 </div>
 
 </body>

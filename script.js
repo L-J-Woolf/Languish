@@ -141,6 +141,13 @@ async function route() {
   load_scene('#/study');
   }
 
+  else if (current_hash.includes('#/search')) { 
+  console.log('Hash includes #/search');
+  task_render_search();
+  load_scene('#/search');
+  searchbar.focus();
+  }
+
   else { 
   console.log('No hash rule detected, loading default scene');
   render_dashboard();
@@ -184,6 +191,7 @@ document.addEventListener('click', function(event) {
   var target = event.target.closest('[data-action]'); if (!target) return;
 
   // perform the relavent task
+  if (target.dataset.action === 'action_debug') {action_debug();}
   if (target.dataset.action === 'action_practice_all') {action_practice_all();}
   if (target.dataset.action === 'action_practice_deck') {action_practice_deck();}
   if (target.dataset.action === 'action_add_deck') {action_add_deck();}
@@ -191,12 +199,13 @@ document.addEventListener('click', function(event) {
   if (target.dataset.action === 'action_add_card') {action_add_card();}
   if (target.dataset.action === 'action_back') {action_back();}
   if (target.dataset.action === 'action_toggle_all') {action_toggle_all();}
-  if (target.dataset.action === 'action_debug') {action_debug();}
+  if (target.dataset.action === 'action_toggle_dev_mode') {action_toggle_dev_mode();}
   if (target.dataset.action === 'action_toggle_modes_on') {action_toggle_modes_on();}
   if (target.dataset.action === 'action_toggle_modes_off') {action_toggle_modes_off();}
   if (target.dataset.action === 'action_practice_random') {action_practice_random();}
   if (target.dataset.action === 'action_practice_mastery') {action_practice_mastery();}
   if (target.dataset.action === 'action_practice_oldest') {action_practice_oldest();}
+  if (target.dataset.action === 'action_navigate_to_search') {action_navigate_to_search();}
   
 });
 
@@ -238,8 +247,6 @@ document.getElementById('dynamic_list_cards').addEventListener('click', function
 
 function action_debug() {
   console.log('Debugging');
-  //update_card_test('-OcAj8qdy7YTbJ-mguSI', { flipped: true, score: 2 });
-  flip_card();
 }
 
 function action_practice_all() {
@@ -330,22 +337,36 @@ function task_toggle_modes_off() {
   document.getElementById('list_study_modes').style.display = 'none';
 }
 
+function action_toggle_dev_mode() {
+  console.log('Action: Dev Mode');
+  task_toggle_dev_mode();
+}
+
+function action_navigate_to_search() {
+  console.log('Action: Search');
+  location.hash = '#/search';
+}
+
+
 // ---------------------------------------------------------
 // TASKS 2.0 
 // ---------------------------------------------------------
 
 // function to toggle dev mode on and off
-function toggle_developer_mode() {
-  if (is_developer_mode === false) {
-    console.log("enabling developer mode");
-    document.getElementById('developer_menu').style.display = "block";
-    is_developer_mode = true;
+function task_toggle_dev_mode() {
+
+  var menu_ref = document.getElementById('dev_menu');
+
+  if (menu_ref.classList.contains('dev_menu_hidden')) {
+    menu_ref.classList.remove('dev_menu_hidden');
+    menu_ref.classList.add('dev_menu_visible');
+  } 
+  
+  else {
+    menu_ref.classList.remove('dev_menu_visible');
+    menu_ref.classList.add('dev_menu_hidden');
   }
-  else if (is_developer_mode === true) {
-    console.log("disabling developer mode");
-    document.getElementById('developer_menu').style.display = "none";
-    is_developer_mode = false;
-  }
+
 }
 
 // function to toggle all deck checkboxes (on or off)
@@ -708,28 +729,28 @@ function render_deck_scene(deck_id_to_render) {
   cards_index.filter(item => item.deck.includes(deck_id_to_render)).forEach (
       
     // specify the actions to perform on each list item
-      function (list_item) {
+    function (list_item) {
 
-        // insert html template
-        dynamic_list_cards.insertAdjacentHTML("beforeend", card_snippet);
+      // insert html template
+      dynamic_list_cards.insertAdjacentHTML("beforeend", card_snippet);
         
-        // grab the element just inserted
-        var snippet = dynamic_list_cards.lastElementChild;
+      // grab the element just inserted
+      var snippet = dynamic_list_cards.lastElementChild;
 
-        // fill its fields
-        snippet.setAttribute('data-id', list_item.unique_id); // set id
-        snippet.querySelector(".card_snippet_question").innerText = list_item.question; // set question
-        snippet.querySelector(".card_snippet_answer").innerText = list_item.answer; // // set answer
+      // fill its fields
+      snippet.setAttribute('data-id', list_item.unique_id); // set id
+      snippet.querySelector(".card_snippet_question").innerText = list_item.question; // set question
+      snippet.querySelector(".card_snippet_answer").innerText = list_item.answer; // // set answer
 
-        if (list_item.score === 0) {snippet.style.borderTop = "3px solid #54555D"}
-        if (list_item.score === 1) {snippet.style.borderTop = "3px solid #C34A3F"}
-        if (list_item.score === 2) {snippet.style.borderTop = "3px solid #EE8343"}
-        if (list_item.score === 3) {snippet.style.borderTop = "3px solid #F6DA39"}
-        if (list_item.score === 4) {snippet.style.borderTop = "3px solid #7FAC3A"}
-        if (list_item.score === 5) {snippet.style.borderTop = "3px solid #43ACD9"}
+      if (list_item.score === 0) {snippet.style.borderTop = "3px solid #54555D"}
+      if (list_item.score === 1) {snippet.style.borderTop = "3px solid #C34A3F"}
+      if (list_item.score === 2) {snippet.style.borderTop = "3px solid #EE8343"}
+      if (list_item.score === 3) {snippet.style.borderTop = "3px solid #F6DA39"}
+      if (list_item.score === 4) {snippet.style.borderTop = "3px solid #7FAC3A"}
+      if (list_item.score === 5) {snippet.style.borderTop = "3px solid #43ACD9"}
 
-      }
-    );
+    }
+  );
 }
 
 // function to render cards list
@@ -1579,4 +1600,87 @@ function randomise_order(array) {
   // return result
   return [...array].sort(() => Math.random() - 0.5);
 
+}
+
+// ---------------------------------------------------------
+// SEARCH
+// ---------------------------------------------------------
+
+document.addEventListener('click', function(event) {
+
+  // find the clicked control
+  var target = event.target.closest('[data-action]'); if (!target) return;
+
+  // perform the relavent task
+  if (target.dataset.action === 'action_clear_search') {action_clear_search();}
+  
+});
+
+document.getElementById('searchbar').addEventListener('input', function() {
+
+  task_populate_results(searchbar.value);
+  var list_ref = document.getElementById('dynamic_list_results');
+  var results_total = list_ref.querySelectorAll('.card_snippet_wrapper').length;
+  document.getElementById('results_indicator').textContent = results_total + ' results';
+
+});
+
+function action_clear_search() {
+  console.log('Action: Clear Search');
+  task_clear_search();
+  searchbar.focus();
+}
+
+function task_render_search() {
+  console.log('Rendering Search Scene...');
+  var searchbar = document.getElementById('searchbar');
+  var results = document.getElementById('dynamic_list_results');
+  results.innerHTML = null;
+  searchbar.value = '';
+  searchbar.focus();
+}
+
+function task_populate_results(value) {
+
+  // select the element to render inside
+  var dynamic_list_results = document.getElementById('dynamic_list_results');
+  
+  // ensure the element has an innerhtml property
+  dynamic_list_results.innerHTML = null;
+
+  // specify array to loop through and perform actions
+  var results_ref = cards_index.filter(item => ['question','answer'].some(key => item[key]?.toLowerCase().includes(value.toLowerCase()))).forEach(
+
+    // specify the actions to perform on each list item
+    function (list_item) {
+
+      // insert html template
+      dynamic_list_results.insertAdjacentHTML("beforeend", card_snippet);
+        
+      // grab the element just inserted
+      var snippet = dynamic_list_results.lastElementChild;
+
+      // fill its fields
+      snippet.setAttribute('data-id', list_item.unique_id); // set id
+      snippet.querySelector(".card_snippet_question").innerText = list_item.question; // set question
+      snippet.querySelector(".card_snippet_answer").innerText = list_item.answer; // // set answer
+
+      if (list_item.score === 0) {snippet.style.borderTop = "3px solid #54555D"}
+      if (list_item.score === 1) {snippet.style.borderTop = "3px solid #C34A3F"}
+      if (list_item.score === 2) {snippet.style.borderTop = "3px solid #EE8343"}
+      if (list_item.score === 3) {snippet.style.borderTop = "3px solid #F6DA39"}
+      if (list_item.score === 4) {snippet.style.borderTop = "3px solid #7FAC3A"}
+      if (list_item.score === 5) {snippet.style.borderTop = "3px solid #43ACD9"}
+
+    }
+  );
+
+}
+
+function task_clear_search() {
+  console.log('Clearing Search...');
+  var searchbar = document.getElementById('searchbar');
+  searchbar.value = ''; 
+  var results = document.getElementById('dynamic_list_results');
+  results.innerHTML = null;
 }
