@@ -34,8 +34,8 @@ var card_snippet = `
             </div>
         </div>
   </div>
-  <div class="card_snippet_question" data-action="action_edit_question" data-placeholder="Question..." contenteditable="true"></div>
-  <div class="card_snippet_answer" data-action="action_edit_answer" data-placeholder="Answer..." contenteditable="true"></div>
+  <div class="card_snippet_question" data-action="action_edit_question" data-placeholder="Question..." contenteditable="plaintext-only"></div>
+  <div class="card_snippet_answer" data-action="action_edit_answer" data-placeholder="Answer..." contenteditable="plaintext-only"></div>
 </div>
 
 `;
