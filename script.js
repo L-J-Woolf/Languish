@@ -1447,7 +1447,7 @@ function create_study_index_for_kzzzt() {
   splice_and_push(5, candidates_5, study_index);
 
   // rebuild candidates from minis (now missing spliced items)
-  candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4, ...candidates_5];
+  candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
 
   // Calculate how many items short of 10 it is
   var difference = 10 - study_index.length;
@@ -1456,7 +1456,7 @@ function create_study_index_for_kzzzt() {
   splice_and_push(difference, candidates, study_index);
 
   // rebuild candidates from minis (now missing spliced items)
-  candidates = [...candidates, ...candidates_0];
+  candidates = [...candidates, ...candidates_0, ...candidates_5];
 
   // Calculate how many items short of 10 it is
   var difference = 10 - study_index.length;
