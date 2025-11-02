@@ -56,12 +56,14 @@ if ("serviceWorker" in navigator) {
     
         <!-- search  -->
          <div class="section_search">
-            <div class="input_search" data-action="action_goto_search">Search...</div>
+            <div class="searchbar" data-action="action_goto_search">
+                <div class="search_input" data-placeholder="Search..."></div>
+            </div>
         </div>
 
         <!-- summary  -->
         <div class="summary_wrapper">
-            <div class="summary_title">Dashboard <span style="opacity: 0.15;"> (251102_1909)</span></div>  
+            <div class="summary_title">Dashboard <span style="opacity: 0.15;"> (251102_2144)</span></div>  
             <div class="metrics_grid">
                 <div class="metric">
                     <div class="metric_content">
@@ -96,7 +98,7 @@ if ("serviceWorker" in navigator) {
                 </div>
             </div>
             
-            <button class="button_primary" data-action="action_practice_all">Practice All</button>
+            <button class="button_primary" data-action="action_practice_default">Practice All</button>
             <button class="btn_hidden" id="btn_toggle_modes_on" data-action="action_toggle_modes_on"><i class="ph-bold ph-caret-down"></i></button>
             <button class="btn_hidden" id="btn_toggle_modes_off" data-action="action_toggle_modes_off"><i class="ph-bold ph-caret-up"></i></button>
             <div class="modes_list" id="list_study_modes">
@@ -112,21 +114,12 @@ if ("serviceWorker" in navigator) {
                     <span class="study_mode_label">Golden Oldies</span>
                     <span class="study_mode_description">Bring back your long-forgotten cards</span>
                 </button>
-                <button class="button_mode" data-action="action_practice_kzzzt">
-                    <span class="study_mode_label">[REDACTED]</span>
-                    <span class="study_mode_description">kzzzt… access denied by entity</span>
-                </button>
             </div>
 
             <!-- developer menu -->
             <div id="dev_menu" class="dev_menu_hidden">
                 <button onclick="console.log(decks_index)">log decks_index</button>
                 <button onclick="console.log(cards_index)">log cards_index</button>
-                <button onclick="action_toggle_all()">action_toggle_all</button>
-                <button onclick="create_study_index()">create_study_index</button>
-                <button onclick="console.log(filter_cards_by_property('score', '1'))">filter_cards_by_property</button>
-                <button onclick="create_study_index_deck()">create_study_index_deck</button>
-                <button onclick="filter_array_by_property(decks_index, 'toggled', true)">filter_array_by_property</button>
                 <button data-action="action_debug">Debug</button>
             </div>
 
@@ -266,9 +259,9 @@ if ("serviceWorker" in navigator) {
         <div class="section_search">
 
             <div class="searchbar">
-                <input id="searchbar" class="search_input" placeholder="Search…"/>
+                <div id="searchbar" class="search_input" data-placeholder="Search..." contenteditable="plaintext-only"></div>
                 <button type="button" class="search_btn" data-action="action_clear_search"><i class="ph-bold ph-x"></i></button>
-            </div> 
+            </div>
 
         </div> 
 

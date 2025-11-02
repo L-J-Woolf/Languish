@@ -198,13 +198,12 @@ document.addEventListener('click', function(event) {
   if (target.dataset.action === 'action_toggle_dev_mode') {action_toggle_dev_mode();}
 
   // study actions
-  if (target.dataset.action === 'action_practice_all') {action_practice_all();}
+  if (target.dataset.action === 'action_practice_default') {action_practice_default();}
   if (target.dataset.action === 'action_practice_deck') {action_practice_deck();}
   if (target.dataset.action === "action_study_card") {action_study_card(target);}
   if (target.dataset.action === 'action_practice_random') {action_practice_random();}
   if (target.dataset.action === 'action_practice_mastery') {action_practice_mastery();}
   if (target.dataset.action === 'action_practice_oldest') {action_practice_oldest();}
-  if (target.dataset.action === 'action_practice_kzzzt') {action_practice_kzzzt();}
 
   // add, edit and delete actions
   if (target.dataset.action === 'action_add_deck') {action_add_deck();}
@@ -245,9 +244,9 @@ function action_debug() {
   console.log('Debugging');
 }
 
-function action_practice_all() {
-  console.log('Action: Practice All');
-  create_study_index_for_all();
+function action_practice_default() {
+  console.log('Action: Practice Default');
+  create_study_index_for_default();
   location.hash = '#/study/0/' + study_index[0].unique_id;
 }
 
@@ -272,12 +271,6 @@ function action_practice_mastery() {
 function action_practice_oldest() {
   console.log('Action: Practice Random');
   create_study_index_for_oldest();
-  location.hash = '#/study/0/' + study_index[0].unique_id;
-}
-
-function action_practice_kzzzt() {
-  console.log('Action: Practice kzzzt');
-  create_study_index_for_kzzzt();
   location.hash = '#/study/0/' + study_index[0].unique_id;
 }
 
@@ -1303,28 +1296,6 @@ function collect_new_order() {
 // TASKS: STUDY INDEX 
 // ---------------------------------------------------------
 
-function create_study_index_for_all() {
-  
-  // log messages in the console
-  console.log('Building Study Index');
-
-  // reset globals
-  study_index = [];
-  var candidates = cards_index; 
-
-  // sort and filter
-  candidates = exclude_untoggled_decks(candidates);
-  candidates = sort_by_score_then_date(candidates);
-  splice_and_push(5, candidates, study_index);
-  candidates = sort_by_last_reviewed(candidates);
-  splice_and_push(5, candidates, study_index);
-  study_index = randomise_order(study_index);
-
-  // log messages in the console
-  console.log('Study Index Complete: ', study_index);
-
-}
-
 function create_study_index_for_deck() {
   
   // log messages in the console
@@ -1419,7 +1390,7 @@ function create_study_index_for_oldest() {
 
 }
 
-function create_study_index_for_kzzzt() {
+function create_study_index_for_default() {
   
   // log messages in the console
   console.log('Building Study Index');
@@ -1567,7 +1538,7 @@ document.addEventListener('click', function(event) {
 
 document.getElementById('searchbar').addEventListener('input', function() {
 
-  task_populate_results(searchbar.value);
+  task_populate_results(this.textContent.trim());
   var list_ref = document.getElementById('dynamic_list_results');
   var results_total = list_ref.querySelectorAll('.card_snippet_wrapper').length;
   document.getElementById('results_indicator').textContent = results_total + ' results';
@@ -1587,7 +1558,7 @@ function task_render_search() {
   var results = document.getElementById('dynamic_list_results');
   document.getElementById('results_indicator').textContent = '0 results';
   results.innerHTML = null;
-  searchbar.value = '';
+  searchbar.textContent = '';
   searchbar.focus();
 }
 
@@ -1631,18 +1602,10 @@ function task_populate_results(value) {
 function task_clear_search() {
   console.log('Clearing Search...');
   var searchbar = document.getElementById('searchbar');
-  searchbar.value = ''; 
+  searchbar.textContent = ''; 
   var results = document.getElementById('dynamic_list_results');
   results.innerHTML = null;
 }
-
-
-
-
-
-
-
-
 
 // ---------------------------------------------------------
 // TESTING
