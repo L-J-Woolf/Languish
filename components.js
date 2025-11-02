@@ -27,15 +27,15 @@ var card_snippet = `
     <div class="dropdown_wrapper">  
             <div class="dropdown_button" tabindex="0"><i class="ph-bold ph-dots-three"></i></div>
             <div class="dropdown_menu">
-                <a tabindex="0" class="dropdown_item" data-action="study_card">Study</a>
+                <a tabindex="0" class="dropdown_item" data-action="action_study_card">Study</a>
                 <a tabindex="0" class="dropdown_item">Edit</a>
                 <div tabindex="0" class="dropdown_divider"></div>
                 <a tabindex="0" class="dropdown_item" data-action="action_delete_card">Delete</a>
             </div>
         </div>
   </div>
-  <div class="card_snippet_question" data-action="edit_question" data-placeholder="Question..." contenteditable="true"></div>
-  <div class="card_snippet_answer" data-action="edit_answer" data-placeholder="Answer..." contenteditable="true"></div>
+  <div class="card_snippet_question" data-action="action_edit_question" data-placeholder="Question..." contenteditable="true"></div>
+  <div class="card_snippet_answer" data-action="action_edit_answer" data-placeholder="Answer..." contenteditable="true"></div>
 </div>
 
 `;

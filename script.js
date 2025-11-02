@@ -122,34 +122,34 @@ async function route() {
   }
 
   if (current_hash.includes('#/dashboard')) { 
-  console.log('Hash includes #/dashboard');
-  render_dashboard();
-  load_scene('#/dashboard');
+    console.log('Hash includes #/dashboard');
+    task_render_dashboard();
+    load_scene('#/dashboard');
   }
 
   else if (current_hash.includes('#/decks/')) { 
-  console.log('Hash includes #/decks/');
-  render_deck_scene(current_hash_id);
-  load_scene('#/decks');
+    console.log('Hash includes #/decks/');
+    task_render_deck(current_hash_id);
+    load_scene('#/decks');
   }
 
   else if (current_hash.includes('#/study')) { 
-  console.log('Hash includes #/study');
-  render_study_scene(current_hash_id);
-  load_scene('#/study');
+    console.log('Hash includes #/study');
+    render_study_scene(current_hash_id);
+    load_scene('#/study');
   }
 
   else if (current_hash.includes('#/search')) { 
-  console.log('Hash includes #/search');
-  task_render_search();
-  load_scene('#/search');
-  searchbar.focus();
+    console.log('Hash includes #/search');
+    task_render_search();
+    load_scene('#/search');
+    searchbar.focus();
   }
 
   else { 
-  console.log('No hash rule detected, loading default scene');
-  render_dashboard();
-  load_scene('#/dashboard');
+    console.log('No hash rule detected, loading default scene');
+    task_render_dashboard();
+    load_scene('#/dashboard');
   }
 }
 
@@ -179,7 +179,7 @@ async function refresh() {
 
   // perform tasks
   await index_database();
-  await route();
+  //await route();
 
 }
 
@@ -200,6 +200,7 @@ document.addEventListener('click', function(event) {
   // study actions
   if (target.dataset.action === 'action_practice_all') {action_practice_all();}
   if (target.dataset.action === 'action_practice_deck') {action_practice_deck();}
+  if (target.dataset.action === "action_study_card") {action_study_card(target);}
   if (target.dataset.action === 'action_practice_random') {action_practice_random();}
   if (target.dataset.action === 'action_practice_mastery') {action_practice_mastery();}
   if (target.dataset.action === 'action_practice_oldest') {action_practice_oldest();}
@@ -208,8 +209,10 @@ document.addEventListener('click', function(event) {
   if (target.dataset.action === 'action_add_deck') {action_add_deck();}
   if (target.dataset.action === 'action_delete_deck') {action_delete_deck();}
   if (target.dataset.action === 'action_add_card') {action_add_card();}
+  if (target.dataset.action === "action_delete_card") {action_delete_card(target)}
 
   // ui & state change actions
+  if (target.dataset.action === "action_toggle_deck") {action_toggle_deck(target);}
   if (target.dataset.action === 'action_toggle_all') {action_toggle_all();}
   if (target.dataset.action === 'action_toggle_dev_mode') {action_toggle_dev_mode();}
   if (target.dataset.action === 'action_toggle_modes_on') {action_toggle_modes_on();}
@@ -219,38 +222,17 @@ document.addEventListener('click', function(event) {
   if (target.dataset.action === 'action_goto_search') {action_goto_search();} 
   if (target.dataset.action === 'action_goto_dashboard') {action_goto_dashboard();}
   if (target.dataset.action === 'action_back') {action_back();}
-  
+
 });
 
-document.getElementById('dynamic_list_decks').addEventListener('click', function(event) {
-  
-  // Find the clicked control
+// listen for focus events on elements and perform the relavent action
+document.addEventListener('focusin', function(event) {
+
+  // find the clicked control
   var target = event.target.closest('[data-action]'); if (!target) return;
 
-  var clicked_item = event.target.closest('.deck_snippet_wrapper'); // find the parent container of the clicked item
-  var unique_id = clicked_item.dataset.id; // store the unique id of the parent container
-  var action = target.dataset.action; // determine the correct action
-
-  if (action === "action_toggle_deck") {action_toggle_deck(unique_id, target)}
-
-});
-
-document.getElementById('dynamic_list_cards').addEventListener('click', function(event) {
-  
-  // Find the clicked control, even if an icon or span inside the button was clicked
-  var target = event.target.closest('[data-action]');
-
-  // guard agianst null clicks
-  if (!target) return;
-
-  var clicked_item = event.target.closest('.card_snippet_wrapper'); // find the parent container of the clicked item
-  var unique_id = clicked_item.dataset.id; // store the unique id of the parent container
-  var action = target.dataset.action; // determine the correct action
-
-  if (action === "edit_question") {edit_question(unique_id, target)}
-  if (action === "edit_answer") {edit_answer(unique_id, target)}
-  if (action === "study_card") {study_card(unique_id)}
-  if (action === "action_delete_card") {action_delete_card(unique_id)}
+  if (target.dataset.action === "action_edit_question") {action_edit_question(target)}
+  if (target.dataset.action === "action_edit_answer") {action_edit_answer(target)}
 
 });
 
@@ -292,24 +274,28 @@ function action_practice_oldest() {
   location.hash = '#/study/0/' + study_index[0].unique_id;
 }
 
-function action_add_deck() {
+async function action_add_deck() {
   console.log('Action: Add Deck');
-  add_deck_to_database();
+  await task_add_deck();
+  task_render_dashboard();
 }
 
 function action_delete_deck() {
   console.log('Action: Delete Deck');
-  delete_deck(get_hash_id());
+  task_delete_deck(get_hash_id());
+  location.hash = '#/dashboard';
 }
 
-function action_add_card() {
+async function action_add_card() {
   console.log('Action: Add Deck');
-  add_card_to_database();
+  await task_add_card();
+  task_render_deck(get_hash_id());
 }
 
-function action_delete_card(unique_id) {
+async function action_delete_card(target) {
   console.log('Action: Delete Card');
-  delete_card_from_database(unique_id);
+  await task_delete_card(target);
+  task_render_deck(get_hash_id());
 }
 
 function action_back() {
@@ -317,14 +303,10 @@ function action_back() {
   window.history.back();
 }
 
-// function for toggling decks on and off
-function action_toggle_deck(unique_id, target) {
-  console.log('deck toggled: ' + target.checked + ' (' + unique_id + ')');
-  update_setting_test('is_all_toggled', false);
-  edit_deck_toggled_status(unique_id, target.checked);
+function action_toggle_deck(target) {
+  task_toggle_deck(target);
 }
 
-// function for toggling all decks on and off
 function action_toggle_all() {
   console.log('Action: Toggle All');
   task_toggle_all()
@@ -336,18 +318,6 @@ function action_toggle_modes_on() {
 
 function action_toggle_modes_off() {
   task_toggle_modes_off();
-}
-
-function task_toggle_modes_on() {
-  document.getElementById('btn_toggle_modes_on').style.display = 'none';
-  document.getElementById('btn_toggle_modes_off').style.display = 'flex';
-  document.getElementById('list_study_modes').style.display = 'flex';
-}
-
-function task_toggle_modes_off() {
-  document.getElementById('btn_toggle_modes_on').style.display = 'flex';
-  document.getElementById('btn_toggle_modes_off').style.display = 'none';
-  document.getElementById('list_study_modes').style.display = 'none';
 }
 
 function action_toggle_dev_mode() {
@@ -365,6 +335,18 @@ function action_goto_dashboard() {
   location.hash = '#/dashboard';
 }
 
+function action_edit_question(target) {
+  task_edit_question(target);
+}
+
+function action_edit_answer(target) {
+  task_edit_answer(target);
+}
+
+// listen for clicks on the study card button
+function action_study_card(target) {
+  task_study_card(target);
+}
 
 // ---------------------------------------------------------
 // TASKS 2.0 
@@ -401,7 +383,7 @@ function task_toggle_all() {
   if (allChecked) {
     // All checked → uncheck all
     toggles_ref.forEach(t => { if (t.checked) t.click(); });
-    update_setting_test('is_all_toggled', false);
+    task_edit_setting('is_all_toggled', false);
     document.querySelector('#toggle_all input[type="checkbox"]').checked = false;
     console.log('All were checked → all unchecked');
   } 
@@ -409,7 +391,7 @@ function task_toggle_all() {
   else if (someChecked) {
     // Some checked → check the rest
     toggles_ref.forEach(t => { if (!t.checked) t.click(); });
-    update_setting_test('is_all_toggled', true);
+    task_edit_setting('is_all_toggled', true);
     document.querySelector('#toggle_all input[type="checkbox"]').checked = true;
     console.log('Some were checked → now all checked');
   } 
@@ -417,60 +399,91 @@ function task_toggle_all() {
   else if (noneChecked) {
     // None checked → check all
     toggles_ref.forEach(t => { if (!t.checked) t.click(); });
-    update_setting_test('is_all_toggled', true);
+    task_edit_setting('is_all_toggled', true);
     document.querySelector('#toggle_all input[type="checkbox"]').checked = true;
     console.log('None were checked → all checked');
   }
 }
 
-// listen for click events on cards questions
-function edit_question(unique_id, target) {
+// listen for click events on cards
+function task_edit_question(target) {
   
+  // get a reference to the parent container
+  var item_ref = target.closest('.card_snippet_wrapper');
+
+  // get a reference to the parent containers id
+  var unique_id = item_ref.dataset.id;
+
   // log messages in the console
   console.log("Question was clicked: " + unique_id);
   
-  // set styles
-  target.style.background = "rgba(255, 255, 255, 0.12)";
-  
   // listen for offfocus
-  target.addEventListener('blur', on_blur);
+  target.addEventListener('focusout', focusout);
   
   // on de-focus
-  function on_blur(event) {
-    target.removeEventListener('blur', on_blur);
-    target.style.removeProperty("background");
-    edit_question_in_database(target.innerText, unique_id);
-    console.log("Question was edited: " + target.innerText);
+  function focusout(event) {
+    target.removeEventListener('focusout', focusout);
+    task_edit_card(unique_id, {question: target.textContent});
+    console.log("Question was edited: " + target.textContent);
   }
 
 }
 
-// listen for click events on cards answers
-function edit_answer(unique_id, target) {
+// listen for click events on cards
+function task_edit_answer(target) {
+  
+  // get a reference to the parent container
+  var item_ref = target.closest('.card_snippet_wrapper');
+
+  // get a reference to the parent containers id
+  var unique_id = item_ref.dataset.id;
+
   // log messages in the console
   console.log("Answer was clicked: " + unique_id);
   
-  // set styles
-  target.style.background = "rgba(255, 255, 255, 0.12)";
-  
   // listen for offfocus
-  target.addEventListener('blur', on_blur);
+  target.addEventListener('focusout', focusout);
   
   // on de-focus
-  function on_blur(event) {
-    target.removeEventListener('blur', on_blur);
-    target.style.removeProperty("background");
-    edit_answer_in_database(target.innerText, unique_id);
-    console.log("Answer was edited: " + target.innerText);
+  function focusout(event) {
+    target.removeEventListener('focusout', focusout);
+    task_edit_card(unique_id, {answer: target.textContent});
+    console.log("Answer was edited: " + target.textContent);
   }
 
 }
 
 // listen for clicks on the study card button
-function study_card(unique_id) {
+function task_study_card(target) {
+
+  // get a reference to the parent items ID
+  var unique_id = target.closest('.card_snippet_wrapper').dataset.id;
+
+  // log messages in the console
   console.log('studying card: ' + unique_id);
+
+  // create study index
   create_study_index_for_card(unique_id);
   location.hash = '#/study/0/' + study_index[0].unique_id;
+}
+
+function task_toggle_deck(target) {
+  var unique_id = target.closest('.deck_snippet_wrapper').dataset.id; // find the parent container of the clicked item
+  console.log('deck toggled: ' + target.checked + ' (' + unique_id + ')');
+  task_edit_setting('is_all_toggled', false);
+  task_edit_deck(unique_id, {toggled: target.checked});
+}
+
+function task_toggle_modes_on() {
+  document.getElementById('btn_toggle_modes_on').style.display = 'none';
+  document.getElementById('btn_toggle_modes_off').style.display = 'flex';
+  document.getElementById('list_study_modes').style.display = 'flex';
+}
+
+function task_toggle_modes_off() {
+  document.getElementById('btn_toggle_modes_on').style.display = 'flex';
+  document.getElementById('btn_toggle_modes_off').style.display = 'none';
+  document.getElementById('list_study_modes').style.display = 'none';
 }
 
 // ---------------------------------------------------------
@@ -508,9 +521,8 @@ document.getElementById('deck_title').addEventListener('dblclick', event => {
   function on_blur(event) {
     element_to_modify.style.removeProperty("background");
     element_to_modify.style.removeProperty("padding");
-    // element_to_modify.style.background = "#38393E";
     element_to_modify.contentEditable = "false";
-    edit_deck_in_database(element_to_modify.textContent, get_hash_id());
+    task_edit_deck(get_hash_id(), {name:element_to_modify.textContent});
     element_to_modify.removeEventListener('blur', on_blur);
   }
 
@@ -572,19 +584,11 @@ document.getElementById('btn_rate').addEventListener('click', function(event) {
     card_is_flipped = true;
   }
 
-  update_card_test(card_ref[0].unique_id, { flipped: card_is_flipped, score: score, last_reviewed: Date.now() });
+  task_edit_card(card_ref[0].unique_id, { flipped: card_is_flipped, score: score, last_reviewed: Date.now() });
   iterate_study_scene();
   update_stats();
 
 });
-
-// function to rate and then iterate cards while studying
-// async function rate_and_interate(card_id, score) {
-//   // await edit_card_score_in_database(card_id, score);
-//   await update_card_test(card_ref[0].unique_id, { flipped: card_status, score: score });
-//   await update_stats();
-//   await iterate_study_scene();
-// }
 
 // function to iterate the study scene through the study_index
 async function iterate_study_scene() {
@@ -630,7 +634,7 @@ function load_scene(scene_to_load) {
 }
 
 // function to render decks list
-function render_dashboard() {
+function task_render_dashboard() {
   
   // show messages in the console
   console.log('rendering dashboard');
@@ -689,7 +693,7 @@ function render_dashboard() {
 }
 
 // function to render cards list
-function render_deck_scene(deck_id_to_render) {
+function task_render_deck(deck_id_to_render) {
 
   // show messages in the console
   console.log('rendering cards list for: ' + deck_id_to_render);
@@ -785,21 +789,8 @@ function render_study_scene(card_id_to_render) {
 // TASKS: UPDATE DATABASE
 // ---------------------------------------------------------
 
-// function to update a card in the database
-function update_card_test(unique_id, fields_to_update) {
-  
-  // get a reference to the card in the database
-  var item_ref = realtime_database.ref('cards/' + unique_id);
-  
-  // update any and all feilds
-  item_ref.update(fields_to_update);
-
-  // log messages in the console
-  console.log(`card ${unique_id} updated:`, fields_to_update);
-}
-
 // function to add an item into the database
-function add_deck_to_database() {
+async function task_add_deck() {
   
   // get a reference to the database
   var item_ref = realtime_database.ref('decks');
@@ -815,67 +806,38 @@ function add_deck_to_database() {
   console.log('New deck added');
 }
 
-// function to edit an item into the database
-function edit_deck_in_database(deck_name, unique_id) {
+// function to update a card in the database
+function task_edit_deck(unique_id, fields_to_update) {
   
-  // point to the specific item using its id
+  // get a reference to the card in the database
   var item_ref = realtime_database.ref('decks/' + unique_id);
-
-  // update only the provided fields
-  item_ref.update({
-    name: deck_name
-  });
-
-  console.log('deck updated:', deck_name, unique_id);
-}
-
-// function to edit an item into the database
-function edit_deck_toggled_status(unique_id, toggle_status) {
   
-  // point to the specific item using its id
-  var item_ref = realtime_database.ref('decks/' + unique_id);
+  // update any and all feilds
+  item_ref.update(fields_to_update);
 
-  // update only the provided fields
-  item_ref.update({
-    toggled: toggle_status
-  });
-
-  console.log('deck updated:', unique_id, toggle_status);
-}
-
-// function to edit an item into the database
-function edit_deck_order_in_database(unique_id, order) {
-  
-  // point to the specific item using its id
-  var item_ref = realtime_database.ref('decks/' + unique_id);
-
-  // update only the provided fields
-  item_ref.update({
-    order: order
-  });
-
-  console.log('deck updated:', unique_id, order);
+  // log messages in the console
+  console.log(`deck ${unique_id} updated:`, fields_to_update);
 }
 
 // function to delete a deck from the Realtime Database by its unique ID
-function delete_deck(item_to_delete) {
+function task_delete_deck(unique_id) {
 
   //build a reference to the specific card you want to delete
-  var deck_ref = realtime_database.ref('decks/' + item_to_delete);
+  var deck_ref = realtime_database.ref('decks/' + unique_id);
 
   // remove it from the database
   deck_ref.remove();
   
-  var cards_to_delete = cards_index.filter(item => item.deck.includes(item_to_delete));
+  var cards_to_delete = cards_index.filter(item => item.deck === unique_id);
 
   cards_to_delete.forEach(function(item) {
-    delete_card_from_database(item.unique_id)
+    var card_ref = realtime_database.ref('cards/' + item.unique_id);
+    card_ref.remove();
   });
-
 }
 
 // function to add an item into the database
-function add_card_to_database() {
+async function task_add_card() {
   
   // get a reference to the database
   var item_ref = realtime_database.ref('cards');
@@ -893,81 +855,33 @@ function add_card_to_database() {
   console.log('new card added:');
 }
 
-// function to edit an item into the database
-function edit_question_in_database(question, unique_id) {
+// function to update a card in the database
+function task_edit_card(unique_id, fields_to_update) {
   
-  // point to the specific item using its id
+  // get a reference to the card in the database
   var item_ref = realtime_database.ref('cards/' + unique_id);
-
-  // update only the provided fields
-  item_ref.update({
-    question: question
-  });
-
-  // show messages in the console
-  console.log('card updated:', question, unique_id);
-}
-
-// function to edit an item into the database
-function edit_answer_in_database(answer, unique_id) {
   
-  // point to the specific item using its id
-  var item_ref = realtime_database.ref('cards/' + unique_id);
+  // update any and all feilds
+  item_ref.update(fields_to_update);
 
-  // update only the provided fields
-  item_ref.update({
-    answer: answer
-  });
-
-  // show messages in the console
-  console.log('card updated:', answer, unique_id);
-}
-
-// function to edit an item into the database
-function edit_card_in_database(question, answer, unique_id) {
-  
-  // point to the specific item using its id
-  var item_ref = realtime_database.ref('cards/' + unique_id);
-
-  // update only the provided fields
-  item_ref.update({
-    question: question,
-    answer: answer
-  });
-
-  // show messages in the console
-  console.log('card updated:', question, answer, unique_id);
-}
-
-// function to edit an item into the database
-function edit_card_score_in_database(unique_id, score) {
-  
-  // point to the specific item using its id
-  var item_ref = realtime_database.ref('cards/' + unique_id);
-
-  // update only the provided fields
-  item_ref.update({
-    score: score,
-    last_reviewed: Date.now()
-  });
-
-  // show messages in the console
-  console.log('card updated:', unique_id, score);
+  // log messages in the console
+  console.log(`card ${unique_id} updated:`, fields_to_update);
 }
 
 // function to delete a card from the Realtime Database by its unique ID
-function delete_card_from_database(item_to_delete) {
+async function task_delete_card(target) {
+
+  var unique_id = target.closest('.card_snippet_wrapper').dataset.id; // find the parent container of the clicked item
 
   //build a reference to the specific card you want to delete
-  var card_ref = realtime_database.ref('cards/' + item_to_delete);
+  var card_ref = realtime_database.ref('cards/' + unique_id);
 
   // remove it from the database
   card_ref.remove();
-
 }
 
 // function to update a setting in the database
-function update_setting_test(setting_to_update, new_value) {
+function task_edit_setting(setting_to_update, new_value) {
   
   // get a reference to the card in the database
   var item_ref = realtime_database.ref('settings');
@@ -1369,7 +1283,7 @@ function collect_new_order() {
 		console.log('Updating Deck: ' + item.id + ' at position ' + item.position);
     
     // test code to update the positions in the database
-    edit_deck_order_in_database(item.id, item.position);
+    task_edit_deck(item.id, {order: item.position});
 
 	});
 	

@@ -708,6 +708,10 @@ padding: 0 12px;
   color: var(--white);
 }
 
+.card_snippet_question:focus {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
 .card_snippet_answer {
   padding: 18px;
   background-color: rgba(255, 255, 255, 0.06);
@@ -718,6 +722,10 @@ padding: 0 12px;
   font-size: 15px;
   color: rgba(255, 255, 255, 0.75);
   border-radius: 0 0 9px 9px;
+}
+
+.card_snippet_answer:focus {
+  background-color: rgba(255, 255, 255, 0.12);
 }
 
 .card_snippet_question:empty::before,
