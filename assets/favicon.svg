@@ -4,11 +4,11 @@
 <path d="M512 0H0V512H512V0Z" fill="white"/>
 </mask>
 <g mask="url(#mask0_71_983)">
-<path d="M512 0H256V102H512V0Z" fill="#AD0081"/>
-<path d="M512 102H256V205H512V102Z" fill="#FC8C4A"/>
-<path d="M512 205H256V307H512V205Z" fill="#FBDD36"/>
-<path d="M512 307H256V410H512V307Z" fill="#7FAC3A"/>
-<path d="M512 410H256V512H512V410Z" fill="#497BB6"/>
+<path d="M512 0H256V102H512V0Z" fill="#C34A3F"/>
+<path d="M512 102H256V205H512V102Z" fill="#EE8343"/>
+<path d="M512 205H256V307H512V205Z" fill="#F6DA39"/>
+<path d="M512 307H256V410H512V307Z" fill="#81B64C"/>
+<path d="M512 410H256V512H512V410Z" fill="#43ACD9"/>
 <path d="M256 0H0V512H256V0Z" fill="#2A2B2F"/>
 <path d="M0 0H256V512H0V0Z" fill="url(#paint0_linear_71_983)"/>
 <g opacity="0.5">

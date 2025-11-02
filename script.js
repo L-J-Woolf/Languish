@@ -8,7 +8,6 @@ var decks_index = [];
 var cards_index = [];
 var study_index = [];
 var is_first_load = true;
-var is_developer_mode = false;
 
 // specify firebase credentials and identifiers
 var firebase_config = {
@@ -103,8 +102,7 @@ async function index_database() {
 
   // build array (array_label: realtime_db_key)
   settings_index = {
-  is_all_toggled: settings_data.is_all_toggled,
-  is_dark_mode: settings_data.is_dark_mode
+  is_all_toggled: settings_data.is_all_toggled
 };
 
   // log messages in the console
@@ -162,50 +160,65 @@ function install_realtime_listener() {
   
   // connect listener to database
   realtime_database.ref("/").on("value", (snapshot) => {
-  const data = snapshot.val();
-  
-  // if just installed, do not refresh
-  if (is_first_load === true) {is_first_load = false;}
-  
-  // else perform these actions when triggered
-  else {
-    refresh();
-  }
+    const data = snapshot.val();
+    
+    // if just installed, do not refresh
+    if (is_first_load === true) {is_first_load = false;}
+    
+    // else perform these actions when triggered
+    else {refresh();}
+
   });
 }
 
 // fucntion to refresh user interface
 async function refresh() {
+
+  // log messages in the console
   console.log("Database updated...");
+
+  // perform tasks
   await index_database();
   await route();
+
 }
 
 // ---------------------------------------------------------
 // LISTENERS 2.0
 // ---------------------------------------------------------
 
+// listen for clicks on action elements and perform the relavent action
 document.addEventListener('click', function(event) {
 
   // find the clicked control
   var target = event.target.closest('[data-action]'); if (!target) return;
 
-  // perform the relavent task
+  // admin actions
   if (target.dataset.action === 'action_debug') {action_debug();}
+  if (target.dataset.action === 'action_toggle_dev_mode') {action_toggle_dev_mode();}
+
+  // study actions
   if (target.dataset.action === 'action_practice_all') {action_practice_all();}
   if (target.dataset.action === 'action_practice_deck') {action_practice_deck();}
+  if (target.dataset.action === 'action_practice_random') {action_practice_random();}
+  if (target.dataset.action === 'action_practice_mastery') {action_practice_mastery();}
+  if (target.dataset.action === 'action_practice_oldest') {action_practice_oldest();}
+
+  // add, edit and delete actions
   if (target.dataset.action === 'action_add_deck') {action_add_deck();}
   if (target.dataset.action === 'action_delete_deck') {action_delete_deck();}
   if (target.dataset.action === 'action_add_card') {action_add_card();}
-  if (target.dataset.action === 'action_back') {action_back();}
+
+  // ui & state change actions
   if (target.dataset.action === 'action_toggle_all') {action_toggle_all();}
   if (target.dataset.action === 'action_toggle_dev_mode') {action_toggle_dev_mode();}
   if (target.dataset.action === 'action_toggle_modes_on') {action_toggle_modes_on();}
   if (target.dataset.action === 'action_toggle_modes_off') {action_toggle_modes_off();}
-  if (target.dataset.action === 'action_practice_random') {action_practice_random();}
-  if (target.dataset.action === 'action_practice_mastery') {action_practice_mastery();}
-  if (target.dataset.action === 'action_practice_oldest') {action_practice_oldest();}
-  if (target.dataset.action === 'action_navigate_to_search') {action_navigate_to_search();}
+  
+  // navigation actions
+  if (target.dataset.action === 'action_goto_search') {action_goto_search();} 
+  if (target.dataset.action === 'action_goto_dashboard') {action_goto_dashboard();}
+  if (target.dataset.action === 'action_back') {action_back();}
   
 });
 
@@ -342,9 +355,14 @@ function action_toggle_dev_mode() {
   task_toggle_dev_mode();
 }
 
-function action_navigate_to_search() {
-  console.log('Action: Search');
+function action_goto_search() {
+  console.log('Action: Go To Search');
   location.hash = '#/search';
+}
+
+function action_goto_dashboard() {
+  console.log('Action: Go To Dashbaord');
+  location.hash = '#/dashboard';
 }
 
 
@@ -404,40 +422,6 @@ function task_toggle_all() {
     console.log('None were checked → all checked');
   }
 }
-
-// function to toggle all deck checkboxes (on or off)
-// function task_toggle_all() {
-  
-//   // collect all elements that contain a deck toggle input
-//   var toggles_ref = Array.from(document.getElementsByClassName('deck_snippet_toggle_wrapper'));
-  
-//   // check whether *all* of the inputs are currently checked
-//   var checked_items = toggles_ref.every(wrapper => {
-//     var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
-//     return toggle_input  && toggle_input .checked;
-//   });
-
-//   // Loop through each wrapper and toggle accordingly
-//   toggles_ref.forEach(function(wrapper) {
-    
-//     // Find the input element inside this wrapper
-//     var toggle_input  = wrapper.querySelector('input[type="checkbox"], input[type="radio"]');
-    
-//     // Proceed only if an input element was found
-//     if (toggle_input ) {
-      
-//       // If all were checked, click to uncheck them, If some were unchecked, click only those unchecked
-//       if (checked_items || !toggle_input .checked) {toggle_input.click();}
-
-//     }
-
-//   });
-
-//   // update_setting_test(is_all_toggled, true)
-
-//   // log messages in the console
-//   console.log(checked_items ? 'All unchecked' : 'All checked');
-// }
 
 // listen for click events on cards questions
 function edit_question(unique_id, target) {
@@ -693,11 +677,6 @@ function render_dashboard() {
       var total_cards = deck_index.length;
       var total_score = deck_index.reduce((total, item) => total + item.score, 0);
       var mastery = ((total_score / (total_cards * 5))*100).toFixed(0);
-      
-      // console.log('Deck: ' , deck_index);
-      // console.log('Total Cards: ' + total_cards);
-      // console.log('Total Score: ' + total_score);
-      // console.log('Mastery: ' + mastery);
 
       snippet.querySelector(".deck_snippet_count").textContent = total_cards + ' cards' + ' • ' + mastery + '%'; // set count
 
@@ -1319,9 +1298,6 @@ document.getElementById('dynamic_list_decks').addEventListener('dragover', funct
 		dragged_over_item.classList.add('drop-below');
 	}
 
-	// log messages in the console
-	// console.log('dragover');
-
 });
 
 // fires when you release the mouse to drop
@@ -1651,7 +1627,7 @@ function task_populate_results(value) {
   dynamic_list_results.innerHTML = null;
 
   // specify array to loop through and perform actions
-  var results_ref = cards_index.filter(item => ['question','answer'].some(key => item[key]?.toLowerCase().includes(value.toLowerCase()))).forEach(
+  cards_index.filter(item => ['question','answer'].some(key => item[key]?.toLowerCase().includes(value.toLowerCase()))).forEach(
 
     // specify the actions to perform on each list item
     function (list_item) {
