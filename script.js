@@ -204,6 +204,7 @@ document.addEventListener('click', function(event) {
   if (target.dataset.action === 'action_practice_random') {action_practice_random();}
   if (target.dataset.action === 'action_practice_mastery') {action_practice_mastery();}
   if (target.dataset.action === 'action_practice_oldest') {action_practice_oldest();}
+  if (target.dataset.action === 'action_practice_kzzzt') {action_practice_kzzzt();}
 
   // add, edit and delete actions
   if (target.dataset.action === 'action_add_deck') {action_add_deck();}
@@ -271,6 +272,12 @@ function action_practice_mastery() {
 function action_practice_oldest() {
   console.log('Action: Practice Random');
   create_study_index_for_oldest();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+}
+
+function action_practice_kzzzt() {
+  console.log('Action: Practice kzzzt');
+  create_study_index_for_kzzzt();
   location.hash = '#/study/0/' + study_index[0].unique_id;
 }
 
@@ -1412,6 +1419,58 @@ function create_study_index_for_oldest() {
 
 }
 
+function create_study_index_for_kzzzt() {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  var candidates = cards_index; 
+
+  // sort and filter
+  candidates = exclude_untoggled_decks(candidates);
+  candidates = sort_by_score_then_date(candidates);
+
+  var candidates_0 = candidates.filter(item => item.score === 0);
+  var candidates_1 = candidates.filter(item => item.score === 1);
+  var candidates_2 = candidates.filter(item => item.score === 2);
+  var candidates_3 = candidates.filter(item => item.score === 3);
+  var candidates_4 = candidates.filter(item => item.score === 4);
+  var candidates_5 = candidates.filter(item => item.score === 5);
+  
+  splice_and_push(1, candidates_0, study_index);
+  splice_and_push(1, candidates_1, study_index);
+  splice_and_push(1, candidates_2, study_index);
+  splice_and_push(1, candidates_3, study_index);
+  splice_and_push(1, candidates_4, study_index);
+  splice_and_push(5, candidates_5, study_index);
+
+  // rebuild candidates from minis (now missing spliced items)
+  candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4, ...candidates_5];
+
+  // Calculate how many items short of 10 it is
+  var difference = 10 - study_index.length;
+
+  candidates = sort_by_score_then_date(candidates);
+  splice_and_push(difference, candidates, study_index);
+
+  // rebuild candidates from minis (now missing spliced items)
+  candidates = [...candidates, ...candidates_0];
+
+  // Calculate how many items short of 10 it is
+  var difference = 10 - study_index.length;
+
+  candidates = sort_by_score_then_date(candidates);
+  splice_and_push(difference, candidates, study_index);
+
+  study_index = randomise_order(study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
 // ---------------------------------------------------------
 // HELPERS: STUDY INDEX 
 // ---------------------------------------------------------
@@ -1576,3 +1635,57 @@ function task_clear_search() {
   var results = document.getElementById('dynamic_list_results');
   results.innerHTML = null;
 }
+
+
+
+
+
+
+
+
+
+// ---------------------------------------------------------
+// TESTING
+// ---------------------------------------------------------
+
+// Listen for paste events anywhere on the page
+// document.addEventListener('paste', (event) => {
+      
+//   // Get the plain text from the clipboard
+//   var pasted_text = event.clipboardData.getData('text');
+
+//   // guard agianst empty text
+//   if (!pasted_text) {console.log('Nothing to paste.');return;}
+
+//   // Split the pasted text by newlines to get each row
+//   var rows = pasted_text.trim().split('\n');
+
+//   var item_ref = realtime_database.ref('cards');
+
+//   console.log('Detected paste event. Processing rows...');
+
+//   // Go through each row
+//   rows.forEach((row, index) => {
+  
+//     // Split by tab characters (common from spreadsheets)
+//     var columns = row.split('\t');
+
+//     var question_ref = columns[0] || '(no question)';
+//     var answer_ref = columns[1] || '(no answer)';
+
+//     // Perform a function for each row (for now, just log it)
+//     console.log(`Row ${index + 1}:`);
+//     console.log('Question: ' + question_ref);
+//     console.log('Answer: ' + answer_ref);
+
+//     item_ref.push({
+//       deck: get_hash_id(),
+//       question: question_ref,
+//       answer: answer_ref,
+//       score: 0,
+//       last_reviewed: Date.now()
+//     });
+    
+//   });
+  
+// });
