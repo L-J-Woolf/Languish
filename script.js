@@ -217,6 +217,8 @@ document.addEventListener('click', function(event) {
   if (target.dataset.action === 'action_toggle_dev_mode') {action_toggle_dev_mode();}
   if (target.dataset.action === 'action_toggle_modes_on') {action_toggle_modes_on();}
   if (target.dataset.action === 'action_toggle_modes_off') {action_toggle_modes_off();}
+  if (target.dataset.action === 'action_show_dialog') {action_show_dialog();}
+  if (target.dataset.action === 'action_hide_dialog') {action_hide_dialog();}
   
   // navigation actions
   if (target.dataset.action === 'action_goto_search') {action_goto_search();} 
@@ -343,9 +345,24 @@ function action_edit_answer(target) {
   task_edit_answer(target);
 }
 
-// listen for clicks on the study card button
 function action_study_card(target) {
   task_study_card(target);
+}
+
+function action_show_dialog() {
+  task_show_dialog();
+}
+
+function action_hide_dialog() {
+  task_hide_dialog();
+}
+
+function task_show_dialog() {
+  document.getElementById('dialog_wrapper').style.display = 'flex';
+}
+
+function task_hide_dialog() {
+  document.getElementById('dialog_wrapper').style.display = 'none';
 }
 
 // ---------------------------------------------------------
@@ -1612,7 +1629,7 @@ function task_clear_search() {
 // ---------------------------------------------------------
 
 // Listen for paste events anywhere on the page
-// document.addEventListener('paste', (event) => {
+// document.getElementById('dialog_input').addEventListener('paste', async (event) => {
       
 //   // Get the plain text from the clipboard
 //   var pasted_text = event.clipboardData.getData('text');
@@ -1651,4 +1668,77 @@ function task_clear_search() {
     
 //   });
   
+//   await index_database();
+//   await task_render_deck(get_hash_id());
+//   await task_hide_dialog();
+  
 // });
+
+// Listen for paste events anywhere on the page
+document.getElementById('dialog_input').addEventListener('paste', async (event) => {
+      
+  // Optional. Stop the browser from dumping the raw paste into the input
+  event.preventDefault();
+
+  // Prefer the HTML table when coming from Google Docs
+  var html = event.clipboardData.getData('text/html') || '';
+  var pasted_text = event.clipboardData.getData('text') || '';
+
+  // If an HTML table is present, convert it to tab and newline text
+  if (html && html.indexOf('<table') !== -1) {
+    var div = document.createElement('div');
+    div.innerHTML = html;
+    var trs = Array.from(div.querySelectorAll('table tr'));
+    pasted_text = trs.map(tr =>
+      Array.from(tr.cells).map(td => td.innerText.trim()).join('\t')
+    ).join('\n');
+  }
+
+  // Guard against empty text
+  if (!pasted_text) { console.log('Nothing to paste.'); return; }
+
+  // Simple normalisation to help plain text from Docs
+  pasted_text = pasted_text
+    .replace(/\r\n?/g, '\n')          // normalise line endings
+    .replace(/[\u00A0\u2000-\u200B]/g, ' ') // replace non-breaking and thin spaces
+    .replace(/[\u2028\u2029]/g, '\n') // line and paragraph separators
+    .replace(/\s{3,}/g, '\t')         // groups of 3+ spaces become a tab
+    .trim();
+
+  // Split the pasted text by newlines to get each row
+  var rows = pasted_text.trim().split('\n');
+
+  var deck_ref = get_hash_id();
+  var item_ref = realtime_database.ref('cards');
+
+  console.log('Detected paste event. Processing rows...');
+
+  // Go through each row
+  rows.forEach((row, index) => {
+  
+    // Split by tab characters (common from spreadsheets)
+    var columns = row.split('\t');
+
+    var question_ref = columns[0] || '(no question)';
+    var answer_ref = columns[1] || '(no answer)';
+
+    // Perform a function for each row (for now, just log it)
+    console.log(`Row ${index + 1}:`);
+    console.log('Question: ' + question_ref);
+    console.log('Answer: ' + answer_ref);
+
+    item_ref.push({
+      deck: deck_ref,
+      question: question_ref,
+      answer: answer_ref,
+      score: 0,
+      last_reviewed: Date.now()
+    });
+    
+  });
+  
+  await index_database();
+  await task_render_deck(deck_ref);
+  await task_hide_dialog();
+  
+});

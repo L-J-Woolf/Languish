@@ -168,7 +168,36 @@ if ("serviceWorker" in navigator) {
 
 <!-- scene: deck  -->
 <div class="scene" id="#/decks">
-    
+
+    <!-- dialog -->
+    <div class="dialog_wrapper" id="dialog_wrapper">
+        <div class="dialog">
+            <div class="dialog_section">
+                <div class="dialog_title">Paste cards from<br>a table or spreadsheet</div>
+                <div class="dialog_input" data-placeholder="CTRL + V" id="dialog_input" contenteditable="true"><br></div>
+            </div>
+            <div class="dialog_section">
+                <div class="dialog_subtitle">Example</div>
+                <div class="dialog_graphic">
+                    <div class="dialog_graphic_row top">
+                        <div class="dialog_graphic_cell">Question</div>
+                        <div class="dialog_graphic_cell">Answer</div>
+                    </div>
+                    <div class="dialog_graphic_row middle">
+                        <div class="dialog_graphic_cell">Question</div>
+                        <div class="dialog_graphic_cell">Answer</div>
+                    </div>
+                    <div class="dialog_graphic_row bottom">
+                        <div class="dialog_graphic_cell">Question</div>
+                        <div class="dialog_graphic_cell">Answer</div>
+                    </div>
+                </div>
+                <div class="dialog_hint">Each row creates a card.<br>The first column is for questions,<br>and the second is for answers.</div>
+            </div>
+        </div> 
+        <div class="dialog_bg" data-action="action_hide_dialog"></div>
+    </div>
+
     <!-- header -->
     <div class="secondary_header">
         <button class="btn_ghost" data-action="action_back"><i class="ph-bold ph-arrow-left"></i></button>
@@ -176,7 +205,8 @@ if ("serviceWorker" in navigator) {
         <div class="dropdown_wrapper">  
             <div class="dropdown_button" tabindex="0"><i class="ph-bold ph-dots-three"></i></div>
             <div class="dropdown_menu">
-                <a tabindex="0" class="dropdown_item">Study</a>
+                <a tabindex="0" class="dropdown_item" data-action="action_show_dialog">Import</a>
+                <a tabindex="0" class="dropdown_item" data-action="action_practice_deck">Study</a>
                 <a tabindex="0" class="dropdown_item">Edit</a>
                 <div tabindex="0" class="dropdown_divider"></div>
                 <a tabindex="0" class="dropdown_item" data-action="action_delete_deck">Delete</a>
