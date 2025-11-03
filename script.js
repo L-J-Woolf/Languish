@@ -1427,6 +1427,8 @@ function create_study_index_for_default() {
   var candidates_4 = candidates.filter(item => item.score === 4);
   var candidates_5 = candidates.filter(item => item.score === 5);
   
+  candidates_0 = randomise_order(candidates_0);
+
   splice_and_push(1, candidates_0, study_index);
   splice_and_push(1, candidates_1, study_index);
   splice_and_push(1, candidates_2, study_index);
@@ -1472,14 +1474,14 @@ function create_study_index_for_deck() {
   candidates = sort_by_score_then_date(candidates);
 
   var candidates_0 = candidates.filter(item => item.score === 0);
-  candidates_0 = randomise_order(candidates_0);
-  
   var candidates_1 = candidates.filter(item => item.score === 1);
   var candidates_2 = candidates.filter(item => item.score === 2);
   var candidates_3 = candidates.filter(item => item.score === 3);
   var candidates_4 = candidates.filter(item => item.score === 4);
   var candidates_5 = candidates.filter(item => item.score === 5);
   
+  candidates_0 = randomise_order(candidates_0);
+
   splice_and_push(1, candidates_0, study_index);
   splice_and_push(1, candidates_1, study_index);
   splice_and_push(1, candidates_2, study_index);
@@ -1532,6 +1534,8 @@ function create_study_index_for_mastery() {
   var candidates_4 = candidates.filter(item => item.score === 4);
   var candidates_5 = candidates.filter(item => item.score === 5);
   
+  candidates_0 = randomise_order(candidates_0);
+
   splice_and_push(2, candidates_1, study_index);
   splice_and_push(2, candidates_2, study_index);
   splice_and_push(2, candidates_3, study_index);
