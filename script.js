@@ -1420,6 +1420,7 @@ function create_study_index_for_default() {
   candidates = exclude_untoggled_decks(candidates);
   candidates = sort_by_score_then_date(candidates);
 
+  // group candidates by score
   var candidates_0 = candidates.filter(item => item.score === 0);
   var candidates_1 = candidates.filter(item => item.score === 1);
   var candidates_2 = candidates.filter(item => item.score === 2);
@@ -1427,8 +1428,10 @@ function create_study_index_for_default() {
   var candidates_4 = candidates.filter(item => item.score === 4);
   var candidates_5 = candidates.filter(item => item.score === 5);
   
+  // ramdomise the order of new cards only (all others are sorted by score + date)
   candidates_0 = randomise_order(candidates_0);
 
+  // collect cards from each group
   splice_and_push(1, candidates_0, study_index);
   splice_and_push(1, candidates_1, study_index);
   splice_and_push(1, candidates_2, study_index);
@@ -1439,9 +1442,10 @@ function create_study_index_for_default() {
   // rebuild candidates from minis (now missing spliced items)
   candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
 
-  // Calculate how many items short of 10 it is
+  // calculate how many cards are still required, if any
   var difference = 10 - study_index.length;
 
+  // sort all known cards by score + date, and add as needed
   candidates = sort_by_score_then_date(candidates);
   splice_and_push(difference, candidates, study_index);
 
@@ -1451,9 +1455,11 @@ function create_study_index_for_default() {
   // Calculate how many items short of 10 it is
   var difference = 10 - study_index.length;
 
+  // assuming no known cards were found, add new cards as needed
   candidates = sort_by_score_then_date(candidates);
   splice_and_push(difference, candidates, study_index);
 
+  // randomise the order before studying
   study_index = randomise_order(study_index);
 
   // log messages in the console
@@ -1686,7 +1692,7 @@ function task_render_search() {
   searchbar.focus();
 }
 
-function task_populate_results(value) {
+function task_populate_results(search_term) {
 
   // select the element to render inside
   var dynamic_list_results = document.getElementById('dynamic_list_results');
@@ -1694,8 +1700,20 @@ function task_populate_results(value) {
   // ensure the element has an innerhtml property
   dynamic_list_results.innerHTML = null;
 
+  // parse seaarch term
+  function parse(search_term) {
+  return search_term
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^\w\s]/g, '')  // remove punctuation
+    .trim()
+    .toLowerCase();
+  }
+
   // specify array to loop through and perform actions
-  cards_index.filter(item => ['question','answer'].some(key => item[key]?.toLowerCase().includes(value.toLowerCase()))).forEach(
+  // cards_index.filter(item => ['question', 'answer'].some(key => item[key]?.toLowerCase().includes(value.toLowerCase()))).forEach(
+  
+  cards_index.filter(item => ['question', 'answer'].some(key => parse(item[key] || '').includes(parse(search_term)))).forEach(
 
     // specify the actions to perform on each list item
     function (list_item) {
