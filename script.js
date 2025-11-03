@@ -1367,25 +1367,25 @@ function create_study_index_for_random() {
 
 }
 
-function create_study_index_for_mastery() {
+// function create_study_index_for_mastery() {
   
-  // log messages in the console
-  console.log('Building Study Index');
+//   // log messages in the console
+//   console.log('Building Study Index');
 
-  // reset globals
-  study_index = [];
-  var candidates = cards_index; 
+//   // reset globals
+//   study_index = [];
+//   var candidates = cards_index; 
 
-  // sort and filter
-  candidates = exclude_untoggled_decks(candidates);
-  candidates = sort_by_score_then_date(candidates);
-  splice_and_push(10, candidates, study_index);
-  study_index = randomise_order(study_index);
+//   // sort and filter
+//   candidates = exclude_untoggled_decks(candidates);
+//   candidates = sort_by_score_then_date(candidates);
+//   splice_and_push(10, candidates, study_index);
+//   study_index = randomise_order(study_index);
 
-  // log messages in the console
-  console.log('Study Index Complete: ', study_index);
+//   // log messages in the console
+//   console.log('Study Index Complete: ', study_index);
 
-}
+// }
 
 function create_study_index_for_oldest() {
   
@@ -1433,6 +1433,56 @@ function create_study_index_for_default() {
   splice_and_push(1, candidates_3, study_index);
   splice_and_push(1, candidates_4, study_index);
   splice_and_push(5, candidates_5, study_index);
+
+  // rebuild candidates from minis (now missing spliced items)
+  candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
+
+  // Calculate how many items short of 10 it is
+  var difference = 10 - study_index.length;
+
+  candidates = sort_by_score_then_date(candidates);
+  splice_and_push(difference, candidates, study_index);
+
+  // rebuild candidates from minis (now missing spliced items)
+  candidates = [...candidates, ...candidates_0, ...candidates_5];
+
+  // Calculate how many items short of 10 it is
+  var difference = 10 - study_index.length;
+
+  candidates = sort_by_score_then_date(candidates);
+  splice_and_push(difference, candidates, study_index);
+
+  study_index = randomise_order(study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
+function create_study_index_for_mastery() {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  var candidates = cards_index; 
+
+  // sort and filter
+  candidates = exclude_untoggled_decks(candidates);
+  candidates = sort_by_score_then_date(candidates);
+
+  var candidates_0 = candidates.filter(item => item.score === 0);
+  var candidates_1 = candidates.filter(item => item.score === 1);
+  var candidates_2 = candidates.filter(item => item.score === 2);
+  var candidates_3 = candidates.filter(item => item.score === 3);
+  var candidates_4 = candidates.filter(item => item.score === 4);
+  var candidates_5 = candidates.filter(item => item.score === 5);
+  
+  splice_and_push(2, candidates_1, study_index);
+  splice_and_push(2, candidates_2, study_index);
+  splice_and_push(2, candidates_3, study_index);
+  splice_and_push(2, candidates_4, study_index);
 
   // rebuild candidates from minis (now missing spliced items)
   candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
