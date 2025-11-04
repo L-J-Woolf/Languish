@@ -199,11 +199,13 @@ document.addEventListener('click', function(event) {
 
   // study actions
   if (target.dataset.action === 'action_practice_default') {action_practice_default();}
+  if (target.dataset.action === 'action_practice_express') {action_practice_express();}
+  if (target.dataset.action === 'action_practice_focus') {action_practice_focus();}
+  if (target.dataset.action === 'action_practice_review') {action_practice_review();}
+  if (target.dataset.action === 'action_practice_shuffle') {action_practice_shuffle();}
+  //
   if (target.dataset.action === 'action_practice_deck') {action_practice_deck();}
   if (target.dataset.action === "action_study_card") {action_study_card(target);}
-  if (target.dataset.action === 'action_practice_random') {action_practice_random();}
-  if (target.dataset.action === 'action_practice_mastery') {action_practice_mastery();}
-  if (target.dataset.action === 'action_practice_oldest') {action_practice_oldest();}
 
   // add, edit and delete actions
   if (target.dataset.action === 'action_add_deck') {action_add_deck();}
@@ -248,31 +250,37 @@ function action_debug() {
 
 function action_practice_default() {
   console.log('Action: Practice Default');
-  create_study_index_for_default();
+  build_balanced_study_index();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+}
+
+function action_practice_express() {
+  console.log('Action: Practice Random');
+  build_express_study_index();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+}
+
+function action_practice_focus() {
+  console.log('Action: Practice Random');
+  build_focused_study_index();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+}
+
+function action_practice_review() {
+  console.log('Action: Practice Random');
+  build_review_study_index();
+  location.hash = '#/study/0/' + study_index[0].unique_id;
+}
+
+function action_practice_shuffle() {
+  console.log('Action: Practice Random');
+  build_shuffle_study_index();
   location.hash = '#/study/0/' + study_index[0].unique_id;
 }
 
 function action_practice_deck() {
   console.log('Action: Practice Deck');
-  create_study_index_for_deck();
-  location.hash = '#/study/0/' + study_index[0].unique_id;
-}
-
-function action_practice_random() {
-  console.log('Action: Practice Random');
-  create_study_index_for_random();
-  location.hash = '#/study/0/' + study_index[0].unique_id;
-}
-
-function action_practice_mastery() {
-  console.log('Action: Practice Random');
-  create_study_index_for_mastery();
-  location.hash = '#/study/0/' + study_index[0].unique_id;
-}
-
-function action_practice_oldest() {
-  console.log('Action: Practice Random');
-  create_study_index_for_oldest();
+  build_balanced_study_index_deck();
   location.hash = '#/study/0/' + study_index[0].unique_id;
 }
 
@@ -1310,7 +1318,7 @@ function collect_new_order() {
 }
 
 // ---------------------------------------------------------
-// TASKS: STUDY INDEX 
+// STUDY MODES: PRIMARY
 // ---------------------------------------------------------
 
 // function create_study_index_for_deck() {
@@ -1334,40 +1342,26 @@ function collect_new_order() {
 
 // }
 
-function create_study_index_for_card(unique_id) {
+// function create_study_index_for_random() {
   
-  // log messages in the console
-  console.log('Building Study Index');
+//   // log messages in the console
+//   console.log('Building Study Index');
 
-  // reset globals
-  study_index = [];
-  study_index = filter_array_by_property(cards_index, 'unique_id', unique_id);
+//   // reset globals
+//   study_index = [];
+//   var candidates = cards_index; 
 
-  // log messages in the console
-  console.log('Study Index Complete: ', study_index);
+//   // sort and filter
+//   candidates = exclude_untoggled_decks(candidates);
+//   candidates = randomise_order(candidates);
+//   splice_and_push(10, candidates, study_index);
 
-}
+//   // log messages in the console
+//   console.log('Study Index Complete: ', study_index);
 
-function create_study_index_for_random() {
-  
-  // log messages in the console
-  console.log('Building Study Index');
+// }
 
-  // reset globals
-  study_index = [];
-  var candidates = cards_index; 
-
-  // sort and filter
-  candidates = exclude_untoggled_decks(candidates);
-  candidates = randomise_order(candidates);
-  splice_and_push(10, candidates, study_index);
-
-  // log messages in the console
-  console.log('Study Index Complete: ', study_index);
-
-}
-
-// function create_study_index_for_mastery() {
+// function build_focused_study_index() {
   
 //   // log messages in the console
 //   console.log('Building Study Index');
@@ -1387,7 +1381,140 @@ function create_study_index_for_random() {
 
 // }
 
-function create_study_index_for_oldest() {
+// function create_study_index_for_oldest() {
+  
+//   // log messages in the console
+//   console.log('Building Study Index');
+
+//   // reset globals
+//   study_index = [];
+//   var candidates = cards_index; 
+
+//   // sort and filter
+//   candidates = exclude_untoggled_decks(candidates);
+//   candidates = sort_by_last_reviewed(candidates);
+//   splice_and_push(10, candidates, study_index);
+//   study_index = randomise_order(study_index);
+
+//   // log messages in the console
+//   console.log('Study Index Complete: ', study_index);
+
+// }
+
+// function create_study_index_for_default() {
+  
+//   // log messages in the console
+//   console.log('Building Study Index');
+
+//   // reset globals
+//   study_index = [];
+//   var candidates = cards_index; 
+
+//   // sort and filter
+//   candidates = exclude_untoggled_decks(candidates);
+//   candidates = sort_by_score_then_date(candidates);
+
+//   // group candidates by score
+//   var candidates_0 = candidates.filter(item => item.score === 0);
+//   var candidates_1 = candidates.filter(item => item.score === 1);
+//   var candidates_2 = candidates.filter(item => item.score === 2);
+//   var candidates_3 = candidates.filter(item => item.score === 3);
+//   var candidates_4 = candidates.filter(item => item.score === 4);
+//   var candidates_5 = candidates.filter(item => item.score === 5);
+  
+//   // ramdomise the order of new cards only (all others are sorted by score + date)
+//   candidates_0 = randomise_order(candidates_0);
+
+//   // collect cards from each group
+//   splice_and_push(1, candidates_0, study_index);
+//   splice_and_push(1, candidates_1, study_index);
+//   splice_and_push(1, candidates_2, study_index);
+//   splice_and_push(1, candidates_3, study_index);
+//   splice_and_push(1, candidates_4, study_index);
+//   splice_and_push(5, candidates_5, study_index);
+
+//   // rebuild candidates from minis (now missing spliced items)
+//   candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
+
+//   // calculate how many cards are still required, if any
+//   var difference = 10 - study_index.length;
+
+//   // sort all known cards by score + date, and add as needed
+//   candidates = sort_by_score_then_date(candidates);
+//   splice_and_push(difference, candidates, study_index);
+
+//   // rebuild candidates from minis (now missing spliced items)
+//   candidates = [...candidates, ...candidates_0, ...candidates_5];
+
+//   // Calculate how many items short of 10 it is
+//   var difference = 10 - study_index.length;
+
+//   // assuming no known cards were found, add new cards as needed
+//   candidates = sort_by_score_then_date(candidates);
+//   splice_and_push(difference, candidates, study_index);
+
+//   // randomise the order before studying
+//   study_index = randomise_order(study_index);
+
+//   // log messages in the console
+//   console.log('Study Index Complete: ', study_index);
+
+// }
+
+// function create_study_index_for_deck() {
+  
+//   // log messages in the console
+//   console.log('Building Study Index');
+
+//   // reset globals
+//   study_index = [];
+//   var candidates = filter_array_by_property(cards_index, 'deck', get_hash_id()); 
+
+//   // sort and filter
+//   candidates = sort_by_score_then_date(candidates);
+
+//   var candidates_0 = candidates.filter(item => item.score === 0);
+//   var candidates_1 = candidates.filter(item => item.score === 1);
+//   var candidates_2 = candidates.filter(item => item.score === 2);
+//   var candidates_3 = candidates.filter(item => item.score === 3);
+//   var candidates_4 = candidates.filter(item => item.score === 4);
+//   var candidates_5 = candidates.filter(item => item.score === 5);
+  
+//   candidates_0 = randomise_order(candidates_0);
+
+//   splice_and_push(1, candidates_0, study_index);
+//   splice_and_push(1, candidates_1, study_index);
+//   splice_and_push(1, candidates_2, study_index);
+//   splice_and_push(1, candidates_3, study_index);
+//   splice_and_push(1, candidates_4, study_index);
+//   splice_and_push(5, candidates_5, study_index);
+
+//   // rebuild candidates from minis (now missing spliced items)
+//   candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
+
+//   // Calculate how many items short of 10 it is
+//   var difference = 10 - study_index.length;
+
+//   candidates = sort_by_score_then_date(candidates);
+//   splice_and_push(difference, candidates, study_index);
+
+//   // rebuild candidates from minis (now missing spliced items)
+//   candidates = [...candidates, ...candidates_0, ...candidates_5];
+
+//   // Calculate how many items short of 10 it is
+//   var difference = 10 - study_index.length;
+
+//   candidates = sort_by_score_then_date(candidates);
+//   splice_and_push(difference, candidates, study_index);
+
+//   study_index = randomise_order(study_index);
+
+//   // log messages in the console
+//   console.log('Study Index Complete: ', study_index);
+
+// }
+
+function build_balanced_study_index_deck() {
   
   // log messages in the console
   console.log('Building Study Index');
@@ -1396,68 +1523,65 @@ function create_study_index_for_oldest() {
   study_index = [];
   var candidates = cards_index; 
 
-  // sort and filter
+  // exclude untoggled decks
   candidates = exclude_untoggled_decks(candidates);
-  candidates = sort_by_last_reviewed(candidates);
-  splice_and_push(10, candidates, study_index);
-  study_index = randomise_order(study_index);
 
-  // log messages in the console
-  console.log('Study Index Complete: ', study_index);
-
-}
-
-function create_study_index_for_default() {
-  
-  // log messages in the console
-  console.log('Building Study Index');
-
-  // reset globals
-  study_index = [];
-  var candidates = cards_index; 
-
-  // sort and filter
-  candidates = exclude_untoggled_decks(candidates);
+  // order and sort before splicing
   candidates = sort_by_score_then_date(candidates);
 
-  // group candidates by score
+  // split candidates into groups by score
   var candidates_0 = candidates.filter(item => item.score === 0);
   var candidates_1 = candidates.filter(item => item.score === 1);
   var candidates_2 = candidates.filter(item => item.score === 2);
   var candidates_3 = candidates.filter(item => item.score === 3);
   var candidates_4 = candidates.filter(item => item.score === 4);
   var candidates_5 = candidates.filter(item => item.score === 5);
-  
-  // ramdomise the order of new cards only (all others are sorted by score + date)
-  candidates_0 = randomise_order(candidates_0);
 
-  // collect cards from each group
-  splice_and_push(1, candidates_0, study_index);
+  // collect cards from groups
   splice_and_push(1, candidates_1, study_index);
   splice_and_push(1, candidates_2, study_index);
   splice_and_push(1, candidates_3, study_index);
   splice_and_push(1, candidates_4, study_index);
-  splice_and_push(5, candidates_5, study_index);
+  
 
-  // rebuild candidates from minis (now missing spliced items)
+
+  // merge minis back into candidates (now missing spliced items)
   candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
 
   // calculate how many cards are still required, if any
-  var difference = 10 - study_index.length;
+  var difference = 5 - study_index.length;
 
-  // sort all known cards by score + date, and add as needed
-  candidates = sort_by_score_then_date(candidates);
+  // add remaining cards, as needed
   splice_and_push(difference, candidates, study_index);
 
+
+
+  // ramdomise the order of new cards only (all others are sorted by score + date)
+  candidates_0 = randomise_order(candidates_0);
+
+  // calculate how many cards are still required, if any
+  var difference = 5 - study_index.length;
+
+  // add remaining cards as needed
+  splice_and_push(difference, candidates_0, study_index);
+
+
+
+  // collect cards from groups
+  splice_and_push(5, candidates_5, study_index);
+  
+  
+  
   // rebuild candidates from minis (now missing spliced items)
-  candidates = [...candidates, ...candidates_0, ...candidates_5];
-
-  // Calculate how many items short of 10 it is
+  candidates = [...candidates_0, ...candidates, ...candidates_5];
+  
+  // calculate how many cards are still required, if any
   var difference = 10 - study_index.length;
 
-  // assuming no known cards were found, add new cards as needed
-  candidates = sort_by_score_then_date(candidates);
+  // add remaining cards as needed
   splice_and_push(difference, candidates, study_index);
+
+
 
   // randomise the order before studying
   study_index = randomise_order(study_index);
@@ -1467,60 +1591,7 @@ function create_study_index_for_default() {
 
 }
 
-function create_study_index_for_deck() {
-  
-  // log messages in the console
-  console.log('Building Study Index');
-
-  // reset globals
-  study_index = [];
-  var candidates = filter_array_by_property(cards_index, 'deck', get_hash_id()); 
-
-  // sort and filter
-  candidates = sort_by_score_then_date(candidates);
-
-  var candidates_0 = candidates.filter(item => item.score === 0);
-  var candidates_1 = candidates.filter(item => item.score === 1);
-  var candidates_2 = candidates.filter(item => item.score === 2);
-  var candidates_3 = candidates.filter(item => item.score === 3);
-  var candidates_4 = candidates.filter(item => item.score === 4);
-  var candidates_5 = candidates.filter(item => item.score === 5);
-  
-  candidates_0 = randomise_order(candidates_0);
-
-  splice_and_push(1, candidates_0, study_index);
-  splice_and_push(1, candidates_1, study_index);
-  splice_and_push(1, candidates_2, study_index);
-  splice_and_push(1, candidates_3, study_index);
-  splice_and_push(1, candidates_4, study_index);
-  splice_and_push(5, candidates_5, study_index);
-
-  // rebuild candidates from minis (now missing spliced items)
-  candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
-
-  // Calculate how many items short of 10 it is
-  var difference = 10 - study_index.length;
-
-  candidates = sort_by_score_then_date(candidates);
-  splice_and_push(difference, candidates, study_index);
-
-  // rebuild candidates from minis (now missing spliced items)
-  candidates = [...candidates, ...candidates_0, ...candidates_5];
-
-  // Calculate how many items short of 10 it is
-  var difference = 10 - study_index.length;
-
-  candidates = sort_by_score_then_date(candidates);
-  splice_and_push(difference, candidates, study_index);
-
-  study_index = randomise_order(study_index);
-
-  // log messages in the console
-  console.log('Study Index Complete: ', study_index);
-
-}
-
-function create_study_index_for_mastery() {
+function build_express_study_index() {
   
   // log messages in the console
   console.log('Building Study Index');
@@ -1529,43 +1600,270 @@ function create_study_index_for_mastery() {
   study_index = [];
   var candidates = cards_index; 
 
-  // sort and filter
+  // exclude untoggled decks
   candidates = exclude_untoggled_decks(candidates);
+
+  // order and sort before splicing
   candidates = sort_by_score_then_date(candidates);
 
+  // split candidates into groups by score
   var candidates_0 = candidates.filter(item => item.score === 0);
   var candidates_1 = candidates.filter(item => item.score === 1);
   var candidates_2 = candidates.filter(item => item.score === 2);
   var candidates_3 = candidates.filter(item => item.score === 3);
   var candidates_4 = candidates.filter(item => item.score === 4);
   var candidates_5 = candidates.filter(item => item.score === 5);
-  
-  candidates_0 = randomise_order(candidates_0);
 
+  // collect cards from groups
   splice_and_push(2, candidates_1, study_index);
   splice_and_push(2, candidates_2, study_index);
   splice_and_push(2, candidates_3, study_index);
   splice_and_push(2, candidates_4, study_index);
+  
 
-  // rebuild candidates from minis (now missing spliced items)
+
+  // merge minis back into candidates (now missing spliced items)
   candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
 
-  // Calculate how many items short of 10 it is
+  // calculate how many cards are still required, if any
   var difference = 10 - study_index.length;
 
-  candidates = sort_by_score_then_date(candidates);
+  // add remaining cards, as needed
   splice_and_push(difference, candidates, study_index);
+
+
+
+  // ramdomise the order of new cards only (all others are sorted by score + date)
+  candidates_0 = randomise_order(candidates_0);
+
+  // calculate how many cards are still required, if any
+  var difference = 10 - study_index.length;
+
+  // add remaining cards as needed
+  splice_and_push(difference, candidates_0, study_index);
+  
+  
+  
+  // rebuild candidates from minis (now missing spliced items)
+  candidates = [...candidates_0, ...candidates, ...candidates_5];
+  
+  // calculate how many cards are still required, if any
+  var difference = 10 - study_index.length;
+
+  // add remaining cards as needed
+  splice_and_push(difference, candidates, study_index);
+
+
+
+  // randomise the order before studying
+  study_index = randomise_order(study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
+function build_focused_study_index() {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  var candidates = cards_index; 
+
+  // exclude untoggled decks
+  candidates = exclude_untoggled_decks(candidates);
+
+  // order and sort before splicing
+  candidates = sort_by_score_then_date(candidates);
+
+  // split candidates into groups by score
+  var candidates_0 = candidates.filter(item => item.score === 0);
+  var candidates_1 = candidates.filter(item => item.score === 1);
+  var candidates_2 = candidates.filter(item => item.score === 2);
+  var candidates_3 = candidates.filter(item => item.score === 3);
+  var candidates_4 = candidates.filter(item => item.score === 4);
+  var candidates_5 = candidates.filter(item => item.score === 5);
+
+  // collect cards from groups
+  splice_and_push(2, candidates_1, study_index);
+  splice_and_push(2, candidates_2, study_index);
+  splice_and_push(2, candidates_3, study_index);
+  splice_and_push(2, candidates_4, study_index);
+  
+
+
+  // merge minis back into candidates (now missing spliced items)
+  candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
+
+  // calculate how many cards are still required, if any
+  var difference = 10 - study_index.length;
+
+  // add remaining cards, as needed
+  splice_and_push(difference, candidates, study_index);
+
 
   // rebuild candidates from minis (now missing spliced items)
-  candidates = [...candidates, ...candidates_0, ...candidates_5];
+  candidates = [...candidates, ...candidates_5];
 
-  // Calculate how many items short of 10 it is
+  // calculate how many cards are still required, if any
   var difference = 10 - study_index.length;
 
-  candidates = sort_by_score_then_date(candidates);
+  // add remaining cards as needed
   splice_and_push(difference, candidates, study_index);
 
+
+
+  // randomise the order before studying
   study_index = randomise_order(study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
+function build_review_study_index() {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  var candidates = cards_index; 
+
+  // exclude untoggled decks
+  candidates = exclude_untoggled_decks(candidates);
+
+  // order and sort before splicing
+  candidates = sort_by_last_reviewed(candidates);
+
+  // split candidates into groups by score
+  var candidates_5 = candidates.filter(item => item.score === 5);
+
+  // collect cards from groups
+  splice_and_push(10, candidates_5, study_index);
+  
+  // randomise the order before studying
+  study_index = randomise_order(study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
+function build_shuffle_study_index() {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  var candidates = cards_index; 
+
+  // exclude untoggled decks
+  candidates = exclude_untoggled_decks(candidates);
+
+  // order and sort before splicing
+  candidates = randomise_order(candidates);
+
+  // collect cards
+  splice_and_push(10, candidates, study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
+// ---------------------------------------------------------
+// STUDY MODES: SECONDARY
+// ---------------------------------------------------------
+
+function build_balanced_study_index() {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  var candidates = filter_array_by_property(cards_index, 'deck', get_hash_id()); 
+
+  // exclude untoggled decks
+  candidates = exclude_untoggled_decks(candidates);
+
+  // order and sort before splicing
+  candidates = sort_by_score_then_date(candidates);
+
+  // split candidates into groups by score
+  var candidates_0 = candidates.filter(item => item.score === 0);
+  var candidates_1 = candidates.filter(item => item.score === 1);
+  var candidates_2 = candidates.filter(item => item.score === 2);
+  var candidates_3 = candidates.filter(item => item.score === 3);
+  var candidates_4 = candidates.filter(item => item.score === 4);
+  var candidates_5 = candidates.filter(item => item.score === 5);
+
+  // collect cards from groups
+  splice_and_push(1, candidates_1, study_index);
+  splice_and_push(1, candidates_2, study_index);
+  splice_and_push(1, candidates_3, study_index);
+  splice_and_push(1, candidates_4, study_index);
+  
+
+
+  // merge minis back into candidates (now missing spliced items)
+  candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
+
+  // calculate how many cards are still required, if any
+  var difference = 5 - study_index.length;
+
+  // add remaining cards, as needed
+  splice_and_push(difference, candidates, study_index);
+
+
+
+  // ramdomise the order of new cards only (all others are sorted by score + date)
+  candidates_0 = randomise_order(candidates_0);
+
+  // calculate how many cards are still required, if any
+  var difference = 5 - study_index.length;
+
+  // add remaining cards as needed
+  splice_and_push(difference, candidates_0, study_index);
+
+
+
+  // collect cards from groups
+  splice_and_push(5, candidates_5, study_index);
+  
+  
+  
+  // rebuild candidates from minis (now missing spliced items)
+  candidates = [...candidates_0, ...candidates, ...candidates_5];
+  
+  // calculate how many cards are still required, if any
+  var difference = 10 - study_index.length;
+
+  // add remaining cards as needed
+  splice_and_push(difference, candidates, study_index);
+
+
+
+  // randomise the order before studying
+  study_index = randomise_order(study_index);
+
+  // log messages in the console
+  console.log('Study Index Complete: ', study_index);
+
+}
+
+function create_study_index_for_card(unique_id) {
+  
+  // log messages in the console
+  console.log('Building Study Index');
+
+  // reset globals
+  study_index = [];
+  study_index = filter_array_by_property(cards_index, 'unique_id', unique_id);
 
   // log messages in the console
   console.log('Study Index Complete: ', study_index);
@@ -1642,14 +1940,29 @@ function splice_and_push(item_number, from_array, to_array) {
 
 }
 
+// function randomise_order(array) {
+
+//   // log messages in the console
+//   console.log('Randomising Card Order...');
+
+//   // return result
+//   return [...array].sort(() => Math.random() - 0.5);
+
+// }
+
 function randomise_order(array) {
 
   // log messages in the console
   console.log('Randomising Card Order...');
 
-  // return result
-  return [...array].sort(() => Math.random() - 0.5);
+  // fisher–yates shuffle
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
 
+  // return result
+  return array;
 }
 
 // ---------------------------------------------------------
