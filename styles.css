@@ -35,7 +35,7 @@ body {
 }
 
 .scene {
-  display: none
+  display: none;
 }
 
 :root {
@@ -1190,3 +1190,125 @@ outline: none;
 .dialog_graphic_row.top {opacity: 1}
 .dialog_graphic_row.middle {opacity: 0.7}
 .dialog_graphic_row.bottom {opacity: 0.4}
+
+/* --------------------------------------------------------- */
+/* Login */
+/* --------------------------------------------------------- */
+
+.login_wrapper {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 18px;
+}
+
+.login_image {
+  display: block;
+  position: relative;
+  width: 96px;
+  height: 96px;
+  background-image: url("/assets/favicon.svg");
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Do not repeat the image */
+  background-size: cover; /* Resize the background image to cover the entire container */
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 100%;
+}
+
+.login_form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  width: 100%; max-width: 600px;
+  padding: 36px 18px;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 9px;
+}
+
+.login_title {
+  position: relative;
+  width: 100%; max-width: 300px;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+  text-align: center;
+}
+
+.login_input {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  width: 100%; max-width: 300px;
+  height: 48px;
+  color: white;
+  font-family: inherit;
+  font-weight: inherit;
+  line-height: 24px;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 9px;
+}
+
+.login_input:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+}
+
+.login_input:active {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.login_input:focus {
+  outline: none;
+  border: 1px solid #7FAC3A;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.login_button {
+  z-index: 60;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  width: 100%; max-width: 300px;
+  height: 48px;
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: 15px;
+  color: white;
+  text-align: center;
+  background-color: #7FAC3A;
+  border: none;
+  border-radius: 9px;
+  box-shadow: inset 0 -2px #00000033;
+  cursor: pointer;
+}
+
+.login_button:hover {
+  background-color: #759D37;
+}
+
+.login_button:active {
+  background-color: #6A8E33;
+}
+
+.login_help {
+  position: relative;
+  width: 100%; max-width: 300px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 15px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.50);
+}

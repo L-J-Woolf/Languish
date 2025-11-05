@@ -16,6 +16,7 @@
 <!-- content delivery network (cdn) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
 <!-- styles -->
 <link rel="stylesheet" href="./styles.css">
@@ -44,12 +45,33 @@ if ("serviceWorker" in navigator) {
 <!-- global tint -->
 <div id="tint"></div>
 
+<!-- scene: login  -->
+<div class="scene" id="#/login">
+
+    <!-- header  -->
+    <div class="header_primary">
+        <div class="header_primary_title">languish</div>
+    </div>
+
+    <!-- login  -->
+    <div class="login_wrapper">
+        <div class="login_form">
+            <div class="login_image"></div>
+            <div  id="login_title" class="login_title">Sign in by email</div>
+            <input id="login_input" class="login_input" type="email" placeholder="example@email.com"></input>
+            <button data-action="action_send_magic_link" class="login_button">Request Link</button>
+            <div id="login_help" class="login_help"> We'll send you a secure link to log in.<br>No password required.</div>
+        </div>
+    </div>
+
+</div>
+
 <!-- scene: decks  -->
 <div class="scene" id="#/dashboard">
 
     <!-- header  -->
     <div class="header_primary">
-        <div data-action="action_toggle_dev_mode" class="header_primary_title">languish</div>
+        <div data-action="action_signout" class="header_primary_title">languish</div>
     </div> 
 
     <div class="content">
@@ -99,6 +121,7 @@ if ("serviceWorker" in navigator) {
             </div>
             
             <button class="button_primary" data-action="action_practice_default">Practice All</button>
+
             <button class="btn_hidden" id="btn_toggle_modes_on" data-action="action_toggle_modes_on"><i class="ph-bold ph-caret-down"></i></button>
             <button class="btn_hidden" id="btn_toggle_modes_off" data-action="action_toggle_modes_off"><i class="ph-bold ph-caret-up"></i></button>
             <div class="modes_list" id="list_study_modes">

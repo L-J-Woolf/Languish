@@ -7,7 +7,8 @@ var stats_index = [];
 var decks_index = [];
 var cards_index = [];
 var study_index = [];
-var is_first_load = true;
+var is_first_index = true;
+var is_first_auth = true;
 
 // specify firebase credentials and identifiers
 var firebase_config = {
@@ -37,20 +38,14 @@ document.addEventListener('DOMContentLoaded', initialise_app);
 async function initialise_app() {
   
   console.log("Initialising app");
-  await index_database();
-  await route();
-  install_realtime_listener();
+  await task_attempt_login();
+  await check_user_auth();
+  // await index_database();
+  // await route();
+  await install_firebase_listener();
+  await install_auth_listener();
   console.log("Initialisation complete");
 
-}
-
-// listener for changes to the hash in the URL
-window.addEventListener('hashchange', on_hash_change);
-
-// function to handle hash changes
-function on_hash_change() {
-  console.log("Hash change detected, URL: " + window.location.hash);
-  route();
 }
 
 // ---------------------------------------------------------
@@ -109,61 +104,17 @@ async function index_database() {
   console.log('Database synced & indexed: ' + get_current_time());
 }
 
-// route
-async function route() {
-
-  var current_hash = window.location.hash;
-  var current_hash_id = get_hash_id();
-
-  if (!current_hash || current_hash === "#" || current_hash === "#/") {
-    // No hash? set default
-    location.hash = "#/dashboard";
-    return; // stop here, route() will run again automatically when hash changes
-  }
-
-  if (current_hash.includes('#/dashboard')) { 
-    console.log('Hash includes #/dashboard');
-    task_render_dashboard();
-    load_scene('#/dashboard');
-  }
-
-  else if (current_hash.includes('#/decks/')) { 
-    console.log('Hash includes #/decks/');
-    task_render_deck(current_hash_id);
-    load_scene('#/decks');
-  }
-
-  else if (current_hash.includes('#/study')) { 
-    console.log('Hash includes #/study');
-    render_study_scene(current_hash_id);
-    load_scene('#/study');
-  }
-
-  else if (current_hash.includes('#/search')) { 
-    console.log('Hash includes #/search');
-    task_render_search();
-    load_scene('#/search');
-    searchbar.focus();
-  }
-
-  else { 
-    console.log('No hash rule detected, loading default scene');
-    task_render_dashboard();
-    load_scene('#/dashboard');
-  }
-}
-
-function install_realtime_listener() {
+async function install_firebase_listener() {
   
   // log messages in the console
-  console.log("Installing realtime listener");
+  console.log("Installing Realtime Firebase Listener");
   
   // connect listener to database
   realtime_database.ref("/").on("value", (snapshot) => {
     const data = snapshot.val();
     
     // if just installed, do not refresh
-    if (is_first_load === true) {is_first_load = false;}
+    if (is_first_index === true) {is_first_index = false;}
     
     // else perform these actions when triggered
     else {refresh();}
@@ -180,6 +131,88 @@ async function refresh() {
   // perform tasks
   await index_database();
   //await route();
+
+}
+
+// ---------------------------------------------------------
+// ROUTING 
+// ---------------------------------------------------------
+
+// listener for changes to the hash in the URL
+window.addEventListener('hashchange', on_hash_change);
+
+// function to handle hash changes
+function on_hash_change() {
+  console.log("Hash change detected, URL: " + window.location.hash);
+  route();
+}
+
+// route
+async function route() {
+
+  // get a reference to the current hash url
+  var current_hash = window.location.hash;
+
+  // protect all private pages
+  var public_pages = ['#/login'];
+  var is_logged_in = !!current_user;
+  var is_public_page = public_pages.includes(current_hash);
+
+  // if not logged in on private page, redirect
+  if (!is_logged_in && !is_public_page) {
+    console.warn('Not signed in → redirecting to login');
+    location.hash = '#/login';
+    return;
+  }
+
+  // if logged in on public page, redirect
+  if (is_logged_in && current_hash === '#/login') {
+    console.warn('Already signed in → redirecting to dashboard');
+    location.hash = '#/dashboard';
+    return;
+  }
+
+  if (current_hash.includes('#/login')) { 
+    console.log('Hash includes #/login');
+    task_load_scene('#/login');
+    return;
+  }
+
+  if (current_hash.includes('#/dashboard')) { 
+    console.log('Hash includes #/dashboard');
+    task_render_dashboard();
+    task_load_scene('#/dashboard');
+    return;
+  }
+
+  else if (current_hash.includes('#/decks/')) { 
+    console.log('Hash includes #/decks/');
+    task_render_deck(get_hash_id());
+    task_load_scene('#/decks');
+    return;
+  }
+
+  else if (current_hash.includes('#/study')) { 
+    console.log('Hash includes #/study');
+    task_render_study(get_hash_id());
+    task_load_scene('#/study');
+    return;
+  }
+
+  else if (current_hash.includes('#/search')) { 
+    console.log('Hash includes #/search');
+    task_render_search();
+    task_load_scene('#/search');
+    searchbar.focus();
+    return;
+  }
+
+  else { 
+    console.log('No scene found, Redirecting to Dashboard...');
+    task_render_dashboard();
+    task_load_scene('#/dashboard');
+    return;
+  }
 
 }
 
@@ -221,6 +254,8 @@ document.addEventListener('click', function(event) {
   if (target.dataset.action === 'action_toggle_modes_off') {action_toggle_modes_off();}
   if (target.dataset.action === 'action_show_dialog') {action_show_dialog();}
   if (target.dataset.action === 'action_hide_dialog') {action_hide_dialog();}
+  if (target.dataset.action === 'action_signout') {action_signout();}
+  if (target.dataset.action === 'action_send_magic_link') {action_send_magic_link();}
   
   // navigation actions
   if (target.dataset.action === 'action_goto_search') {action_goto_search();} 
@@ -371,6 +406,18 @@ function task_show_dialog() {
 
 function task_hide_dialog() {
   document.getElementById('dialog_wrapper').style.display = 'none';
+}
+
+async function action_signout() {
+  task_signout();
+}
+
+async function task_signout() {
+  await firebase.auth().signOut();
+}
+
+async function action_send_magic_link() {
+  task_send_magic_link();
 }
 
 // ---------------------------------------------------------
@@ -642,7 +689,7 @@ async function iterate_study_scene() {
 // ---------------------------------------------------------
 
 // function which loads specified scene and hides all others
-function load_scene(scene_to_load) {
+function task_load_scene(scene_to_load) {
  
   // Find the scene element
   var scene_element = document.getElementById(scene_to_load);
@@ -762,7 +809,7 @@ function task_render_deck(deck_id_to_render) {
 }
 
 // function to render cards list
-function render_study_scene(card_id_to_render) {
+function task_render_study(card_id_to_render) {
 
   // show messages in the console
   console.log('rendering study scene for: ' + card_id_to_render);
@@ -989,9 +1036,6 @@ function get_cards_studied_total() {
   // else get the current running total
   else {studied_total = date_ref.total;}
 
-  // log messages in the console
-  console.log("Total Cards Studied (Today):", studied_total);
-
   // return result
   return studied_total;
 }
@@ -1026,7 +1070,6 @@ function get_average_last_7_days() {
 
   // Calculate average
   var average_last_7_days = Math.round(total_sum / timeframe);
-  console.log("Average cards studied (last 7 days):", average_last_7_days);
   return average_last_7_days;
 }
 
@@ -1060,7 +1103,6 @@ function get_average_last_30_days() {
 
   // Calculate average
   var average_last_30_days = Math.round(total_sum / timeframe);
-  console.log("Average cards studied (last 30 days):", average_last_30_days);
   return average_last_30_days;
 }
 
@@ -1092,7 +1134,6 @@ function get_daily_streak() {
     }
   }
   
-  console.log("Streak:", consecutive_days);
   return consecutive_days;
 }
 
@@ -1320,199 +1361,6 @@ function collect_new_order() {
 // ---------------------------------------------------------
 // STUDY MODES: PRIMARY
 // ---------------------------------------------------------
-
-// function create_study_index_for_deck() {
-  
-//   // log messages in the console
-//   console.log('Building Study Index');
-
-//   // reset globals
-//   study_index = [];
-//   var candidates = filter_array_by_property(cards_index, 'deck', get_hash_id());
-
-//   // sort and filter
-//   candidates = sort_by_score_then_date(candidates);
-//   splice_and_push(5, candidates, study_index);
-//   candidates = sort_by_last_reviewed(candidates);
-//   splice_and_push(5, candidates, study_index);
-//   study_index = randomise_order(study_index);
-
-//   // log messages in the console
-//   console.log('Study Index Complete: ', study_index);
-
-// }
-
-// function create_study_index_for_random() {
-  
-//   // log messages in the console
-//   console.log('Building Study Index');
-
-//   // reset globals
-//   study_index = [];
-//   var candidates = cards_index; 
-
-//   // sort and filter
-//   candidates = exclude_untoggled_decks(candidates);
-//   candidates = randomise_order(candidates);
-//   splice_and_push(10, candidates, study_index);
-
-//   // log messages in the console
-//   console.log('Study Index Complete: ', study_index);
-
-// }
-
-// function build_focused_study_index() {
-  
-//   // log messages in the console
-//   console.log('Building Study Index');
-
-//   // reset globals
-//   study_index = [];
-//   var candidates = cards_index; 
-
-//   // sort and filter
-//   candidates = exclude_untoggled_decks(candidates);
-//   candidates = sort_by_score_then_date(candidates);
-//   splice_and_push(10, candidates, study_index);
-//   study_index = randomise_order(study_index);
-
-//   // log messages in the console
-//   console.log('Study Index Complete: ', study_index);
-
-// }
-
-// function create_study_index_for_oldest() {
-  
-//   // log messages in the console
-//   console.log('Building Study Index');
-
-//   // reset globals
-//   study_index = [];
-//   var candidates = cards_index; 
-
-//   // sort and filter
-//   candidates = exclude_untoggled_decks(candidates);
-//   candidates = sort_by_last_reviewed(candidates);
-//   splice_and_push(10, candidates, study_index);
-//   study_index = randomise_order(study_index);
-
-//   // log messages in the console
-//   console.log('Study Index Complete: ', study_index);
-
-// }
-
-// function create_study_index_for_default() {
-  
-//   // log messages in the console
-//   console.log('Building Study Index');
-
-//   // reset globals
-//   study_index = [];
-//   var candidates = cards_index; 
-
-//   // sort and filter
-//   candidates = exclude_untoggled_decks(candidates);
-//   candidates = sort_by_score_then_date(candidates);
-
-//   // group candidates by score
-//   var candidates_0 = candidates.filter(item => item.score === 0);
-//   var candidates_1 = candidates.filter(item => item.score === 1);
-//   var candidates_2 = candidates.filter(item => item.score === 2);
-//   var candidates_3 = candidates.filter(item => item.score === 3);
-//   var candidates_4 = candidates.filter(item => item.score === 4);
-//   var candidates_5 = candidates.filter(item => item.score === 5);
-  
-//   // ramdomise the order of new cards only (all others are sorted by score + date)
-//   candidates_0 = randomise_order(candidates_0);
-
-//   // collect cards from each group
-//   splice_and_push(1, candidates_0, study_index);
-//   splice_and_push(1, candidates_1, study_index);
-//   splice_and_push(1, candidates_2, study_index);
-//   splice_and_push(1, candidates_3, study_index);
-//   splice_and_push(1, candidates_4, study_index);
-//   splice_and_push(5, candidates_5, study_index);
-
-//   // rebuild candidates from minis (now missing spliced items)
-//   candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
-
-//   // calculate how many cards are still required, if any
-//   var difference = 10 - study_index.length;
-
-//   // sort all known cards by score + date, and add as needed
-//   candidates = sort_by_score_then_date(candidates);
-//   splice_and_push(difference, candidates, study_index);
-
-//   // rebuild candidates from minis (now missing spliced items)
-//   candidates = [...candidates, ...candidates_0, ...candidates_5];
-
-//   // Calculate how many items short of 10 it is
-//   var difference = 10 - study_index.length;
-
-//   // assuming no known cards were found, add new cards as needed
-//   candidates = sort_by_score_then_date(candidates);
-//   splice_and_push(difference, candidates, study_index);
-
-//   // randomise the order before studying
-//   study_index = randomise_order(study_index);
-
-//   // log messages in the console
-//   console.log('Study Index Complete: ', study_index);
-
-// }
-
-// function create_study_index_for_deck() {
-  
-//   // log messages in the console
-//   console.log('Building Study Index');
-
-//   // reset globals
-//   study_index = [];
-//   var candidates = filter_array_by_property(cards_index, 'deck', get_hash_id()); 
-
-//   // sort and filter
-//   candidates = sort_by_score_then_date(candidates);
-
-//   var candidates_0 = candidates.filter(item => item.score === 0);
-//   var candidates_1 = candidates.filter(item => item.score === 1);
-//   var candidates_2 = candidates.filter(item => item.score === 2);
-//   var candidates_3 = candidates.filter(item => item.score === 3);
-//   var candidates_4 = candidates.filter(item => item.score === 4);
-//   var candidates_5 = candidates.filter(item => item.score === 5);
-  
-//   candidates_0 = randomise_order(candidates_0);
-
-//   splice_and_push(1, candidates_0, study_index);
-//   splice_and_push(1, candidates_1, study_index);
-//   splice_and_push(1, candidates_2, study_index);
-//   splice_and_push(1, candidates_3, study_index);
-//   splice_and_push(1, candidates_4, study_index);
-//   splice_and_push(5, candidates_5, study_index);
-
-//   // rebuild candidates from minis (now missing spliced items)
-//   candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
-
-//   // Calculate how many items short of 10 it is
-//   var difference = 10 - study_index.length;
-
-//   candidates = sort_by_score_then_date(candidates);
-//   splice_and_push(difference, candidates, study_index);
-
-//   // rebuild candidates from minis (now missing spliced items)
-//   candidates = [...candidates, ...candidates_0, ...candidates_5];
-
-//   // Calculate how many items short of 10 it is
-//   var difference = 10 - study_index.length;
-
-//   candidates = sort_by_score_then_date(candidates);
-//   splice_and_push(difference, candidates, study_index);
-
-//   study_index = randomise_order(study_index);
-
-//   // log messages in the console
-//   console.log('Study Index Complete: ', study_index);
-
-// }
 
 function build_balanced_study_index_deck() {
   
@@ -1940,16 +1788,6 @@ function splice_and_push(item_number, from_array, to_array) {
 
 }
 
-// function randomise_order(array) {
-
-//   // log messages in the console
-//   console.log('Randomising Card Order...');
-
-//   // return result
-//   return [...array].sort(() => Math.random() - 0.5);
-
-// }
-
 function randomise_order(array) {
 
   // log messages in the console
@@ -2063,54 +1901,8 @@ function task_clear_search() {
 }
 
 // ---------------------------------------------------------
-// TESTING
+// SEARCH
 // ---------------------------------------------------------
-
-// Listen for paste events anywhere on the page
-// document.getElementById('dialog_input').addEventListener('paste', async (event) => {
-      
-//   // Get the plain text from the clipboard
-//   var pasted_text = event.clipboardData.getData('text');
-
-//   // guard agianst empty text
-//   if (!pasted_text) {console.log('Nothing to paste.');return;}
-
-//   // Split the pasted text by newlines to get each row
-//   var rows = pasted_text.trim().split('\n');
-
-//   var item_ref = realtime_database.ref('cards');
-
-//   console.log('Detected paste event. Processing rows...');
-
-//   // Go through each row
-//   rows.forEach((row, index) => {
-  
-//     // Split by tab characters (common from spreadsheets)
-//     var columns = row.split('\t');
-
-//     var question_ref = columns[0] || '(no question)';
-//     var answer_ref = columns[1] || '(no answer)';
-
-//     // Perform a function for each row (for now, just log it)
-//     console.log(`Row ${index + 1}:`);
-//     console.log('Question: ' + question_ref);
-//     console.log('Answer: ' + answer_ref);
-
-//     item_ref.push({
-//       deck: get_hash_id(),
-//       question: question_ref,
-//       answer: answer_ref,
-//       score: 0,
-//       last_reviewed: Date.now()
-//     });
-    
-//   });
-  
-//   await index_database();
-//   await task_render_deck(get_hash_id());
-//   await task_hide_dialog();
-  
-// });
 
 // Listen for paste events anywhere on the page
 document.getElementById('dialog_input').addEventListener('paste', async (event) => {
@@ -2180,3 +1972,157 @@ document.getElementById('dialog_input').addEventListener('paste', async (event) 
   await task_hide_dialog();
   
 });
+
+// ---------------------------------------------------------
+// USER AUTHENTICATION
+// ---------------------------------------------------------
+
+// get a reference to the current signed-in user object
+var current_user = null;
+
+// specify where firebase should send users after clicking the magic link, and send users back to my app and let me finish signing them in here
+var magic_link_config = {
+  url: window.location.origin + window.location.pathname + '#/',
+  handleCodeInApp: true
+};
+
+// track auth state in realtime (know when you’re signed in)
+async function install_auth_listener() {
+  
+  // log messages in the console
+  console.log('Installing Realtime Authentication Listener...');
+
+  firebase.auth().onAuthStateChanged(function(user) {
+    
+    current_user = user || null;
+
+    // skip the first run (already handled during startup)
+    if (is_first_auth === true) {is_first_auth = false; return}
+
+    if (current_user) {
+      console.log('You Are Signed In, Loading Dashboard...' , 'Email: ' + current_user.email , 'Id: ' + current_user.uid);
+      location.hash = '#/dashboard';
+
+    } 
+    
+    else {
+      console.log('You Are Not Signed In, Redirecting To Login Page');
+      location.hash = '#/login';
+    }
+
+  });
+
+}
+
+// checks auth state in manually (know when you’re signed in)
+async function check_user_auth() {
+  
+  // log messages in the console
+  console.log('Authenticating User...');
+
+  return new Promise(resolve => {firebase.auth().onAuthStateChanged(async user => {
+    
+    current_user = user || null;
+
+    if (current_user) {
+      console.log('You Are Signed In, Loading Dashboard...' , 'Email: ' + current_user.email , 'Id: ' + current_user.uid);
+      await index_database();
+      location.hash = '#/dashboard';
+      route();
+    } 
+    
+    else {
+      console.log('You Are Not Signed In, Redirecting To Login Page');
+      location.hash = '#/login';
+      route();
+    }
+
+    resolve(current_user);
+
+    });
+  });
+}
+
+// complete sign-in if the current URL is a magic-link
+async function task_attempt_login() {
+  
+  // log messages in the console
+  console.log('Checking for magic links...');
+
+  // get a refernece to the full URL the user just landed on (it contains Firebase’s one-time sign-in code).
+  var href = location.href;
+
+  // check if this is a visit from an email-link sign-in URL, and stops early if not 
+  if (!firebase.auth().isSignInWithEmailLink(href)) return;
+
+  // require the email we saved when sending the link
+  var email = localStorage.getItem('emailForSignIn');
+  if (!email) return; // no email stored → do nothing (or show a message)
+
+  try {
+    
+    // attempt to login
+    await firebase.auth().signInWithEmailLink(email, href);
+    
+    // if login is successful
+    console.log('Login Successful');
+    
+  } catch (err) {
+    
+    // if login fails
+    console.log('Login Failed, ' + err);
+
+  } finally {
+    // cleanup so refresh doesn’t try again
+    // localStorage.removeItem('emailForSignIn');
+    // IMPORTANT: clean the query but keep the current hash (don’t set it here)
+    const cleanUrl = location.origin + location.pathname + location.hash;
+    history.replaceState(null, '', cleanUrl);
+  }
+}
+
+// send a passwordless sign-in link to a user’s email
+async function task_send_magic_link() {
+
+  // get references to input & validation elements in the html
+  var login_title = document.querySelector('#login_title');
+  var login_input = document.querySelector('#login_input');
+  var login_help = document.querySelector('#login_help');
+
+  // read the email address from the input, or use an empty string if it’s missing
+  var email = (login_input?.value || '').trim();
+  
+  // simple validation - if no email is provided, show a message and exit early
+  if (!email) {
+    login_help.textContent = 'Please enter an email.';
+    return;
+  }
+
+  try { // attempt to send the magic link
+  
+    // log messages in the console
+    console.log('Sending Magic Link...');
+
+    // firebase generates a one-time “magic” URL and emails it to the user
+    await firebase.auth().sendSignInLinkToEmail(email, magic_link_config);
+
+    // store the email for later use (stored in localStorage), so the user doesn’t have to retype on the same device
+    window.localStorage.setItem('emailForSignIn', email);
+
+    // update the on-screen status message so the user knows the email was sent
+    if (true) // this branch runs only if no error is thrown
+      console.log('Success: Magic link sent to: ', email);
+      login_title.textContent = "A Sign-in Link Has Been Sent";
+      login_help.textContent = "If it's not there, look in your spam or junk<br>folder, or request another link.";
+    }
+
+    // handle any errors (invalid email, network issue, etc.)
+    catch (err) {if (true) {
+      console.error('Error: Magic link not sent: ', err);
+      login_title.textContent = "Something Went Wrong";
+      login_help.textContent = 'Please try again.';
+    }
+
+  }
+
+}
