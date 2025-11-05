@@ -59,14 +59,14 @@ async function index_database() {
   console.log("Indexing database...");
 
   // get a live reference to the realtime database
-  var snapshot = await realtime_database.ref('/').once('value');
+  var snapshot = await realtime_database.ref('/users/' + current_user.uid).once('value');
   
   // store the snapshot  
   var db = snapshot.val();
-  var decks_data = db?.decks || {};
-  var cards_data = db?.cards || {};
+  var decks_data = db?.languages.german.decks || {};
+  var cards_data = db?.languages.german.cards || {};
   var stats_data = db?.stats || {};
-  var settings_data = db?.settings || {};
+  var settings_data = db?.languages.german.settings || {};
 
   // build array (array_label: realtime_db_key)
   stats_index = Object.entries(stats_data).map(([realtime_id, realtime_object]) => ({
@@ -110,8 +110,9 @@ async function install_firebase_listener() {
   console.log("Installing Realtime Firebase Listener");
   
   // connect listener to database
-  realtime_database.ref("/").on("value", (snapshot) => {
-    const data = snapshot.val();
+  realtime_database.ref('/users/' + current_user.uid).on("value", (snapshot) => {
+    
+    var data = snapshot.val();
     
     // if just installed, do not refresh
     if (is_first_index === true) {is_first_index = false;}
@@ -756,8 +757,6 @@ function task_render_dashboard() {
 
       snippet.querySelector(".deck_snippet_count").textContent = total_cards + ' cards' + ' • ' + mastery + '%'; // set count
 
-      //snippet.querySelector(".deck_snippet_count").textContent = cards_index.filter(item => item.deck.includes(list_item.unique_id)).length + ' cards'; // set count
-
       if (list_item.toggled === true) { snippet.querySelector('input[type="checkbox"]').checked = true;  }
       else if (list_item.toggled === false) { snippet.querySelector('input[type="checkbox"]').checked = false;  }
     }
@@ -865,7 +864,7 @@ function task_render_study(card_id_to_render) {
 async function task_add_deck() {
   
   // get a reference to the database
-  var item_ref = realtime_database.ref('decks');
+  var item_ref = realtime_database.ref('/users/' + current_user.uid + '/languages/german/decks');
 
   // push a new item (firebase will give it a unique ID)
   item_ref.push({
@@ -882,7 +881,7 @@ async function task_add_deck() {
 function task_edit_deck(unique_id, fields_to_update) {
   
   // get a reference to the card in the database
-  var item_ref = realtime_database.ref('decks/' + unique_id);
+  var item_ref = realtime_database.ref('/users/' + current_user.uid + '/languages/german/decks/' + unique_id);
   
   // update any and all feilds
   item_ref.update(fields_to_update);
@@ -895,15 +894,15 @@ function task_edit_deck(unique_id, fields_to_update) {
 function task_delete_deck(unique_id) {
 
   //build a reference to the specific card you want to delete
-  var deck_ref = realtime_database.ref('decks/' + unique_id);
+  var item_ref = realtime_database.ref('/users/' + current_user.uid + '/languages/german/decks/' + unique_id);
 
   // remove it from the database
-  deck_ref.remove();
+  item_ref.remove();
   
   var cards_to_delete = cards_index.filter(item => item.deck === unique_id);
 
   cards_to_delete.forEach(function(item) {
-    var card_ref = realtime_database.ref('cards/' + item.unique_id);
+    var card_ref = realtime_database.ref('/users/' + current_user.uid + '/languages/german/cards/' + item.unique_id);
     card_ref.remove();
   });
 }
@@ -912,7 +911,7 @@ function task_delete_deck(unique_id) {
 async function task_add_card() {
   
   // get a reference to the database
-  var item_ref = realtime_database.ref('cards');
+  var item_ref = realtime_database.ref('/users/' + current_user.uid + '/languages/german/cards/');
 
   // push a new item (firebase will give it a unique ID)
   item_ref.push({
@@ -931,7 +930,7 @@ async function task_add_card() {
 function task_edit_card(unique_id, fields_to_update) {
   
   // get a reference to the card in the database
-  var item_ref = realtime_database.ref('cards/' + unique_id);
+  var item_ref = realtime_database.ref('/users/' + current_user.uid + '/languages/german/cards/' + unique_id);
   
   // update any and all feilds
   item_ref.update(fields_to_update);
@@ -946,17 +945,17 @@ async function task_delete_card(target) {
   var unique_id = target.closest('.card_snippet_wrapper').dataset.id; // find the parent container of the clicked item
 
   //build a reference to the specific card you want to delete
-  var card_ref = realtime_database.ref('cards/' + unique_id);
+  var item_ref = realtime_database.ref('/users/' + current_user.uid + '/languages/german/cards/' + unique_id);
 
   // remove it from the database
-  card_ref.remove();
+  item_ref.remove();
 }
 
 // function to update a setting in the database
 function task_edit_setting(setting_to_update, new_value) {
   
   // get a reference to the card in the database
-  var item_ref = realtime_database.ref('settings');
+  var item_ref = realtime_database.ref('/users/' + current_user.uid + '/languages/german/settings/');
   
   // update any and all feilds
   item_ref.update({ [setting_to_update]: new_value });
@@ -989,14 +988,14 @@ function play_fail() {
 
 async function update_stats() {
   
-  var database_ref = realtime_database.ref('stats'); // get a reference to the database
+  var database_ref = realtime_database.ref('/users/' + current_user.uid + '/stats/'); // get a reference to the database
   var date_ref = get_timestamp(); //get a reference to todays date
   var stats_ref = stats_index.find(item => item.timestamp === date_ref); // get a reference to todays stats
   
   // if stats for today exist, increment the total
   if (stats_ref) {
     console.log('Updating Stats: ' + get_current_date());
-    var item_ref = realtime_database.ref('stats/' + stats_ref.unique_id);
+    var item_ref = realtime_database.ref('/users/' + current_user.uid + '/stats/' + stats_ref.unique_id);
     var existing_total = stats_ref.total;
     item_ref.update({
       date: get_current_date(),
@@ -1939,7 +1938,7 @@ document.getElementById('dialog_input').addEventListener('paste', async (event) 
   var rows = pasted_text.trim().split('\n');
 
   var deck_ref = get_hash_id();
-  var item_ref = realtime_database.ref('cards');
+  var item_ref = realtime_database.ref('/users/' + current_user.uid + '/languages/german/cards/');
 
   console.log('Detected paste event. Processing rows...');
 
@@ -2000,7 +1999,7 @@ async function install_auth_listener() {
     if (is_first_auth === true) {is_first_auth = false; return}
 
     if (current_user) {
-      console.log('You Are Signed In, Loading Dashboard...' , 'Email: ' + current_user.email , 'Id: ' + current_user.uid);
+      console.log('You Are Signed In As: ' + current_user.email);
       location.hash = '#/dashboard';
 
     } 
