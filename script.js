@@ -2026,7 +2026,7 @@ async function check_user_auth() {
     if (current_user) {
       console.log('You Are Signed In, Loading Dashboard...' , 'Email: ' + current_user.email , 'Id: ' + current_user.uid);
       await index_database();
-      location.hash = '#/dashboard';
+      //location.hash = '#/dashboard';
       route();
     } 
     
