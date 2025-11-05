@@ -1209,7 +1209,7 @@ outline: none;
   position: relative;
   width: 96px;
   height: 96px;
-  background-image: url("/assets/favicon.svg");
+  background-image: url("assets/favicon.svg");
   background-position: center; /* Center the image */
   background-repeat: no-repeat; /* Do not repeat the image */
   background-size: cover; /* Resize the background image to cover the entire container */
