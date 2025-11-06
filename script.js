@@ -1361,7 +1361,7 @@ function collect_new_order() {
 // STUDY MODES: PRIMARY
 // ---------------------------------------------------------
 
-function build_balanced_study_index_deck() {
+function build_balanced_study_index() {
   
   // log messages in the console
   console.log('Building Study Index');
@@ -1626,7 +1626,7 @@ function build_shuffle_study_index() {
 // STUDY MODES: SECONDARY
 // ---------------------------------------------------------
 
-function build_balanced_study_index() {
+function build_balanced_study_index_deck() {
   
   // log messages in the console
   console.log('Building Study Index');
@@ -1634,9 +1634,6 @@ function build_balanced_study_index() {
   // reset globals
   study_index = [];
   var candidates = filter_array_by_property(cards_index, 'deck', get_hash_id()); 
-
-  // exclude untoggled decks
-  candidates = exclude_untoggled_decks(candidates);
 
   // order and sort before splicing
   candidates = sort_by_score_then_date(candidates);
