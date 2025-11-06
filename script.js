@@ -42,8 +42,8 @@ async function initialise_app() {
   await check_user_auth();
   // await index_database();
   // await route();
-  await install_firebase_listener();
-  await install_auth_listener();
+  // await install_firebase_listener();
+  // await install_auth_listener();
   console.log("Initialisation complete");
 
 }
@@ -107,7 +107,7 @@ async function index_database() {
 async function install_firebase_listener() {
   
   // log messages in the console
-  console.log("Installing Realtime Firebase Listener");
+  console.log("Installing firebase listener...");
   
   // connect listener to database
   realtime_database.ref('/users/' + current_user.uid).on("value", (snapshot) => {
@@ -210,8 +210,7 @@ async function route() {
 
   else { 
     console.log('No scene found, Redirecting to Dashboard...');
-    task_render_dashboard();
-    task_load_scene('#/dashboard');
+    location.hash = '#/dashboard';
     return;
   }
 
@@ -1856,9 +1855,6 @@ function task_populate_results(search_term) {
     .trim()
     .toLowerCase();
   }
-
-  // specify array to loop through and perform actions
-  // cards_index.filter(item => ['question', 'answer'].some(key => item[key]?.toLowerCase().includes(value.toLowerCase()))).forEach(
   
   cards_index.filter(item => ['question', 'answer'].some(key => parse(item[key] || '').includes(parse(search_term)))).forEach(
 
@@ -1977,28 +1973,89 @@ document.getElementById('dialog_input').addEventListener('paste', async (event) 
 var current_user = null;
 
 // specify where firebase should send users after clicking the magic link, and send users back to my app and let me finish signing them in here
-// var magic_link_config = {
-//   url: window.location.origin + window.location.pathname + '#/',
-//   handleCodeInApp: true
-// };
-
-// Remove the fixed magic_link_config and add this helper instead
 function configure_magic_link(email) {
-  // Put the email in the fragment, not the query string
-  // Example final shape:
-  // https://yourapp/#/login?e=<urlencoded>
-  var base = window.location.origin + window.location.pathname + '#/login?e=' + encodeURIComponent(email);
+  var base = window.location.origin + window.location.pathname + '#/?e=' + encodeURIComponent(email);
   return {
     url: base,
     handleCodeInApp: true
   };
 }
 
+// checks auth state in manually (know when you’re signed in)
+async function check_user_auth() {
+  
+  // log messages in the console
+  console.log('Checking user authentication...');
+
+  return new Promise(resolve => {firebase.auth().onAuthStateChanged(async user => {
+    
+    current_user = user || null;
+
+    if (current_user) {
+      console.log('You are signed in as: ' + current_user.email);
+      await index_database();
+      await route();
+      await install_firebase_listener();
+      await install_auth_listener();
+    } 
+    
+    else {
+      console.log('You Are Not Signed In, Redirecting To Login Page');
+      await route();
+    }
+
+    resolve(current_user);
+
+    });
+  });
+}
+
+// complete sign-in if the current URL is a magic-link
+async function task_attempt_login() {
+
+  // get a refernece to the full URL the user just landed on (it contains Firebase’s one-time sign-in code).
+  var href = location.href;
+
+  // check if this is a visit from an email-link sign-in URL, and stops early if not 
+  if (!firebase.auth().isSignInWithEmailLink(href)) return;
+
+  // log messages in the console
+  console.log('Magic link detected, attempting sign-in…');
+
+  // retrieve the encoded email from the url
+  var email = get_encoded_email();
+
+  // no email stored → do nothing (or show a message)
+  if (!email) {
+    console.warn('No email available, unable to complete sign-in');
+    return;
+  }
+
+  try {
+
+    // attempt to login
+    await firebase.auth().signInWithEmailLink(email, href);
+
+    // if login is successful
+    console.log('Magic link sign-in was successful for', email);
+
+  } catch (err) {
+
+    // if login fails
+    console.log('Magic link sign-in failed,', err);
+
+  } finally {
+
+    // Remove Firebase query bits and your email fragment
+    clear_encoded_email();
+  }
+}
+
 // track auth state in realtime (know when you’re signed in)
 async function install_auth_listener() {
   
   // log messages in the console
-  console.log('Installing Realtime Authentication Listener...');
+  console.log('Installing authentication listener...');
 
   firebase.auth().onAuthStateChanged(function(user) {
     
@@ -2008,86 +2065,19 @@ async function install_auth_listener() {
     if (is_first_auth === true) {is_first_auth = false; return}
 
     if (current_user) {
-      console.log('You Are Signed In As: ' + current_user.email);
+      console.log('You are signed in as: ' + current_user.email);
       location.hash = '#/dashboard';
 
     } 
     
     else {
-      console.log('You Are Not Signed In, Redirecting To Login Page');
+      console.log('You are not signed in, redirecting to login page');
       location.hash = '#/login';
     }
 
   });
 
 }
-
-// checks auth state in manually (know when you’re signed in)
-async function check_user_auth() {
-  
-  // log messages in the console
-  console.log('Authenticating User...');
-
-  return new Promise(resolve => {firebase.auth().onAuthStateChanged(async user => {
-    
-    current_user = user || null;
-
-    if (current_user) {
-      console.log('You Are Signed In, Loading Dashboard...' , 'Email: ' + current_user.email);
-      await index_database();
-      //location.hash = '#/dashboard';
-      route();
-    } 
-    
-    else {
-      console.log('You Are Not Signed In, Redirecting To Login Page');
-      location.hash = '#/login';
-      route();
-    }
-
-    resolve(current_user);
-
-    });
-  });
-}
-
-// // complete sign-in if the current URL is a magic-link
-// async function task_attempt_login() {
-  
-//   // log messages in the console
-//   console.log('Checking for magic links...');
-
-//   // get a refernece to the full URL the user just landed on (it contains Firebase’s one-time sign-in code).
-//   var href = location.href;
-
-//   // check if this is a visit from an email-link sign-in URL, and stops early if not 
-//   if (!firebase.auth().isSignInWithEmailLink(href)) return;
-
-//   // require the email we saved when sending the link
-//   var email = localStorage.getItem('emailForSignIn');
-//   if (!email) return; // no email stored → do nothing (or show a message)
-
-//   try {
-    
-//     // attempt to login
-//     await firebase.auth().signInWithEmailLink(email, href);
-    
-//     // if login is successful
-//     console.log('Login Successful');
-    
-//   } catch (err) {
-    
-//     // if login fails
-//     console.log('Login Failed, ' + err);
-
-//   } finally {
-//     // cleanup so refresh doesn’t try again
-//     // localStorage.removeItem('emailForSignIn');
-//     // IMPORTANT: clean the query but keep the current hash (don’t set it here)
-//     const cleanUrl = location.origin + location.pathname + location.hash;
-//     history.replaceState(null, '', cleanUrl);
-//   }
-// }
 
 // send a passwordless sign-in link to a user’s email
 async function task_send_magic_link() {
@@ -2106,16 +2096,13 @@ async function task_send_magic_link() {
   try { // attempt to send the magic link
   
     // log messages in the console
-    console.log('Sending Magic Link...');
+    console.log('Sending magic link...');
 
     // firebase generates a one-time “magic” URL and emails it to the user
     await firebase.auth().sendSignInLinkToEmail(email, configure_magic_link(email));
 
-    // store the email for later use (stored in localStorage), so the user doesn’t have to retype on the same device
-    // window.localStorage.setItem('emailForSignIn', email);
-
-    // update the on-screen status message so the user knows the email was sent
-    if (true) // this branch runs only if no error is thrown
+    // this branch runs only if no error is thrown
+    if (true) 
       console.log('Success: Magic link sent to: ', email);
       login_title.textContent = "A Sign-in Link Has Been Sent";
       login_help.innerHTML = "If it's not there, look in your spam or junk<br>folder, or request another link.";
@@ -2132,47 +2119,21 @@ async function task_send_magic_link() {
 
 }
 
-function getEmailFromFragment() {
+// helper to encode the users email in the url
+function get_encoded_email() {
   // Allow both "#/login?e=…" and "#/?e=…"
-  const hash = window.location.hash || '';
-  const queryPart = hash.includes('?') ? hash.split('?')[1] : '';
-  const params = new URLSearchParams(queryPart);
-  const e = params.get('e');
+  var hash = window.location.hash || '';
+  var queryPart = hash.includes('?') ? hash.split('?')[1] : '';
+  var params = new URLSearchParams(queryPart);
+  var e = params.get('e');
   return e ? decodeURIComponent(e) : null;
 }
 
-function clearEmailInFragmentPreservingRoute() {
+// helper to clear encoded email from url
+function clear_encoded_email() {
   // Keep the hash route but drop the query part after "?"
-  const hash = window.location.hash || '';
-  const cleanHash = hash.split('?')[0] || '#/';
-  const cleanUrl = location.origin + location.pathname + cleanHash;
+  var hash = window.location.hash || '';
+  var cleanHash = hash.split('?')[0] || '#/';
+  var cleanUrl = location.origin + location.pathname + cleanHash;
   history.replaceState(null, '', cleanUrl);
-}
-
-async function task_attempt_login() {
-  console.log('Checking for magic links…');
-
-  const href = location.href;
-  if (!firebase.auth().isSignInWithEmailLink(href)) return;
-
-  // Do not rely on localStorage. Try fragment first, keep localStorage only as last-ditch fallback if you really want it.
-  let email = getEmailFromFragment();
-  if (!email) {
-    // optional very last fallback:
-    try { email = window.localStorage.getItem('emailForSignIn') || null; } catch (_) {}
-  }
-  if (!email) {
-    console.warn('No email available in fragment. Cannot complete sign-in.');
-    return;
-  }
-
-  try {
-    await firebase.auth().signInWithEmailLink(email, href);
-    console.log('Login Successful for', email);
-  } catch (err) {
-    console.log('Login Failed,', err);
-  } finally {
-    // Remove Firebase query bits and your email fragment
-    clearEmailInFragmentPreservingRoute();
-  }
 }
