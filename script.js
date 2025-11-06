@@ -1977,10 +1977,22 @@ document.getElementById('dialog_input').addEventListener('paste', async (event) 
 var current_user = null;
 
 // specify where firebase should send users after clicking the magic link, and send users back to my app and let me finish signing them in here
-var magic_link_config = {
-  url: window.location.origin + window.location.pathname + '#/',
-  handleCodeInApp: true
-};
+// var magic_link_config = {
+//   url: window.location.origin + window.location.pathname + '#/',
+//   handleCodeInApp: true
+// };
+
+// Remove the fixed magic_link_config and add this helper instead
+function configure_magic_link(email) {
+  // Put the email in the fragment, not the query string
+  // Example final shape:
+  // https://yourapp/#/login?e=<urlencoded>
+  var base = window.location.origin + window.location.pathname + '#/login?e=' + encodeURIComponent(email);
+  return {
+    url: base,
+    handleCodeInApp: true
+  };
+}
 
 // track auth state in realtime (know when you’re signed in)
 async function install_auth_listener() {
@@ -2039,43 +2051,43 @@ async function check_user_auth() {
   });
 }
 
-// complete sign-in if the current URL is a magic-link
-async function task_attempt_login() {
+// // complete sign-in if the current URL is a magic-link
+// async function task_attempt_login() {
   
-  // log messages in the console
-  console.log('Checking for magic links...');
+//   // log messages in the console
+//   console.log('Checking for magic links...');
 
-  // get a refernece to the full URL the user just landed on (it contains Firebase’s one-time sign-in code).
-  var href = location.href;
+//   // get a refernece to the full URL the user just landed on (it contains Firebase’s one-time sign-in code).
+//   var href = location.href;
 
-  // check if this is a visit from an email-link sign-in URL, and stops early if not 
-  if (!firebase.auth().isSignInWithEmailLink(href)) return;
+//   // check if this is a visit from an email-link sign-in URL, and stops early if not 
+//   if (!firebase.auth().isSignInWithEmailLink(href)) return;
 
-  // require the email we saved when sending the link
-  var email = localStorage.getItem('emailForSignIn');
-  if (!email) return; // no email stored → do nothing (or show a message)
+//   // require the email we saved when sending the link
+//   var email = localStorage.getItem('emailForSignIn');
+//   if (!email) return; // no email stored → do nothing (or show a message)
 
-  try {
+//   try {
     
-    // attempt to login
-    await firebase.auth().signInWithEmailLink(email, href);
+//     // attempt to login
+//     await firebase.auth().signInWithEmailLink(email, href);
     
-    // if login is successful
-    console.log('Login Successful');
+//     // if login is successful
+//     console.log('Login Successful');
     
-  } catch (err) {
+//   } catch (err) {
     
-    // if login fails
-    console.log('Login Failed, ' + err);
+//     // if login fails
+//     console.log('Login Failed, ' + err);
 
-  } finally {
-    // cleanup so refresh doesn’t try again
-    // localStorage.removeItem('emailForSignIn');
-    // IMPORTANT: clean the query but keep the current hash (don’t set it here)
-    const cleanUrl = location.origin + location.pathname + location.hash;
-    history.replaceState(null, '', cleanUrl);
-  }
-}
+//   } finally {
+//     // cleanup so refresh doesn’t try again
+//     // localStorage.removeItem('emailForSignIn');
+//     // IMPORTANT: clean the query but keep the current hash (don’t set it here)
+//     const cleanUrl = location.origin + location.pathname + location.hash;
+//     history.replaceState(null, '', cleanUrl);
+//   }
+// }
 
 // send a passwordless sign-in link to a user’s email
 async function task_send_magic_link() {
@@ -2089,10 +2101,7 @@ async function task_send_magic_link() {
   var email = (login_input?.value || '').trim();
   
   // simple validation - if no email is provided, show a message and exit early
-  if (!email) {
-    login_help.textContent = 'Please enter an email.';
-    return;
-  }
+  if (!email) {login_help.textContent = 'Please enter an email.';return;}
 
   try { // attempt to send the magic link
   
@@ -2100,16 +2109,16 @@ async function task_send_magic_link() {
     console.log('Sending Magic Link...');
 
     // firebase generates a one-time “magic” URL and emails it to the user
-    await firebase.auth().sendSignInLinkToEmail(email, magic_link_config);
+    await firebase.auth().sendSignInLinkToEmail(email, configure_magic_link(email));
 
     // store the email for later use (stored in localStorage), so the user doesn’t have to retype on the same device
-    window.localStorage.setItem('emailForSignIn', email);
+    // window.localStorage.setItem('emailForSignIn', email);
 
     // update the on-screen status message so the user knows the email was sent
     if (true) // this branch runs only if no error is thrown
       console.log('Success: Magic link sent to: ', email);
       login_title.textContent = "A Sign-in Link Has Been Sent";
-      login_help.textContent = "If it's not there, look in your spam or junk<br>folder, or request another link.";
+      login_help.innerHTML = "If it's not there, look in your spam or junk<br>folder, or request another link.";
     }
 
     // handle any errors (invalid email, network issue, etc.)
@@ -2121,4 +2130,49 @@ async function task_send_magic_link() {
 
   }
 
+}
+
+function getEmailFromFragment() {
+  // Allow both "#/login?e=…" and "#/?e=…"
+  const hash = window.location.hash || '';
+  const queryPart = hash.includes('?') ? hash.split('?')[1] : '';
+  const params = new URLSearchParams(queryPart);
+  const e = params.get('e');
+  return e ? decodeURIComponent(e) : null;
+}
+
+function clearEmailInFragmentPreservingRoute() {
+  // Keep the hash route but drop the query part after "?"
+  const hash = window.location.hash || '';
+  const cleanHash = hash.split('?')[0] || '#/';
+  const cleanUrl = location.origin + location.pathname + cleanHash;
+  history.replaceState(null, '', cleanUrl);
+}
+
+async function task_attempt_login() {
+  console.log('Checking for magic links…');
+
+  const href = location.href;
+  if (!firebase.auth().isSignInWithEmailLink(href)) return;
+
+  // Do not rely on localStorage. Try fragment first, keep localStorage only as last-ditch fallback if you really want it.
+  let email = getEmailFromFragment();
+  if (!email) {
+    // optional very last fallback:
+    try { email = window.localStorage.getItem('emailForSignIn') || null; } catch (_) {}
+  }
+  if (!email) {
+    console.warn('No email available in fragment. Cannot complete sign-in.');
+    return;
+  }
+
+  try {
+    await firebase.auth().signInWithEmailLink(email, href);
+    console.log('Login Successful for', email);
+  } catch (err) {
+    console.log('Login Failed,', err);
+  } finally {
+    // Remove Firebase query bits and your email fragment
+    clearEmailInFragmentPreservingRoute();
+  }
 }
