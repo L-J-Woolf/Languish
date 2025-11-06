@@ -1,5 +1,5 @@
-const CACHE = `251106_2205`; // update cache name when changing assets, or old caches can linger.
-const ASSETS = [
+var CACHE = `251107_0907`; // update cache name when changing assets, or old caches can linger.
+var ASSETS = [
   ".",
   "index.html",
   "styles.css",

@@ -1303,6 +1303,10 @@ outline: none;
   background-color: #6A8E33;
 }
 
+.login_button:disabled {
+  background-color: rgba(255, 255, 255, 0.24);
+}
+
 .login_help {
   position: relative;
   width: 100%; max-width: 300px;

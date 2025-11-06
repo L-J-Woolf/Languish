@@ -40,10 +40,6 @@ async function initialise_app() {
   console.log("Initialising app");
   await task_attempt_login();
   await check_user_auth();
-  // await index_database();
-  // await route();
-  // await install_firebase_listener();
-  // await install_auth_listener();
   console.log("Initialisation complete");
 
 }
@@ -2085,6 +2081,7 @@ async function task_send_magic_link() {
   // get references to input & validation elements in the html
   var login_title = document.querySelector('#login_title');
   var login_input = document.querySelector('#login_input');
+  var login_button = document.querySelector('#login_button');
   var login_help = document.querySelector('#login_help');
 
   // read the email address from the input, or use an empty string if it’s missing
@@ -2105,6 +2102,9 @@ async function task_send_magic_link() {
     if (true) 
       console.log('Success: Magic link sent to: ', email);
       login_title.textContent = "A Sign-in Link Has Been Sent";
+      login_input.value = "";
+      login_button.disabled = true;
+      setTimeout(() => {login_button.disabled = false;}, 2000);
       login_help.innerHTML = "If it's not there, look in your spam or junk<br>folder, or request another link.";
     }
 
