@@ -169,35 +169,30 @@ async function route() {
     return;
   }
 
-  if (current_hash.includes('#/login')) { 
-    console.log('Hash includes #/login');
+  if (current_hash.includes('#/login')) {
     task_load_scene('#/login');
     return;
   }
 
   if (current_hash.includes('#/dashboard')) { 
-    console.log('Hash includes #/dashboard');
     task_render_dashboard();
     task_load_scene('#/dashboard');
     return;
   }
 
   else if (current_hash.includes('#/decks/')) { 
-    console.log('Hash includes #/decks/');
     task_render_deck(get_hash_id());
     task_load_scene('#/decks');
     return;
   }
 
   else if (current_hash.includes('#/study')) { 
-    console.log('Hash includes #/study');
     task_render_study(get_hash_id());
     task_load_scene('#/study');
     return;
   }
 
   else if (current_hash.includes('#/search')) { 
-    console.log('Hash includes #/search');
     task_render_search();
     task_load_scene('#/search');
     searchbar.focus();
@@ -660,20 +655,20 @@ document.getElementById('btn_rate').addEventListener('click', function(event) {
 
 // function to iterate the study scene through the study_index
 async function iterate_study_scene() {
-  console.log('Iterating Study Scene');
+  console.log('Iterating study scene');
 
   var hash = window.location.hash;
   var match = hash.match(/#\/study\/(\d+)\/[-\w]+/);
   var iteration = match ? Number(match[1]) : null;
 
-  console.log('Current Iteration: ' + iteration);
+  console.log('Current iteration: ' + iteration);
 
   var next_iteration = iteration + 1;
 
-  console.log('Next Iteration: ' + next_iteration);
+  console.log('Next iteration: ' + next_iteration);
 
   if (next_iteration === 10 || study_index[next_iteration] === undefined) {
-    console.log('Session Complete');
+    console.log('Session complete');
     location.hash = '#/dashboard';
   }
 
@@ -698,14 +693,14 @@ function task_load_scene(scene_to_load) {
   scene_element.style.display = "block";
 
   // log messages in the console
-  console.log('loading scene: ' + scene_to_load);
+  console.log('Loading ' + scene_to_load);
 }
 
 // function to render decks list
 function task_render_dashboard() {
   
   // show messages in the console
-  console.log('rendering dashboard');
+  console.log('Rendering dashboard');
 
   document.getElementById('scene_sync_date').innerText = 'synced ' + get_current_time();
   document.getElementById('metric_streak').textContent = get_daily_streak();
@@ -762,7 +757,7 @@ function task_render_dashboard() {
 function task_render_deck(deck_id_to_render) {
 
   // show messages in the console
-  console.log('rendering cards list for: ' + deck_id_to_render);
+  console.log('Rendering selected deck: ' + deck_id_to_render);
 
   // render page details
   document.getElementById('deck_title').innerText = filter_array_by_property(decks_index , 'unique_id' , deck_id_to_render)[0].deck_name;
@@ -806,7 +801,7 @@ function task_render_deck(deck_id_to_render) {
 function task_render_study(card_id_to_render) {
 
   // show messages in the console
-  console.log('rendering study scene for: ' + card_id_to_render);
+  console.log('rendering study sesseion');
 
   var title = document.getElementById('study_scene_title');
   var question = document.getElementById('studycard_question_content');
@@ -1379,7 +1374,11 @@ function build_balanced_study_index() {
   var candidates_4 = candidates.filter(item => item.score === 4);
   var candidates_5 = candidates.filter(item => item.score === 5);
 
+  // ramdomise the order of new cards only (all others are sorted by score + date)
+  candidates_0 = randomise_order(candidates_0);
+
   // collect cards from groups
+  splice_and_push(1, candidates_0, study_index);
   splice_and_push(1, candidates_1, study_index);
   splice_and_push(1, candidates_2, study_index);
   splice_and_push(1, candidates_3, study_index);
@@ -1388,7 +1387,7 @@ function build_balanced_study_index() {
 
 
   // merge minis back into candidates (now missing spliced items)
-  candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
+  candidates = [...candidates_0, ...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
 
   // calculate how many cards are still required, if any
   var difference = 5 - study_index.length;
@@ -1396,26 +1395,13 @@ function build_balanced_study_index() {
   // add remaining cards, as needed
   splice_and_push(difference, candidates, study_index);
 
-
-
-  // ramdomise the order of new cards only (all others are sorted by score + date)
-  candidates_0 = randomise_order(candidates_0);
-
-  // calculate how many cards are still required, if any
-  var difference = 5 - study_index.length;
-
-  // add remaining cards as needed
-  splice_and_push(difference, candidates_0, study_index);
-
-
-
+  
+  
   // collect cards from groups
   splice_and_push(5, candidates_5, study_index);
   
-  
-  
   // rebuild candidates from minis (now missing spliced items)
-  candidates = [...candidates_0, ...candidates, ...candidates_5];
+  candidates = [...candidates, ...candidates_5];
   
   // calculate how many cards are still required, if any
   var difference = 10 - study_index.length;
@@ -1988,7 +1974,7 @@ async function check_user_auth() {
     current_user = user || null;
 
     if (current_user) {
-      console.log('You are signed in as: ' + current_user.email);
+      console.log('Signed in as: ' + current_user.email);
       await index_database();
       await route();
       await install_firebase_listener();
@@ -2061,7 +2047,7 @@ async function install_auth_listener() {
     if (is_first_auth === true) {is_first_auth = false; return}
 
     if (current_user) {
-      console.log('You are signed in as: ' + current_user.email);
+      console.log('Signed in as: ' + current_user.email);
       location.hash = '#/dashboard';
 
     } 
