@@ -2,11 +2,17 @@
 // GLOBALS 
 // ---------------------------------------------------------
 
+// get a reference to the current signed-in user object
+var current_user = null;
+
+// get a reference for the various index's
 var settings_index = [];
 var stats_index = [];
 var decks_index = [];
 var cards_index = [];
 var study_index = [];
+
+// configure settings
 var is_first_index = true;
 var is_first_auth = true;
 
@@ -48,6 +54,104 @@ async function initialise_app() {
 // START-UP TASKS 
 // ---------------------------------------------------------
 
+// checks auth state in manually (know when you’re signed in)
+async function check_user_auth() {
+  
+  // log messages in the console
+  console.log('Checking user authentication...');
+
+  return new Promise(resolve => {firebase.auth().onAuthStateChanged(async user => {
+    
+    current_user = user || null;
+
+    if (current_user) {
+      console.log('Signed in as: ' + current_user.email);
+      await index_database();
+      await route();
+      await install_firebase_listener();
+      await install_auth_listener();
+    } 
+    
+    else {
+      console.log('You Are Not Signed In, Redirecting To Login Page');
+      await route();
+    }
+
+    resolve(current_user);
+
+    });
+  });
+}
+
+// complete sign-in if the current URL is a magic-link
+async function task_attempt_login() {
+
+  // get a refernece to the full URL the user just landed on (it contains Firebase’s one-time sign-in code).
+  var href = location.href;
+
+  // check if this is a visit from an email-link sign-in URL, and stops early if not 
+  if (!firebase.auth().isSignInWithEmailLink(href)) return;
+
+  // log messages in the console
+  console.log('Magic link detected, attempting sign-in…');
+
+  // retrieve the encoded email from the url
+  var email = get_encoded_email();
+
+  // no email stored → do nothing (or show a message)
+  if (!email) {
+    console.warn('No email available, unable to complete sign-in');
+    return;
+  }
+
+  try {
+
+    // attempt to login
+    await firebase.auth().signInWithEmailLink(email, href);
+
+    // if login is successful
+    console.log('Magic link sign-in was successful for', email);
+
+  } catch (err) {
+
+    // if login fails
+    console.log('Magic link sign-in failed,', err);
+
+  } finally {
+
+    // Remove Firebase query bits and your email fragment
+    clear_encoded_email();
+  }
+}
+
+// track auth state in realtime (know when you’re signed in)
+async function install_auth_listener() {
+  
+  // log messages in the console
+  console.log('Installing authentication listener...');
+
+  firebase.auth().onAuthStateChanged(function(user) {
+    
+    current_user = user || null;
+
+    // skip the first run (already handled during startup)
+    if (is_first_auth === true) {is_first_auth = false; return}
+
+    if (current_user) {
+      console.log('Signed in as: ' + current_user.email);
+      location.hash = '#/dashboard';
+
+    } 
+    
+    else {
+      console.log('You are not signed in, redirecting to login page');
+      location.hash = '#/login';
+    }
+
+  });
+
+}
+
 // manually sync the local database with the realtime database
 async function index_database() {
   
@@ -82,11 +186,11 @@ async function index_database() {
 
   // build array (array_label: realtime_db_key)
   cards_index = Object.entries(cards_data).map(([realtime_id, realtime_object]) => ({
+    score: realtime_object.score,
     unique_id: realtime_id,
     deck: realtime_object.deck,
     question: realtime_object.question,
     answer: realtime_object.answer,
-    score: realtime_object.score,
     is_flipped: realtime_object.flipped,
     last_reviewed: realtime_object.last_reviewed
   }));
@@ -803,6 +907,7 @@ function task_render_study(card_id_to_render) {
   // show messages in the console
   console.log('rendering study sesseion');
 
+  task_speak_german("  ");
   var title = document.getElementById('study_scene_title');
   var question = document.getElementById('studycard_question_content');
   var answer = document.getElementById('studycard_answer_content');
@@ -1228,8 +1333,6 @@ document.getElementById('dynamic_list_decks').addEventListener('dragend', functi
 	// add a class to the dragged item
 	dragged_item.classList.remove('dragging');
 
-	// dragged_over_item.classList.remove('drop-above', 'drop-below');
-
 	// log messages in the console
 	console.log('dragend');
 
@@ -1383,26 +1486,23 @@ function build_balanced_study_index() {
   splice_and_push(1, candidates_2, study_index);
   splice_and_push(1, candidates_3, study_index);
   splice_and_push(1, candidates_4, study_index);
+  splice_and_push(5, candidates_5, study_index);
+
   
+  // merge minis back into candidates (now missing spliced items)
+  candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4, ...candidates_5];
+
+  // calculate how many cards are still required, if any
+  var difference = 10 - study_index.length;
+
+  // add remaining cards as needed
+  splice_and_push(difference, candidates, study_index);
+
 
 
   // merge minis back into candidates (now missing spliced items)
-  candidates = [...candidates_0, ...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
+  candidates = [...candidates_0, ...candidates];
 
-  // calculate how many cards are still required, if any
-  var difference = 5 - study_index.length;
-
-  // add remaining cards, as needed
-  splice_and_push(difference, candidates, study_index);
-
-  
-  
-  // collect cards from groups
-  splice_and_push(5, candidates_5, study_index);
-  
-  // rebuild candidates from minis (now missing spliced items)
-  candidates = [...candidates, ...candidates_5];
-  
   // calculate how many cards are still required, if any
   var difference = 10 - study_index.length;
 
@@ -1627,44 +1727,32 @@ function build_balanced_study_index_deck() {
   var candidates_4 = candidates.filter(item => item.score === 4);
   var candidates_5 = candidates.filter(item => item.score === 5);
 
+  // ramdomise the order of new cards only (all others are sorted by score + date)
+  candidates_0 = randomise_order(candidates_0);
+
   // collect cards from groups
+  splice_and_push(1, candidates_0, study_index);
   splice_and_push(1, candidates_1, study_index);
   splice_and_push(1, candidates_2, study_index);
   splice_and_push(1, candidates_3, study_index);
   splice_and_push(1, candidates_4, study_index);
+  splice_and_push(5, candidates_5, study_index);
+
   
-
-
   // merge minis back into candidates (now missing spliced items)
-  candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4];
+  candidates = [...candidates_1, ...candidates_2, ...candidates_3, ...candidates_4, ...candidates_5];
 
   // calculate how many cards are still required, if any
-  var difference = 5 - study_index.length;
+  var difference = 10 - study_index.length;
 
-  // add remaining cards, as needed
+  // add remaining cards as needed
   splice_and_push(difference, candidates, study_index);
 
 
 
-  // ramdomise the order of new cards only (all others are sorted by score + date)
-  candidates_0 = randomise_order(candidates_0);
+  // merge minis back into candidates (now missing spliced items)
+  candidates = [...candidates_0, ...candidates];
 
-  // calculate how many cards are still required, if any
-  var difference = 5 - study_index.length;
-
-  // add remaining cards as needed
-  splice_and_push(difference, candidates_0, study_index);
-
-
-
-  // collect cards from groups
-  splice_and_push(5, candidates_5, study_index);
-  
-  
-  
-  // rebuild candidates from minis (now missing spliced items)
-  candidates = [...candidates_0, ...candidates, ...candidates_5];
-  
   // calculate how many cards are still required, if any
   var difference = 10 - study_index.length;
 
@@ -1675,20 +1763,6 @@ function build_balanced_study_index_deck() {
 
   // randomise the order before studying
   study_index = randomise_order(study_index);
-
-  // log messages in the console
-  console.log('Study Index Complete: ', study_index);
-
-}
-
-function create_study_index_for_card(unique_id) {
-  
-  // log messages in the console
-  console.log('Building Study Index');
-
-  // reset globals
-  study_index = [];
-  study_index = filter_array_by_property(cards_index, 'unique_id', unique_id);
 
   // log messages in the console
   console.log('Study Index Complete: ', study_index);
@@ -1948,118 +2022,8 @@ document.getElementById('dialog_input').addEventListener('paste', async (event) 
 });
 
 // ---------------------------------------------------------
-// USER AUTHENTICATION
+// USER AUTHENTICATION: TASKS
 // ---------------------------------------------------------
-
-// get a reference to the current signed-in user object
-var current_user = null;
-
-// specify where firebase should send users after clicking the magic link, and send users back to my app and let me finish signing them in here
-function configure_magic_link(email) {
-  var base = window.location.origin + window.location.pathname + '#/?e=' + encodeURIComponent(email);
-  return {
-    url: base,
-    handleCodeInApp: true
-  };
-}
-
-// checks auth state in manually (know when you’re signed in)
-async function check_user_auth() {
-  
-  // log messages in the console
-  console.log('Checking user authentication...');
-
-  return new Promise(resolve => {firebase.auth().onAuthStateChanged(async user => {
-    
-    current_user = user || null;
-
-    if (current_user) {
-      console.log('Signed in as: ' + current_user.email);
-      await index_database();
-      await route();
-      await install_firebase_listener();
-      await install_auth_listener();
-    } 
-    
-    else {
-      console.log('You Are Not Signed In, Redirecting To Login Page');
-      await route();
-    }
-
-    resolve(current_user);
-
-    });
-  });
-}
-
-// complete sign-in if the current URL is a magic-link
-async function task_attempt_login() {
-
-  // get a refernece to the full URL the user just landed on (it contains Firebase’s one-time sign-in code).
-  var href = location.href;
-
-  // check if this is a visit from an email-link sign-in URL, and stops early if not 
-  if (!firebase.auth().isSignInWithEmailLink(href)) return;
-
-  // log messages in the console
-  console.log('Magic link detected, attempting sign-in…');
-
-  // retrieve the encoded email from the url
-  var email = get_encoded_email();
-
-  // no email stored → do nothing (or show a message)
-  if (!email) {
-    console.warn('No email available, unable to complete sign-in');
-    return;
-  }
-
-  try {
-
-    // attempt to login
-    await firebase.auth().signInWithEmailLink(email, href);
-
-    // if login is successful
-    console.log('Magic link sign-in was successful for', email);
-
-  } catch (err) {
-
-    // if login fails
-    console.log('Magic link sign-in failed,', err);
-
-  } finally {
-
-    // Remove Firebase query bits and your email fragment
-    clear_encoded_email();
-  }
-}
-
-// track auth state in realtime (know when you’re signed in)
-async function install_auth_listener() {
-  
-  // log messages in the console
-  console.log('Installing authentication listener...');
-
-  firebase.auth().onAuthStateChanged(function(user) {
-    
-    current_user = user || null;
-
-    // skip the first run (already handled during startup)
-    if (is_first_auth === true) {is_first_auth = false; return}
-
-    if (current_user) {
-      console.log('Signed in as: ' + current_user.email);
-      location.hash = '#/dashboard';
-
-    } 
-    
-    else {
-      console.log('You are not signed in, redirecting to login page');
-      location.hash = '#/login';
-    }
-
-  });
-
-}
 
 // send a passwordless sign-in link to a user’s email
 async function task_send_magic_link() {
@@ -2103,6 +2067,19 @@ async function task_send_magic_link() {
 
   }
 
+}
+
+// ---------------------------------------------------------
+// USER AUTHENTICATION: HELPERS
+// ---------------------------------------------------------
+
+// helper to specify where firebase should send users after clicking the magic link
+function configure_magic_link(email) {
+  var base = window.location.origin + window.location.pathname + '#/dashboard?e=' + encodeURIComponent(email);
+  return {
+    url: base,
+    handleCodeInApp: true
+  };
 }
 
 // helper to encode the users email in the url
