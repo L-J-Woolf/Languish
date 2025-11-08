@@ -516,7 +516,7 @@ async function action_send_magic_link() {
 }
 
 // ---------------------------------------------------------
-// TASKS 2.0 
+// TASKS
 // ---------------------------------------------------------
 
 // function to toggle dev mode on and off
@@ -812,10 +812,25 @@ function task_render_dashboard() {
   document.getElementById('metric_7_day_avg').textContent = get_average_last_7_days();
   document.getElementById('metric_30_day_avg').textContent = get_average_last_30_days();
 
+  // if the user has no decks, set the empty state and finish early
+  if (decks_index.length === 0) {
+    console.log("No decks detected, loading empty state");
+    document.querySelector('.decks_outer').style.display = 'none';
+    document.querySelector('.deck_empty_state').style.display = 'flex';
+    return;
+  }
+
+  if (decks_index.length > 0) {
+    console.log("Decks detected, loading populated state");
+    document.querySelector('.decks_outer').style.display = 'block';
+    document.querySelector('.deck_empty_state').style.display = 'none';
+  }
+
   var all_cards_total = cards_index.length;
   var all_total_score = cards_index.reduce((total, item) => total + item.score, 0);
   var all_mastery = ((all_total_score / (all_cards_total * 5))*100).toFixed(1);
   document.getElementById('data_all_card_count').textContent = all_cards_total + ' cards' + ' • ' + all_mastery + '%'; // set count
+  if (isNaN(all_mastery)) {document.getElementById('data_all_card_count').textContent = all_cards_total + ' cards';} // set count
   if (settings_index.is_all_toggled === true) { document.querySelector('#toggle_all input[type="checkbox"]').checked = true;  }
   else if (settings_index.is_all_toggled === false) { document.querySelector('#toggle_all input[type="checkbox"]').checked = false;  }
 
@@ -847,9 +862,11 @@ function task_render_dashboard() {
       var deck_index = cards_index.filter(item => item.deck.includes(list_item.unique_id));
       var total_cards = deck_index.length;
       var total_score = deck_index.reduce((total, item) => total + item.score, 0);
-      var mastery = ((total_score / (total_cards * 5))*100).toFixed(0);
+      //var mastery = ((total_score / (total_cards * 5))*100).toFixed(0);
+      var mastery = Math.floor((total_score / (total_cards * 5)) * 100);
 
       snippet.querySelector(".deck_snippet_count").textContent = total_cards + ' cards' + ' • ' + mastery + '%'; // set count
+      if (!mastery) {snippet.querySelector(".deck_snippet_count").textContent = total_cards + ' cards';} // set count}
 
       if (list_item.toggled === true) { snippet.querySelector('input[type="checkbox"]').checked = true;  }
       else if (list_item.toggled === false) { snippet.querySelector('input[type="checkbox"]').checked = false;  }
@@ -1065,7 +1082,7 @@ function task_edit_setting(setting_to_update, new_value) {
 
 // Preload the audio files
 var audio_success = new Audio('sounds/success.mp3'); audio_success.preload = 'auto'; audio_success.load();
-var audio_fail = new Audio('sounds/failure2.mp3'); audio_fail.preload = 'auto'; audio_fail.load();
+var audio_fail = new Audio('sounds/success.mp3'); audio_fail.preload = 'auto'; audio_fail.load();
 
 function play_success() {
     audio_success.currentTime = 0;
@@ -1206,13 +1223,21 @@ function get_daily_streak() {
   // Reference to today's timestamp
   var today = get_timestamp();
 
+  // Check if there’s a record for today
+  var has_today_record = stats_index.some(function(item) {
+    return item.timestamp === today;
+  });
+
+  // If no record for today, start from yesterday
+  var start_day = has_today_record ? today : today - (24 * 60 * 60 * 1000);
+
   // Counter for consecutive days
   var consecutive_days = 0;
 
   // We'll iterate backwards indefinitely until a null day is found
   for (var i = 0; ; i++) {
     // Calculate timestamp for each previous day
-    var date_ref = today - (i * 24 * 60 * 60 * 1000);
+    var date_ref = start_day - (i * 24 * 60 * 60 * 1000);
 
     // Try to find a matching record in stats_index
     var item_ref = stats_index.find(function(item) {

@@ -39,3 +39,13 @@ var card_snippet = `
 </div>
 
 `;
+
+// reusable HTML snippet
+var empty_deck_snippet = `
+
+<div class="deck_empty_state">
+  <span>Lets get started!</span>
+  <span>Use the <i class="ph-bold ph-plus-circle"></i> button in the bottom right corner Create your first deck!</span>
+</div>
+
+`;
