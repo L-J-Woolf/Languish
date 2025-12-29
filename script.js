@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', initialise_app);
 
 async function initialise_app() {
   
-  console.log("Initialising app (251229_2058)");
+  console.log("Initialising app (251229_2200)");
   await task_attempt_login();
   await check_user_auth();
   console.log("Initialisation complete");
