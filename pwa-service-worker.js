@@ -1,4 +1,4 @@
-var CACHE = `251108_2244`; // update cache name when changing assets, or old caches can linger.
+var CACHE = `251229_2058`; // update cache name when changing assets, or old caches can linger.
 var ASSETS = [
   ".",
   "index.html",
