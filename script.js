@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', initialise_app);
 
 async function initialise_app() {
   
-  console.log("Initialising app (251229_2200)");
+  console.log("Initialising app (251231_1120)");
   await task_attempt_login();
   await check_user_auth();
   console.log("Initialisation complete");
@@ -1567,7 +1567,11 @@ function build_express_study_index() {
   var candidates_4 = candidates.filter(item => item.score === 4);
   var candidates_5 = candidates.filter(item => item.score === 5);
 
+  // ramdomise the order of new cards only (all others are sorted by score + date)
+  candidates_0 = randomise_order(candidates_0);
+
   // collect cards from groups
+  splice_and_push(2, candidates_0, study_index);
   splice_and_push(2, candidates_1, study_index);
   splice_and_push(2, candidates_2, study_index);
   splice_and_push(2, candidates_3, study_index);
@@ -1586,25 +1590,11 @@ function build_express_study_index() {
 
 
 
-  // ramdomise the order of new cards only (all others are sorted by score + date)
-  candidates_0 = randomise_order(candidates_0);
-
   // calculate how many cards are still required, if any
   var difference = 10 - study_index.length;
 
   // add remaining cards as needed
   splice_and_push(difference, candidates_0, study_index);
-  
-  
-  
-  // rebuild candidates from minis (now missing spliced items)
-  candidates = [...candidates_0, ...candidates, ...candidates_5];
-  
-  // calculate how many cards are still required, if any
-  var difference = 10 - study_index.length;
-
-  // add remaining cards as needed
-  splice_and_push(difference, candidates, study_index);
 
 
 
@@ -1654,16 +1644,6 @@ function build_focused_study_index() {
   var difference = 10 - study_index.length;
 
   // add remaining cards, as needed
-  splice_and_push(difference, candidates, study_index);
-
-
-  // rebuild candidates from minis (now missing spliced items)
-  candidates = [...candidates, ...candidates_5];
-
-  // calculate how many cards are still required, if any
-  var difference = 10 - study_index.length;
-
-  // add remaining cards as needed
   splice_and_push(difference, candidates, study_index);
 
 
